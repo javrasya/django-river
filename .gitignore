@@ -1,0 +1,11 @@
+*.pyc
+**node_modules
+**bower_components
+.tmp
+coverage
+.idea
+.tox*
+junit-*.xml
+*.log
+*egg-info*
+*sqlite3*
