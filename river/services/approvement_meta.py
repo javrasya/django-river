@@ -1,4 +1,3 @@
-from river.models import Object
 from river.models.approvement import Approvement
 
 __author__ = 'ahmetdal'
@@ -8,17 +7,18 @@ __author__ = 'ahmetdal'
 class ApprovementMetaService:
     @staticmethod
     def apply_new_approvement_meta(new_approvement_meta):
-        if new_approvement_meta.approvement_set.count() == 0:
+        if new_approvement_meta.approvements.count() == 0:
             content_type = new_approvement_meta.transition.content_type
+            WorkflowObjectClass = content_type.model_class()
             field = new_approvement_meta.transition.field
             Approvement.objects.bulk_create(
                 list(
                     Approvement(
-                        object_id=obj_id,
+                        object=workflow_object,
                         meta=new_approvement_meta,
                         field=field,
                         content_type=content_type
                     )
-                    for obj_id in Object.objects.values_list('object_id', flat=True)
+                    for workflow_object in WorkflowObjectClass.objects.all()
                 )
             )

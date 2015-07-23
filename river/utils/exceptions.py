@@ -1,5 +1,5 @@
 __author__ = 'ahmetdal'
 
 
-class RiverIOException(Exception):
+class RiverException(Exception):
     pass

@@ -1,5 +1,5 @@
-from django.contrib.auth.models import Group
 from django.db import models
+
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
@@ -16,9 +16,9 @@ class ApprovementMeta(BaseModel):
         unique_together = [('transition', 'order')]
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
-    permission = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'),null=True)
-    groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'),null=True)
+    permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'), null=True)
+    groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'), null=True)
     order = models.IntegerField(default=0, verbose_name=_('Order'))
 
     def __unicode__(self):
-        return 'Transition:%s, Permission:%s, Order:%s' % (self.transition, self.permission, self.order)
+        return 'Transition:%s, Permissions:%s, Order:%s' % (self.transition, ','.join(self.permissions.values_list('name', flat=True)), self.order)

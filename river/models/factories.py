@@ -1,27 +1,11 @@
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 import factory
 
-from river.models import Application, State, Field, Transition, ApprovementMeta
+from river.models import State, Transition, ApprovementMeta
 
 __author__ = 'ahmetdal'
-
-
-class UserFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = 'esefauth.User'
-
-    username = factory.Sequence(lambda n: 'User_%s' % n)
-
-
-class ApplicationObjectFactory(DjangoModelFactory):
-    class Meta:
-        model = Application
-
-    name = factory.Sequence(lambda n: 'app_%s' % n)
-    description = factory.Sequence(lambda n: 'desc_%s' % n)
-    owner = factory.SubFactory(UserFactory)
 
 
 class ContentTypeObjectFactory(DjangoModelFactory):
@@ -31,16 +15,40 @@ class ContentTypeObjectFactory(DjangoModelFactory):
     model = factory.Sequence(lambda n: 'ect_model_%s' % n)
 
 
-class PermissionObjectFactory(DjangoModelFactory):
+class UserObjectFactory(factory.DjangoModelFactory):
     class Meta:
-        model = Permission
+        model = get_user_model()
 
-    name = factory.Sequence(lambda n: 'ep_name_%s' % n)
+    username = factory.Sequence(lambda n: 'User_%s' % n)
+
+    @factory.post_generation
+    def user_permissions(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for permission in extracted:
+                self.user_permissions.add(permission)
+
+    @factory.post_generation
+    def user_groups(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for group in extracted:
+                self.user_groups.add(group)
 
 
-class UserObjectFactory(DjangoModelFactory):
+class GroupObjectFactory(factory.DjangoModelFactory):
     class Meta:
-        model = User
+        model = 'auth.Group'
+
+    name = factory.Sequence(lambda n: 'Group_%s' % n)
 
     @factory.post_generation
     def permissions(self, create, extracted, **kwargs):
@@ -54,22 +62,21 @@ class UserObjectFactory(DjangoModelFactory):
                 self.permissions.add(permission)
 
 
+class PermissionObjectFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = 'auth.Permission'
+
+    name = factory.Sequence(lambda n: 'Permission_%s' % n)
+    codename = factory.Sequence(lambda n: 'Codename_%s' % n)
+    content_type = factory.SubFactory(ContentTypeObjectFactory)
+
+
 class StateObjectFactory(DjangoModelFactory):
     class Meta:
         model = State
 
     label = factory.Sequence(lambda n: 's%s' % n)
     description = factory.Sequence(lambda n: 'desc_%s' % n)
-    application = factory.SubFactory(ApplicationObjectFactory)
-
-
-class FieldObjectFactory(DjangoModelFactory):
-    class Meta:
-        model = Field
-
-    label = factory.Sequence(lambda n: 'l%s' % n)
-    description = factory.Sequence(lambda n: 'desc_%s' % n)
-    application = factory.SubFactory(ApplicationObjectFactory)
 
 
 class TransitionObjectFactory(DjangoModelFactory):
@@ -77,7 +84,7 @@ class TransitionObjectFactory(DjangoModelFactory):
         model = Transition
 
     content_type = factory.SubFactory(ContentTypeObjectFactory)
-    field = factory.SubFactory(FieldObjectFactory)
+    field = 'my_field'
     source_state = factory.SubFactory(StateObjectFactory)
     destination_state = factory.SubFactory(StateObjectFactory)
 
@@ -89,7 +96,7 @@ class ApprovementMetaObjectFactory(DjangoModelFactory):
     transition = factory.SubFactory(TransitionObjectFactory)
 
     @factory.post_generation
-    def permission(self, create, extracted, **kwargs):
+    def permissions(self, create, extracted, **kwargs):
         if not create:
             # Simple build, do nothing.
             return
@@ -97,4 +104,4 @@ class ApprovementMetaObjectFactory(DjangoModelFactory):
         if extracted:
             # A list of groups were passed in, use them
             for permission in extracted:
-                self.permission.add(permission)
+                self.permissions.add(permission)

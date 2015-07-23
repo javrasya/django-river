@@ -1,10 +1,12 @@
-from django.contrib.auth.models import Group
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 from django.db import models
+
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.approvement_meta import ApprovementMeta
 from river.models.base_model import BaseModel
-from river.models.field import Field
+from river.models.managers.approvement import ApprovementManager
 from river.services.config import RiverConfig
 
 __author__ = 'ahmetdal'
@@ -25,12 +27,14 @@ class Approvement(BaseModel):
         verbose_name = _("Approvement")
         verbose_name_plural = _("Approvements")
 
+    objects = ApprovementManager()
+
     content_type = models.ForeignKey(RiverConfig.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
     object_id = models.PositiveIntegerField(verbose_name=_('Related Object'))
-    field = models.ForeignKey(Field, verbose_name=_('Field'))
-    # object = generic.GenericForeignKey('content_type', 'object_pk')
+    field = models.CharField(verbose_name=_('Field'), max_length=200)
+    object = GenericForeignKey('content_type', 'object_id')
 
-    meta = models.ForeignKey(ApprovementMeta, verbose_name=_('Approve Definition'))
+    meta = models.ForeignKey(ApprovementMeta, verbose_name=_('Approve Definition'), related_name="approvements")
     transactioner = models.ForeignKey(RiverConfig.USER_CLASS, verbose_name=_('Approver'), null=True, blank=True)
     transaction_date = models.DateTimeField(null=True, blank=True)
 

@@ -1,25 +1,20 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
-from apps.riverio.models.application_based import ApplicationBasedModel
-
+from river.models import BaseModel
 
 __author__ = 'ahmetdal'
 
 
-class State(ApplicationBasedModel):
+class State(BaseModel):
     class Meta:
         verbose_name = _("State")
         verbose_name_plural = _("States")
-        ordering = ('created_at',)
 
     label = models.CharField(max_length=50)
     description = models.CharField(_("Description"), max_length=200, null=True, blank=True)
 
-
     def __unicode__(self):
         return self.label
-
 
     def details(self):
         detail = super(State, self).details()
@@ -30,8 +25,3 @@ class State(ApplicationBasedModel):
             }
         )
         return detail
-
-
-
-
-
