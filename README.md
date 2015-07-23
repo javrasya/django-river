@@ -30,7 +30,7 @@ python manage.py migrate
 
 * In your model class which will be processing in workflow;
 
-```django
+```python
 from django.db import models
 from river.models.fields.state import StateField
 
