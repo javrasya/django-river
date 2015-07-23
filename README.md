@@ -1,5 +1,5 @@
 # Django River
-[![Build Status](https://travis-ci.org/javrasya/django-river.svg)](https://travis-ci.org/javrasya/django-river) [![Coverage Status](https://coveralls.io/repos/github/javrasya/django-river/badge.svg?branch=master)](https://coveralls.io/github/javrasya/django-river?branch=master)
+[![Build Status](https://travis-ci.org/javrasya/django-river.svg)](https://travis-ci.org/javrasya/django-river) [![Coverage Status](https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github)](https://coveralls.io/github/javrasya/django-river?branch=master)
 
 River is a open source workflow system for `Django` which support on the fly changes on every item in workflow instead of hardcoding states and transitions.
 
