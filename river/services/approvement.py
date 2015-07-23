@@ -94,3 +94,13 @@ class ApprovementService:
         """
         approvements = Approvement.objects.filter(Q(transactioner=user) | Q(meta__permission__in=user.permissions.all())).filter(content_type=content_type, field=field)
         return approvements.count() != 0
+
+    @staticmethod
+    def override_permissions(approvement, permissions):
+        approvement.permissions.clear()
+        approvement.permissions.add(*permissions)
+
+    @staticmethod
+    def override_groups(approvement, groups):
+        approvement.groups.clear()
+        approvement.groups.add(*groups)
