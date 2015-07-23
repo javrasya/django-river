@@ -9,3 +9,4 @@ junit-*.xml
 *.log
 *egg-info*
 *sqlite3*
+.coverage

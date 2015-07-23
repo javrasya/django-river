@@ -1,0 +1,10 @@
+[run]
+omit =
+    river/tests/*
+    river/migrations/*
+    */__init__*
+    .tox/*
+    setup.py
+    test_settings.py
+    test_urls.py
+    manage.py
