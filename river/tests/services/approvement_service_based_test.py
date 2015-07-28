@@ -51,6 +51,5 @@ class ApprovementServiceBasedTest(BaseTestCase):
 
         for n, approvement_meta in enumerate(self.approvement_metas):
             approvement_meta.permissions.add(self.permissions[n] if n <= 3 else self.permissions[3])
-            approvement_meta.save()
 
         self.objects = TestModelObjectFactory.create_batch(2)

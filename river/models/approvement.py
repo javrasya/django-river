@@ -44,3 +44,4 @@ class Approvement(BaseModel):
 
     permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'), null=True)
     groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'), null=True)
+    order = models.IntegerField(default=0, verbose_name=_('Order'))

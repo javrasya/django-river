@@ -22,6 +22,7 @@ class ApprovementService:
                 object=workflow_object,
                 field=field,
                 defaults={
+                    'order': approvement_meta.order,
                     'status': PENDING,
                 }
             )
@@ -51,8 +52,8 @@ class ApprovementService:
     def get_approvements_object_waiting_for_approval(workflow_object, field, user, source_states, include_user=True, destination_state=None):
 
         def get_approvement(approvements):
-            min_order = approvements.aggregate(Min('meta__order'))['meta__order__min']
-            approvements = approvements.filter(meta__order=min_order)
+            min_order = approvements.aggregate(Min('order'))['order__min']
+            approvements = approvements.filter(order=min_order)
             if include_user:
                 approvements = approvements.filter(
                     (

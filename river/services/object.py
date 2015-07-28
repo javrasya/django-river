@@ -28,3 +28,8 @@ class ObjectService:
     @staticmethod
     def get_object_count_waiting_for_approval(content_type, field, user):
         return ObjectService.get_objects_waiting_for_approval(content_type, field, user).count()
+
+    @staticmethod
+    def is_workflow_completed(workflow_object, field):
+        current_state = getattr(workflow_object, field)
+        return Approvement.objects.filter(object=workflow_object, meta__transition__source_state=current_state).count() == 0

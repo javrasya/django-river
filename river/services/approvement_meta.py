@@ -22,3 +22,4 @@ class ApprovementMetaService:
                     for workflow_object in WorkflowObjectClass.objects.all()
                 )
             )
+
