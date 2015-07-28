@@ -3,7 +3,7 @@
 
 River is a open source workflow system for `Django` which support on the fly changes on every item in workflow instead of hardcoding states and transitions.
 
-Main goal of developing this framework is **to be able to edit any workflow item on the fly.** This means, all elements in workflow like states, transitions, user authorizations(permission), group authorization are editable. To do this, all data about the workflow item is persisted into DB. **Hence, they can be change without touching the code and re-deploying your application.**
+Main goal of developing this framework is **to be able to edit any workflow item on the fly.** This means, all elements in workflow like states, transitions, user authorizations(permission), group authorization are editable. To do this, all data about the workflow item is persisted into DB. **Hence, they can be changed without touching the code and re-deploying your application.**
 
 There is ordering aprovments for a transition functionality in `django-river`. It also provides skipping specific transition of a specific objects.
 
@@ -38,7 +38,7 @@ class MyModel(models.Model):
     my_state_field = StateField()    
 ```
 
-That's it. Whenever your new model object is saved, it'll be state field will be initialized according to given meta data about workflow. To know how to do your workflow confirmation(states, transitions, permissions etc.), see the next part.
+That's it. Whenever your new model object is saved, it's state field will be initialized according to given meta data about workflow. To know how to do your workflow confirmation(states, transitions, permissions etc.), see the next part.
 
 
 ## Usage	
