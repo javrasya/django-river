@@ -31,7 +31,7 @@ def post_group_change(sender, instance, *args, **kwargs):
     from river.models.approvement import PENDING
 
     for approvement_pending in instance.approvements.filter(status=PENDING):
-        ApprovementService.override_groups(approvement_pending, approvement_meta.groups.all())
+        ApprovementService.override_groups(approvement_pending, instance.groups.all())
 
 
 def post_permissions_change(sender, instance, *args, **kwargs):
@@ -39,7 +39,7 @@ def post_permissions_change(sender, instance, *args, **kwargs):
     from river.services.approvement import ApprovementService
 
     for approvement_pending in instance.approvements.filter(status=PENDING):
-        ApprovementService.override_permissions(approvement_pending, approvement_meta.permissions.all())
+        ApprovementService.override_permissions(approvement_pending, instance.permissions.all())
 
 
 m2m_changed.connect(post_group_change, sender=ApprovementMeta.groups.through)
