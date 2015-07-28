@@ -10,7 +10,7 @@ from river.utils.exceptions import RiverException
 __author__ = 'ahmetdal'
 
 
-class TransitionService:
+class TransitionService(object):
     def __init__(self):
         pass
 
@@ -24,7 +24,8 @@ class TransitionService:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
             workflow_object.save()
 
-        on_transition.send(sender=TransitionService, workflow_object=workflow_object, field=field, source_state=current_state, destination_state=getattr(workflow_object, field))
+        if current_state != getattr(workflow_object, field):
+            on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, source_state=current_state, destination_state=getattr(workflow_object, field))
         if ObjectService.is_workflow_completed(workflow_object, field):
             workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
