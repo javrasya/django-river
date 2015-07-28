@@ -4,7 +4,7 @@ from river.models.approvement import APPROVED, REJECTED
 from river.services.approvement import ApprovementService
 from river.services.object import ObjectService
 from river.services.state import StateService
-from river.signals import workflow_is_completed, on_transition
+from river.signals import workflow_is_completed_successfully, on_transition
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
@@ -27,7 +27,7 @@ class TransitionService(object):
         if current_state != getattr(workflow_object, field):
             on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, source_state=current_state, destination_state=getattr(workflow_object, field))
         if ObjectService.is_workflow_completed(workflow_object, field):
-            workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
+            workflow_is_completed_successfully.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
     @staticmethod
     def reject_transition(workflow_object, field, user, next_state=None):

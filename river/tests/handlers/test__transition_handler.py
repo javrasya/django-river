@@ -1,13 +1,13 @@
+from river.handlers.transition import TransitionHandler
 from river.models import State
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.signals import TransitionHandler
 from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
 
 __author__ = 'ahmetdal'
 
 
-class TransitionHandlerTest(ApprovementServiceBasedTest):
+class test_TransitionHandler(ApprovementServiceBasedTest):
     def test_register_for_all(self):
         self.test_args = None
         self.test_kwargs = None
