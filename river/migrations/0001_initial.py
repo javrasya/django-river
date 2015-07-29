@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('order', models.IntegerField(default=0, verbose_name='Order')),
-                ('groups', models.ManyToManyField(to='auth.Group', null=True, verbose_name='Groups')),
-                ('permissions', models.ManyToManyField(to='auth.Permission', null=True, verbose_name='Permissions')),
+                ('groups', models.ManyToManyField(to='auth.Group', verbose_name='Groups')),
+                ('permissions', models.ManyToManyField(to='auth.Permission', verbose_name='Permissions')),
             ],
             options={
                 'verbose_name': 'Approvement Meta',
