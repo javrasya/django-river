@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ('order', models.IntegerField(default=0, verbose_name='Order')),
                 ('enabled', models.BooleanField(default=True, verbose_name='Enabled?')),
                 ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType')),
-                ('groups', models.ManyToManyField(to='auth.Group', null=True, verbose_name='Groups')),
+                ('groups', models.ManyToManyField(to='auth.Group', verbose_name='Groups')),
             ],
             options={
                 'verbose_name': 'Approvement',
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='approvement',
             name='permissions',
-            field=models.ManyToManyField(to='auth.Permission', null=True, verbose_name='Permissions'),
+            field=models.ManyToManyField(to='auth.Permission', verbose_name='Permissions'),
         ),
         migrations.AddField(
             model_name='approvement',
