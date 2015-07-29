@@ -71,7 +71,8 @@ class ApprovementService:
             object=workflow_object,
             field=field,
             meta__transition__source_state__in=source_states,
-            status=PENDING
+            status=PENDING,
+            enabled=True
         )
         all_approvements = get_approvement(approvements)
         unskipped_approvements = get_approvement(approvements.filter(skip=False))

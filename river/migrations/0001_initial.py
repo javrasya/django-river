@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
                 ('transaction_date', models.DateTimeField(null=True, blank=True)),
                 ('status', models.IntegerField(default=0, verbose_name='Status', choices=[(0, 'Pending'), (1, 'Approved'), (2, 'Rejected')])),
                 ('skip', models.BooleanField(default=False, verbose_name='Skip')),
+                ('order', models.IntegerField(default=0, verbose_name='Order')),
+                ('enabled', models.BooleanField(default=True, verbose_name='Enabled?')),
                 ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType')),
                 ('groups', models.ManyToManyField(to='auth.Group', null=True, verbose_name='Groups')),
             ],
