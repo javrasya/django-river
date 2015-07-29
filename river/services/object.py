@@ -8,7 +8,7 @@ __author__ = 'ahmetdal'
 class ObjectService:
     @staticmethod
     def register_object(workflow_object, field):
-        approvements = Approvement.objects.filter(object=workflow_object, field=field)
+        approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field)
         if approvements.count() == 0:
             ApprovementService.init_approvements(workflow_object, field)
 
@@ -32,4 +32,4 @@ class ObjectService:
     @staticmethod
     def is_workflow_completed(workflow_object, field):
         current_state = getattr(workflow_object, field)
-        return Approvement.objects.filter(object=workflow_object, meta__transition__source_state=current_state).count() == 0
+        return Approvement.objects.filter(workflow_object=workflow_object, meta__transition__source_state=current_state).count() == 0

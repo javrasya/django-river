@@ -14,7 +14,7 @@ class ApprovementMetaService:
             Approvement.objects.bulk_create(
                 list(
                     Approvement(
-                        object=workflow_object,
+                        workflow_object=workflow_object,
                         meta=new_approvement_meta,
                         field=field,
                         content_type=content_type
@@ -22,4 +22,3 @@ class ApprovementMetaService:
                     for workflow_object in WorkflowObjectClass.objects.all()
                 )
             )
-

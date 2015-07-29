@@ -7,7 +7,7 @@ __author__ = 'ahmetdal'
 
 class ApprovementManager(models.Manager):
     def filter(self, *args, **kwarg):
-        object = kwarg.pop('object', None)
+        object = kwarg.pop('workflow_object', None)
         if object:
             kwarg['content_type'] = RiverConfig.CONTENT_TYPE_CLASS.objects.get_for_model(object)
             kwarg['object_id'] = object.pk
@@ -15,7 +15,7 @@ class ApprovementManager(models.Manager):
         return super(ApprovementManager, self).filter(*args, **kwarg)
 
     def update_or_create(self, *args, **kwarg):
-        object = kwarg.pop('object', None)
+        object = kwarg.pop('workflow_object', None)
         if object:
             kwarg['content_type'] = RiverConfig.CONTENT_TYPE_CLASS.objects.get_for_model(object)
             kwarg['object_id'] = object.pk

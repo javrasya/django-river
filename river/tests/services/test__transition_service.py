@@ -71,7 +71,7 @@ class test__TransitionService(ApprovementServiceBasedTest):
         self.assertEqual(State.objects.get(label='s2'), getattr(self.objects[0], self.field))
 
         approvements = Approvement.objects.filter(
-            object=self.objects[0],
+            workflow_object=self.objects[0],
             field=self.field,
             status=APPROVED,
             meta__transition__source_state__label='s1',
@@ -125,7 +125,7 @@ class test__TransitionService(ApprovementServiceBasedTest):
         self.assertEqual(State.objects.get(label='s2'), getattr(self.objects[0], self.field))
 
         approvements = Approvement.objects.filter(
-            object=self.objects[0],
+            workflow_object=self.objects[0],
             field=self.field,
             status=APPROVED,
             meta__transition__source_state__label='s2',
@@ -149,7 +149,7 @@ class test__TransitionService(ApprovementServiceBasedTest):
         self.assertEqual(State.objects.get(label='s3'), getattr(self.objects[0], self.field))
 
         approvements = Approvement.objects.filter(
-            object=self.objects[0],
+            workflow_object=self.objects[0],
             field=self.field,
             status=APPROVED,
             meta__transition__source_state__label='s2',
@@ -226,7 +226,7 @@ class test__TransitionService(ApprovementServiceBasedTest):
         self.assertEqual(State.objects.get(label='s5'), getattr(self.objects[0], self.field))
 
         approvements = Approvement.objects.filter(
-            object=self.objects[0],
+            workflow_object=self.objects[0],
             field=self.field,
             status=APPROVED,
             meta__transition__source_state__label='s3',

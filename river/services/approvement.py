@@ -19,7 +19,7 @@ class ApprovementService:
         for approvement_meta in ApprovementMeta.objects.filter(transition__content_type=content_type, transition__field=field):
             approvement, created = Approvement.objects.update_or_create(
                 meta=approvement_meta,
-                object=workflow_object,
+                workflow_object=workflow_object,
                 field=field,
                 defaults={
                     'order': approvement_meta.order,
@@ -68,7 +68,7 @@ class ApprovementService:
             return approvements
 
         approvements = Approvement.objects.filter(
-            object=workflow_object,
+            workflow_object=workflow_object,
             field=field,
             meta__transition__source_state__in=source_states,
             status=PENDING,

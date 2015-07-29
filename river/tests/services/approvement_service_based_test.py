@@ -1,5 +1,4 @@
 from django.contrib.contenttypes.models import ContentType
-
 import factory
 
 from river.tests.base_test import BaseTestCase
@@ -15,7 +14,6 @@ class ApprovementServiceBasedTest(BaseTestCase):
             TransitionObjectFactory, \
             UserObjectFactory, \
             PermissionObjectFactory, \
-            ContentTypeObjectFactory, \
             ApprovementMetaObjectFactory, \
             StateObjectFactory
 

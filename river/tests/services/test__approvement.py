@@ -42,7 +42,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state=State.objects.get(label='s2')
         ).update(skip=True)
 
@@ -55,7 +55,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state=State.objects.get(label='s3')
         ).update(skip=True)
 
@@ -70,7 +70,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state=State.objects.get(label='s4')
         ).update(skip=True)
 
@@ -83,12 +83,12 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state=State.objects.get(label='s4')
         ).update(skip=False)
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state=State.objects.get(label='s5')
         ).update(skip=True)
 
@@ -101,7 +101,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state__in=State.objects.filter(label__in=['s4', 's5'])
         ).update(skip=True)
 
@@ -120,7 +120,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
 
         Approvement.objects.filter(
             field=self.field,
-            object=self.objects[1],
+            workflow_object=self.objects[1],
             meta__transition__destination_state__in=State.objects.filter(label__in=['s4.1', 's5.1'])
         ).update(skip=True)
 

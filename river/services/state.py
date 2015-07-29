@@ -23,7 +23,7 @@ class StateService:
         current_state = getattr(workflow_object, field)
         approvements = Approvement.objects.filter(
             field=field,
-            object=workflow_object,
+            workflow_object=workflow_object,
             meta__transition__source_state=current_state,
         )
         if include_user:

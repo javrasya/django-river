@@ -30,9 +30,9 @@ class test_ApprovementMetaService(BaseTestCase):
         from river.models.factories import ApprovementMetaObjectFactory, TransitionObjectFactory
 
         ct = self.approvement_meta.transition.content_type
-        self.assertEqual(0, Approvement.objects.filter(object=self.object).count())
+        self.assertEqual(0, Approvement.objects.filter(workflow_object=self.object).count())
         ObjectService.register_object(self.object, self.field)
-        self.assertEqual(1, Approvement.objects.filter(object=self.object).count())
+        self.assertEqual(1, Approvement.objects.filter(workflow_object=self.object).count())
 
         transition = TransitionObjectFactory(content_type=ct, field=self.field, source_state=self.state2, destination_state=self.state3)
 
@@ -41,12 +41,12 @@ class test_ApprovementMetaService(BaseTestCase):
 
         approvement_meta = ApprovementMetaObjectFactory(transition=transition, permissions__in=self.approvement_meta.permissions.all())
 
-        self.assertEqual(1, Approvement.objects.filter(object=self.object, field=self.field).count())
+        self.assertEqual(1, Approvement.objects.filter(workflow_object=self.object, field=self.field).count())
 
         ApprovementMetaService.apply_new_approvement_meta(approvement_meta)
 
-        self.assertEqual(2, Approvement.objects.filter(object=self.object, field=self.field).count())
+        self.assertEqual(2, Approvement.objects.filter(workflow_object=self.object, field=self.field).count())
 
         approvement_meta.save()
 
-        self.assertEqual(2, Approvement.objects.filter(object=self.object, field=self.field).count())
+        self.assertEqual(2, Approvement.objects.filter(workflow_object=self.object, field=self.field).count())

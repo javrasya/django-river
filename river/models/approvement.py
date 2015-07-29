@@ -32,7 +32,7 @@ class Approvement(BaseModel):
     content_type = models.ForeignKey(RiverConfig.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
     object_id = models.PositiveIntegerField(verbose_name=_('Related Object'))
     field = models.CharField(verbose_name=_('Field'), max_length=200)
-    object = GenericForeignKey('content_type', 'object_id')
+    workflow_object = GenericForeignKey('content_type', 'object_id')
 
     meta = models.ForeignKey(ApprovementMeta, verbose_name=_('Approve Definition'), related_name="approvements")
     transactioner = models.ForeignKey(RiverConfig.USER_CLASS, verbose_name=_('Approver'), null=True, blank=True)
