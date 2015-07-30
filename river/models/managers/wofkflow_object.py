@@ -15,5 +15,5 @@ class WorkflowObjectManager(models.Manager):
     def get_objects_waiting_for_approval(self, user):
         return ObjectService.get_objects_waiting_for_approval(ContentType.objects.get_for_model(self.model), self.field, user)
 
-    def get_object_count_waiting_for_approval(self, content_type, field, user):
+    def get_object_count_waiting_for_approval(self, user):
         return ObjectService.get_object_count_waiting_for_approval(ContentType.objects.get_for_model(self.model), self.field, user)
