@@ -6,6 +6,9 @@ __author__ = 'ahmetdal'
 
 
 class ApprovementManager(models.Manager):
+    def __init__(self, *args, **kwargs):
+        super(ApprovementManager, self).__init__(*args, **kwargs)
+
     def filter(self, *args, **kwarg):
         object = kwarg.pop('workflow_object', None)
         if object:

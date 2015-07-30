@@ -48,6 +48,6 @@ def _post_save(*args, **kwargs):  # signal, sender, instance):
     instance = kwargs['instance']
     for f in instance._meta.fields:
         if isinstance(f, StateField):
-            approvements = Approvement.objects.filter(object=instance, field=f.name)
+            approvements = Approvement.objects.filter(workflow_object=instance, field=f.name)
             if approvements.count() == 0:
                 ApprovementService.init_approvements(instance, f.name)
