@@ -1,4 +1,6 @@
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
+
 from django.db.models.signals import pre_save
 
 from django.db.models.signals import post_save
@@ -27,12 +29,23 @@ class StateField(models.ForeignKey):
         def is_workflow_completed(workflow_object):
             return ObjectService.is_workflow_completed(workflow_object, name)
 
-
         def approve(self, user, next_state=None):
             TransitionService.approve_transition(self, name, user, next_state=next_state)
 
         def reject(self, user, next_state=None):
             TransitionService.reject_transition(self, name, user, next_state=next_state)
+
+        @property
+        def on_inital_state(self):
+            from river.services.state import StateService
+
+            return StateService.get_init_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
+
+        @property
+        def on_final_state(self):
+            from river.services.state import StateService
+
+            return getattr(self, name) in StateService.get_final_states(ContentType.objects.get_for_model(self), name)
 
         self.model = cls
 
@@ -42,6 +55,9 @@ class StateField(models.ForeignKey):
         cls.add_to_class("is_workflow_completed", is_workflow_completed)
         cls.add_to_class("approve", approve)
         cls.add_to_class("reject", reject)
+
+        cls.add_to_class("on_inital_state", on_inital_state)
+        cls.add_to_class("on_final_state", on_final_state)
 
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 

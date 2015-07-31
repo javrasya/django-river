@@ -1,6 +1,5 @@
-from river.handlers.completed_successfully import CompletedSuccessfullyHandler
-from river.handlers.transition import TransitionHandler
-from river.models import State, Transition
+from river.handlers.completed import CompletedHandler
+from river.models import Transition
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
 from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
@@ -8,9 +7,9 @@ from river.tests.services.approvement_service_based_test import ApprovementServi
 __author__ = 'ahmetdal'
 
 
-class test_CompletedSuccessfullyHandler(ApprovementServiceBasedTest):
+class test_CompletedHandler(ApprovementServiceBasedTest):
     def setUp(self):
-        super(test_CompletedSuccessfullyHandler, self).setUp()
+        super(test_CompletedHandler, self).setUp()
         transition = Transition.objects.get(source_state__label='s2', destination_state__label='s3')
         Transition.objects.filter(pk__gt=transition.pk).delete()
 
@@ -25,7 +24,7 @@ class test_CompletedSuccessfullyHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        CompletedSuccessfullyHandler.register(test_handler)
+        CompletedHandler.register(test_handler)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -61,7 +60,7 @@ class test_CompletedSuccessfullyHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        CompletedSuccessfullyHandler.register(test_handler, self.objects[0], 'my_field')
+        CompletedHandler.register(test_handler, self.objects[0], 'my_field')
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)

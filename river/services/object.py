@@ -1,5 +1,6 @@
 from river.models.approvement import Approvement
 from river.services.approvement import ApprovementService
+from river.services.state import StateService
 
 __author__ = 'ahmetdal'
 

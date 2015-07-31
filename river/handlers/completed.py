@@ -1,10 +1,10 @@
 from river.handlers.handler import Handler
-from river.signals import workflow_is_completed_successfully
+from river.signals import workflow_is_completed
 
 __author__ = 'ahmetdal'
 
 
-class CompletedSuccessfullyHandler(Handler):
+class CompletedHandler(Handler):
     handlers = []
 
     @classmethod
@@ -12,7 +12,7 @@ class CompletedSuccessfullyHandler(Handler):
         suitable_handlers = filter(
             lambda h:
             h.get('workflow_object_pk', workflow_object.pk) == workflow_object.pk and
-            h.get('field', field) == field, CompletedSuccessfullyHandler.handlers
+            h.get('field', field) == field, CompletedHandler.handlers
         )
 
         for handler in suitable_handlers:
@@ -20,8 +20,8 @@ class CompletedSuccessfullyHandler(Handler):
 
     @classmethod
     def register(cls, *args, **kwargs):
-        d = super(CompletedSuccessfullyHandler, cls).register(*args, **kwargs)
-        CompletedSuccessfullyHandler.handlers.append(d)
+        d = super(CompletedHandler, cls).register(*args, **kwargs)
+        CompletedHandler.handlers.append(d)
 
 
-workflow_is_completed_successfully.connect(CompletedSuccessfullyHandler.dispatch)
+workflow_is_completed.connect(CompletedHandler.dispatch)
