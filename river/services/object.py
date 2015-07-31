@@ -20,7 +20,7 @@ class ObjectService:
         WorkflowObjectClass = content_type.model_class()
         for workflow_object in WorkflowObjectClass.objects.all():
             current_state = getattr(workflow_object, field)
-            approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, user, [current_state])
+            approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
             if approvements.count():
                 object_pks.append(workflow_object.pk)
         return WorkflowObjectClass.objects.filter(pk__in=object_pks)

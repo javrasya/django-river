@@ -19,7 +19,7 @@ class TransitionService(object):
         approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state)
         current_state = getattr(workflow_object, field)
         # Any other approvement is left?
-        required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, user, [current_state], include_user=False, destination_state=next_state)
+        required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state)
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
             workflow_object.save()
@@ -36,7 +36,7 @@ class TransitionService(object):
     @staticmethod
     def process(workflow_object, field, user, action, next_state=None):
         current_state = getattr(workflow_object, field)
-        approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, user, [current_state])
+        approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
         c = approvements.count()
         if c == 0:
             raise RiverException("There is no available state for destination for the user.")

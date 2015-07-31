@@ -49,23 +49,25 @@ class ApprovementService:
     #         )
 
     @staticmethod
-    def get_approvements_object_waiting_for_approval(workflow_object, field, user, source_states, include_user=True, destination_state=None):
+    def get_approvements_object_waiting_for_approval(workflow_object, field, source_states, user=None, destination_state=None):
 
         def get_approvement(approvements):
             min_order = approvements.aggregate(Min('order'))['order__min']
             approvements = approvements.filter(order=min_order)
-            if include_user:
-                approvements = approvements.filter(
-                    (
-                        (Q(transactioner__isnull=True) | Q(transactioner=user)) &
-                        (Q(permissions__isnull=True) | Q(permissions__in=user.user_permissions.all())) &
-                        (Q(groups__isnull=True) | Q(groups__in=user.groups.all()))
-                    )
-                )
+
             if destination_state:
                 approvements = approvements.filter(meta__transition__destination_state=destination_state)
 
             return approvements
+
+        def authorize_approvements(approvements):
+            return approvements.filter(
+                (
+                    (Q(transactioner__isnull=True) | Q(transactioner=user)) &
+                    (Q(permissions__isnull=True) | Q(permissions__in=user.user_permissions.all())) &
+                    (Q(groups__isnull=True) | Q(groups__in=user.groups.all()))
+                )
+            )
 
         approvements = Approvement.objects.filter(
             workflow_object=workflow_object,
@@ -74,16 +76,18 @@ class ApprovementService:
             status=PENDING,
             enabled=True
         )
-        all_approvements = get_approvement(approvements)
-        unskipped_approvements = get_approvement(approvements.filter(skip=False))
 
-        if all_approvements.count() == 0:
-            return all_approvements
-        elif unskipped_approvements.count() != 0:
-            return unskipped_approvements
-        else:
-            source_state_pks = list(approvements.values_list('meta__transition__destination_state', flat=True))
-            return ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, user, State.objects.filter(pk__in=source_state_pks), include_user=False)
+        suitable_approvements = get_approvement(approvements.filter(skip=False))
+
+        if user:
+            suitable_approvements = authorize_approvements(suitable_approvements)
+
+        skipped_approvements = get_approvement(approvements.filter(skip=True))
+        if skipped_approvements:
+            source_state_pks = list(skipped_approvements.values_list('meta__transition__destination_state', flat=True))
+            suitable_approvements = suitable_approvements | ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, State.objects.filter(pk__in=source_state_pks),
+                                                                                                                            user=user)
+        return suitable_approvements
 
     @staticmethod
     def has_user_any_action(content_type, field, user):

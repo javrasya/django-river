@@ -119,7 +119,6 @@ class test__TransitionService(ApprovementServiceBasedTest):
         # Approved by two user has required permission for this transition to get next state (order is user2(2002),user3(2003)).
 
         self.assertEqual(State.objects.get(label='s2'), getattr(self.objects[0], self.field))
-
         TransitionService.approve_transition(self.objects[0], self.field, self.user2)
 
         self.assertEqual(State.objects.get(label='s2'), getattr(self.objects[0], self.field))
