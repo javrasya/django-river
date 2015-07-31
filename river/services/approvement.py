@@ -29,7 +29,7 @@ class ApprovementService:
             approvement.permissions.add(*approvement_meta.permissions.all())
             approvement.groups.add(*approvement_meta.groups.all())
 
-        init_state = StateService.get_init_state(content_type, field)
+        init_state = StateService.get_inital_state(content_type, field)
         setattr(workflow_object, field, init_state)
         workflow_object.save()
 

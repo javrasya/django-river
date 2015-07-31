@@ -39,7 +39,7 @@ class StateField(models.ForeignKey):
         def on_inital_state(self):
             from river.services.state import StateService
 
-            return StateService.get_init_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
+            return StateService.get_inital_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
 
         @property
         def on_final_state(self):

@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 import factory
 
-from river.models import State, Transition, ApprovementMeta
+from river.models import State, Transition, ApprovementMeta, FORWARD
 
 __author__ = 'ahmetdal'
 
@@ -87,6 +87,7 @@ class TransitionObjectFactory(DjangoModelFactory):
     field = 'my_field'
     source_state = factory.SubFactory(StateObjectFactory)
     destination_state = factory.SubFactory(StateObjectFactory)
+    direction = FORWARD
 
 
 class ApprovementMetaObjectFactory(DjangoModelFactory):
