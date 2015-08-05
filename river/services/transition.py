@@ -2,9 +2,9 @@ from datetime import datetime
 
 from river.models.approvement import APPROVED, REJECTED
 from river.services.approvement import ApprovementService
-from river.services.object import ObjectService
 from river.services.state import StateService
 from river.signals import workflow_is_completed, on_transition
+from river.utils.error_codes import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
@@ -39,15 +39,15 @@ class TransitionService(object):
         approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
         c = approvements.count()
         if c == 0:
-            raise RiverException("There is no available state for destination for the user.")
+            raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
         if c > 1:
             if next_state:
                 approvements = approvements.filter(meta__transition__destination_state=next_state)
                 if approvements.count() == 0:
                     available_states = StateService.get_available_states(workflow_object, field, user)
-                    raise RiverException("Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
+                    raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,"Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
             else:
-                raise RiverException("State must be given when there are multiple states for destination")
+                raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED,"State must be given when there are multiple states for destination")
         approvement = approvements[0]
         approvement.status = action
         approvement.transactioner = user
