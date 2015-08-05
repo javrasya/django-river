@@ -3,7 +3,7 @@ from river.models import State, Approvement, APPROVED
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
 from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
-from river.utils.error_codes import ErrorCode
+from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'

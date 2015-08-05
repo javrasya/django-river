@@ -4,7 +4,7 @@ from river.models.approvement import APPROVED, REJECTED
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
 from river.signals import workflow_is_completed, on_transition
-from river.utils.error_codes import ErrorCode
+from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'

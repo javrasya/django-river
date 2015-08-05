@@ -2,7 +2,7 @@ from django.db.models import Q
 from river.models import FORWARD, BACKWARD
 from river.models.approvement import Approvement
 from river.models.state import State
-from river.utils.error_codes import ErrorCode
+from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
