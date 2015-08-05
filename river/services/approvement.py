@@ -29,7 +29,7 @@ class ApprovementService:
             approvement.permissions.add(*approvement_meta.permissions.all())
             approvement.groups.add(*approvement_meta.groups.all())
 
-        init_state = StateService.get_inital_state(content_type, field)
+        init_state = StateService.get_initial_state(content_type, field)
         setattr(workflow_object, field, init_state)
         workflow_object.save()
 
@@ -98,7 +98,8 @@ class ApprovementService:
         :return: Boolean value indicates whether the user has any role for the content type and field are sent. Any elements existence
           accepted, rejected or pending for the user, means the user in active for the content type and field.
         """
-        approvements = Approvement.objects.filter(Q(transactioner=user) | Q(meta__permission__in=user.permissions.all())).filter(content_type=content_type, field=field)
+        approvements = Approvement.objects.filter(Q(transactioner=user) | Q(permissions__in=user.user_permissions.all()) | Q(groups__in=user.groups.all())).filter(content_type=content_type,
+                                                                                                                                                                   field=field)
         return approvements.count() != 0
 
     @staticmethod

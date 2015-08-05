@@ -12,7 +12,7 @@ class test_ObjectService(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        initial_state = StateService.get_inital_state(self.content_type, self.field)
+        initial_state = StateService.get_initial_state(self.content_type, self.field)
 
         self.assertEqual(initial_state, getattr(self.objects[0], self.field))
         self.assertEqual(18, Approvement.objects.count())

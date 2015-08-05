@@ -27,7 +27,7 @@ class test_ApprovementService(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        approvements = ApprovementService.get_approvements_object_waiting_for_approval(self.objects[1], self.field, [self.objects[1].my_field], user=self.user1)
+        approvements = self.objects[1].get_available_approvements(self.user1)
         self.assertEqual(1, approvements.count())
         self.assertEqual(State.objects.get(label='s2'), approvements[0].meta.transition.destination_state)
 

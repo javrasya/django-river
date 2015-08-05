@@ -50,7 +50,7 @@ class test__StateService(ApprovementServiceBasedTest):
         self.assertEqual(State.objects.get(label='s2'), available_states[0])
 
     def test_get_initial_state(self):
-        self.assertEqual(State.objects.get(label='s1'), StateService.get_inital_state(self.content_type, self.field))
+        self.assertEqual(State.objects.get(label='s1'), StateService.get_initial_state(self.content_type, self.field))
 
     def test_get_final_states(self):
         self.assertListEqual(list(State.objects.filter(label__in=['s4.1', 's4.2', 's5.1', 's5.2'])), list(StateService.get_final_states(self.content_type, self.field)))

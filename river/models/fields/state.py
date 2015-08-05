@@ -36,16 +36,26 @@ class StateField(models.ForeignKey):
             TransitionService.reject_transition(self, name, user, next_state=next_state)
 
         @property
-        def on_inital_state(self):
+        def on_initial_state(self):
             from river.services.state import StateService
 
-            return StateService.get_inital_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
+            return StateService.get_initial_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
 
         @property
         def on_final_state(self):
             from river.services.state import StateService
 
             return getattr(self, name) in StateService.get_final_states(ContentType.objects.get_for_model(self), name)
+
+        def get_initial_state(self):
+            from river.services.state import StateService
+
+            return StateService.get_initial_state(ContentType.objects.get_for_model(self), name)
+
+        def get_available_approvements(self, user):
+            from river.services.approvement import ApprovementService
+
+            return ApprovementService.get_approvements_object_waiting_for_approval(self, name, [getattr(self, name)], user)
 
         self.model = cls
 
@@ -56,8 +66,11 @@ class StateField(models.ForeignKey):
         cls.add_to_class("approve", approve)
         cls.add_to_class("reject", reject)
 
-        cls.add_to_class("on_inital_state", on_inital_state)
+        cls.add_to_class("on_initial_state", on_initial_state)
         cls.add_to_class("on_final_state", on_final_state)
+
+        cls.add_to_class("get_initial_state", get_initial_state)
+        cls.add_to_class("get_available_approvements", get_available_approvements)
 
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 

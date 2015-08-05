@@ -21,6 +21,7 @@ class ApprovementMeta(BaseModel):
     permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'))
     groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'))
     order = models.IntegerField(default=0, verbose_name=_('Order'))
+    action_text = models.TextField(_("Approve Text"), max_length=200, null=True, blank=True)
 
     def __unicode__(self):
         return 'Transition:%s, Permissions:%s, Order:%s' % (self.transition, ','.join(self.permissions.values_list('name', flat=True)), self.order)

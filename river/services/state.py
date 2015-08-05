@@ -36,7 +36,7 @@ class StateService:
         return State.objects.filter(pk__in=destination_states)
 
     @staticmethod
-    def get_inital_state(content_type, field):
+    def get_initial_state(content_type, field):
         """
         A state which is not a destination of a transition but can be source of a transition OR not (a destination of a transition and this transition direction is FORWARD)
         """
