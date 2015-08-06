@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from river.models.approvement import APPROVED, REJECTED
+from river.models.approvement import APPROVED, REJECTED, Approvement, PENDING
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
 from river.signals import workflow_is_completed, on_transition
@@ -17,12 +17,16 @@ class TransitionService(object):
     @staticmethod
     def approve_transition(workflow_object, field, user, next_state=None):
         approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state)
+
         current_state = getattr(workflow_object, field)
         # Any other approvement is left?
         required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state)
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
             workflow_object.save()
+
+            # Next states should be PENDING back again if there is circle.
+            Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state=approvement.meta.transition.destination_state).update(status=PENDING)
 
         if current_state != getattr(workflow_object, field):
             on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, source_state=current_state, destination_state=getattr(workflow_object, field))
@@ -45,12 +49,14 @@ class TransitionService(object):
                 approvements = approvements.filter(meta__transition__destination_state=next_state)
                 if approvements.count() == 0:
                     available_states = StateService.get_available_states(workflow_object, field, user)
-                    raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,"Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
+                    raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,
+                                         "Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
             else:
-                raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED,"State must be given when there are multiple states for destination")
+                raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED, "State must be given when there are multiple states for destination")
         approvement = approvements[0]
         approvement.status = action
         approvement.transactioner = user
         approvement.transaction_date = datetime.now()
         approvement.save()
+
         return approvement
