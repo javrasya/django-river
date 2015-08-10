@@ -41,7 +41,6 @@ class TransitionService(object):
         TransitionService.process(workflow_object, field, user, REJECTED, next_state)
 
     @staticmethod
-    @atomic
     def process(workflow_object, field, user, action, next_state=None):
         current_state = getattr(workflow_object, field)
         approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
