@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.db.transaction import atomic
 
 from river.models.approvement import APPROVED, REJECTED, Approvement, PENDING
 from river.services.approvement import ApprovementService
@@ -15,6 +16,7 @@ class TransitionService(object):
         pass
 
     @staticmethod
+    @atomic
     def approve_transition(workflow_object, field, user, next_state=None):
         approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state)
 
@@ -34,10 +36,12 @@ class TransitionService(object):
             workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
     @staticmethod
+    @atomic
     def reject_transition(workflow_object, field, user, next_state=None):
         TransitionService.process(workflow_object, field, user, REJECTED, next_state)
 
     @staticmethod
+    @atomic
     def process(workflow_object, field, user, action, next_state=None):
         current_state = getattr(workflow_object, field)
         approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
