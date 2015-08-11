@@ -31,7 +31,8 @@ class TransitionService(object):
             Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state=approvement.meta.transition.destination_state).update(status=PENDING)
 
         if current_state != getattr(workflow_object, field):
-            on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, source_state=current_state, destination_state=getattr(workflow_object, field))
+            on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
+                               destination_state=getattr(workflow_object, field))
         if workflow_object.on_final_state:
             workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 

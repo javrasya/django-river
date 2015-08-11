@@ -8,7 +8,7 @@ class TransitionHandler(Handler):
     handlers = []
 
     @classmethod
-    def dispatch(cls, sender, workflow_object, field, source_state, destination_state, *args, **kwargs):
+    def dispatch(cls, sender, workflow_object, field, approvement, source_state, destination_state, *args, **kwargs):
         suitable_handlers = filter(
             lambda h:
             h.get('workflow_object_pk', workflow_object.pk) == workflow_object.pk and
@@ -18,7 +18,7 @@ class TransitionHandler(Handler):
         )
 
         for handler in suitable_handlers:
-            handler.get('handler')(object=workflow_object, field=field, source_state=source_state, destination_state=destination_state)
+            handler.get('handler')(object=workflow_object, field=field, approvement=approvement, source_state=source_state, destination_state=destination_state)
 
     @classmethod
     def register(cls, handler, source_state=None, destination_state=None, *args, **kwargs):

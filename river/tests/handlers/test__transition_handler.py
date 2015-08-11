@@ -1,5 +1,5 @@
 from river.handlers.transition import TransitionHandler
-from river.models import State
+from river.models import State, Approvement
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
 from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
@@ -31,6 +31,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
+                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
                 'source_state': State.objects.get(label='s1'),
                 'destination_state': State.objects.get(label='s2')
             }, self.test_kwargs)
@@ -44,6 +45,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
+                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
                 'source_state': State.objects.get(label='s1'),
                 'destination_state': State.objects.get(label='s2')
             }, self.test_kwargs)
@@ -55,6 +57,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
+                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)
@@ -93,6 +96,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
+                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)
@@ -130,6 +134,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
+                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)
