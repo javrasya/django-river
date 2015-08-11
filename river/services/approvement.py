@@ -50,7 +50,7 @@ class ApprovementService:
     #         )
 
     @staticmethod
-    def get_approvements_object_waiting_for_approval(workflow_object, field, source_states, user=None, destination_state=None):
+    def get_approvements_object_waiting_for_approval(workflow_object, field, source_states, user=None, destination_state=None, god_mod=False):
 
         def get_approvement(approvements):
             min_order = approvements.aggregate(Min('order'))['order__min']
@@ -80,7 +80,7 @@ class ApprovementService:
 
         suitable_approvements = get_approvement(approvements.filter(skip=False))
 
-        if user:
+        if user and not god_mod:
             suitable_approvements = authorize_approvements(suitable_approvements)
 
         skipped_approvements = get_approvement(approvements.filter(skip=True))

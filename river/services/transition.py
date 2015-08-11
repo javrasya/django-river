@@ -17,12 +17,12 @@ class TransitionService(object):
 
     @staticmethod
     @atomic
-    def approve_transition(workflow_object, field, user, next_state=None):
-        approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state)
+    def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
+        approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
 
         current_state = getattr(workflow_object, field)
         # Any other approvement is left?
-        required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state)
+        required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state, god_mod=god_mod)
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
             workflow_object.save()
@@ -41,9 +41,9 @@ class TransitionService(object):
         TransitionService.process(workflow_object, field, user, REJECTED, next_state)
 
     @staticmethod
-    def process(workflow_object, field, user, action, next_state=None):
+    def process(workflow_object, field, user, action, next_state=None, god_mod=False):
         current_state = getattr(workflow_object, field)
-        approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
+        approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user, god_mod=god_mod)
         c = approvements.count()
         if c == 0:
             raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
