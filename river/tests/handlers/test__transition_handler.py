@@ -1,3 +1,4 @@
+from unittest import skip
 from river.handlers.transition import TransitionHandler
 from river.models import State, Approvement
 from river.services.object import ObjectService
@@ -8,6 +9,7 @@ __author__ = 'ahmetdal'
 
 
 class test_TransitionHandler(ApprovementServiceBasedTest):
+    @skip("workflow object is now required to register")
     def test_register_for_all(self):
         self.test_args = None
         self.test_kwargs = None
@@ -112,7 +114,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        TransitionHandler.register(test_handler, source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
+        TransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field', source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
