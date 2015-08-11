@@ -1,5 +1,6 @@
 from django.db.models import Min, Q
 
+from river.models import FORWARD
 from river.models.approvement import Approvement, PENDING
 from river.models.approvement_meta import ApprovementMeta
 from river.models.state import State
@@ -111,3 +112,13 @@ class ApprovementService:
     def override_groups(approvement, groups):
         approvement.groups.clear()
         approvement.groups.add(*groups)
+
+    @staticmethod
+    def get_initial_approvements(content_type, field):
+        initial_state = StateService.get_initial_state(content_type, field)
+        return Approvement.objects.filter(meta__transition__source_state=initial_state, meta__transition__direction=FORWARD)
+
+    @staticmethod
+    def get_final_approvements(content_type, field):
+        final_states = StateService.get_final_states(content_type, field)
+        return Approvement.objects.filter(meta__transition__destination_state__in=final_states, meta__transition__direction=FORWARD)
