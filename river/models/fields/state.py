@@ -57,6 +57,18 @@ class StateField(models.ForeignKey):
 
             return ApprovementService.get_approvements_object_waiting_for_approval(self, name, [getattr(self, name)], user)
 
+        @property
+        def initial_approvements(self):
+            from river.services.approvement import ApprovementService
+
+            return getattr(self, name) in ApprovementService.get_initial_approvements(ContentType.objects.get_for_model(self), name)
+
+        @property
+        def final_approvements(self):
+            from river.services.approvement import ApprovementService
+
+            return getattr(self, name) in ApprovementService.get_final_approvements(ContentType.objects.get_for_model(self), name)
+
         self.model = cls
 
         approvements_field = GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier)
@@ -71,6 +83,9 @@ class StateField(models.ForeignKey):
 
         cls.add_to_class("get_initial_state", get_initial_state)
         cls.add_to_class("get_available_approvements", get_available_approvements)
+
+        cls.add_to_class("initial_approvements", initial_approvements)
+        cls.add_to_class("final_approvements", final_approvements)
 
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 
