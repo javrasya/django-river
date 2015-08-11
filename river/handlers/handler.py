@@ -44,4 +44,4 @@ class Handler(object):
     def powerset(cls, iterable):
         xs = list(iterable)
         # note we return an iterator rather than a list
-        return chain.from_iterable(permutations(xs, n) for n in range(len(xs) + 1))
+        return chain.from_iterable(combinations(xs, n) for n in range(len(xs) + 1))
