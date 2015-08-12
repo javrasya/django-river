@@ -88,7 +88,7 @@ class ApprovementService:
         if skipped_approvements:
             source_state_pks = list(skipped_approvements.values_list('meta__transition__destination_state', flat=True))
             suitable_approvements = suitable_approvements | ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, State.objects.filter(pk__in=source_state_pks),
-                                                                                                                            user=user)
+                                                                                                                            user=user, destination_state=destination_state, god_mod=god_mod)
         return suitable_approvements
 
     @staticmethod
@@ -134,4 +134,3 @@ class ApprovementService:
     def get_final_approvements(content_type, field):
         final_states = StateService.get_final_states(content_type, field)
         return Approvement.objects.filter(meta__transition__destination_state__in=final_states, meta__transition__direction=FORWARD)
-
