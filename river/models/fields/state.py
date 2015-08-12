@@ -30,8 +30,8 @@ class StateField(models.ForeignKey):
         def is_workflow_completed(workflow_object):
             return ObjectService.is_workflow_completed(workflow_object, name)
 
-        def approve(self, user, next_state=None):
-            TransitionService.approve_transition(self, name, user, next_state=next_state)
+        def approve(self, user, next_state=None, god_mod=False):
+            TransitionService.approve_transition(self, name, user, next_state=next_state, god_mod=god_mod)
 
         def reject(self, user, next_state=None):
             TransitionService.reject_transition(self, name, user, next_state=next_state)
