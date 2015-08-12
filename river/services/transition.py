@@ -28,7 +28,7 @@ class TransitionService(object):
             workflow_object.save()
 
             # Next states should be PENDING back again if there is circle.
-            Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state=approvement.meta.transition.destination_state).update(status=PENDING)
+            ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
 
         if current_state != getattr(workflow_object, field):
             on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
