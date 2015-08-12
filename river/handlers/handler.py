@@ -26,7 +26,7 @@ class Handler(object):
 
     @classmethod
     def get_hash(cls, workflow_object, field, *args, **kwargs):
-        return (str(workflow_object.pk) if workflow_object else '') + (field or '')
+        return 'object' + (str(workflow_object.pk) if workflow_object else '') + 'field' + (field or '')
 
     @classmethod
     def get_handlers(cls, workflow_object, field, *args, **kwargs):
