@@ -78,23 +78,23 @@ class StateField(models.ForeignKey):
 
         self.model = cls
 
-        cls.add_to_class("approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier))
-        cls.add_to_class("current_approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
+        self.__add_to_class(cls, "approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier))
+        self.__add_to_class(cls, "current_approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
 
-        cls.add_to_class("objects", self.object_manager(name))
-        cls.add_to_class("is_workflow_completed", is_workflow_completed)
-        cls.add_to_class("approve", approve)
-        cls.add_to_class("reject", reject)
+        self.__add_to_class(cls, "objects", self.object_manager(name))
+        self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
+        self.__add_to_class(cls, "approve", approve)
+        self.__add_to_class(cls, "reject", reject)
 
-        cls.add_to_class("on_initial_state", on_initial_state)
-        cls.add_to_class("on_final_state", on_final_state)
+        self.__add_to_class(cls, "on_initial_state", on_initial_state)
+        self.__add_to_class(cls, "on_final_state", on_final_state)
 
-        cls.add_to_class("get_initial_state", get_initial_state)
-        cls.add_to_class("get_available_approvements", get_available_approvements)
+        self.__add_to_class(cls, "get_initial_state", get_initial_state)
+        self.__add_to_class(cls, "get_available_approvements", get_available_approvements)
 
-        cls.add_to_class("initial_approvements", initial_approvements)
-        cls.add_to_class("final_approvements", final_approvements)
-        cls.add_to_class("next_approvements", next_approvements)
+        self.__add_to_class(cls, "initial_approvements", initial_approvements)
+        self.__add_to_class(cls, "final_approvements", final_approvements)
+        self.__add_to_class(cls, "next_approvements", next_approvements)
 
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 
@@ -106,6 +106,10 @@ class StateField(models.ForeignKey):
 
     def set_state(self, instance, state):
         instance.__dict__[self.attname] = state.pk
+
+    def __add_to_class(self, cls, key, value):
+        if not hasattr(cls, key):
+            cls.add_to_class(key, value)
 
 
 def _post_save(sender, instance, created, *args, **kwargs):  # signal, sender, instance):
