@@ -6,6 +6,7 @@ from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
 
 from river.models import State, Approvement
+from river.models.approvement_track import ApprovementTrack
 from river.models.managers.wofkflow_object import WorkflowObjectManager
 from river.services.config import RiverConfig
 from river.services.object import ObjectService
@@ -77,8 +78,9 @@ class StateField(models.ForeignKey):
 
         self.model = cls
 
-        approvements_field = GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier)
-        cls.add_to_class("approvements", approvements_field)
+        cls.add_to_class("approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier))
+        cls.add_to_class("current_approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
+
         cls.add_to_class("objects", self.object_manager(name))
         cls.add_to_class("is_workflow_completed", is_workflow_completed)
         cls.add_to_class("approve", approve)

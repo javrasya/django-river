@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db.transaction import atomic
 
 from river.models.approvement import APPROVED, REJECTED, Approvement, PENDING
+from river.models.approvement_track import ApprovementTrack
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
 from river.signals import workflow_is_completed, on_transition
@@ -18,21 +19,26 @@ class TransitionService(object):
     @staticmethod
     @atomic
     def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
-        approvement = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
+        approvement, track = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
+        workflow_object.current_approvement_track = track
 
         current_state = getattr(workflow_object, field)
         # Any other approvement is left?
         required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state, god_mod=god_mod)
+
+        transition_status = False
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
-            workflow_object.save()
+            transition_status = True
 
             # Next states should be PENDING back again if there is circle.
             ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
 
-        if current_state != getattr(workflow_object, field):
+        workflow_object.save()
+        if transition_status:
             on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
                                destination_state=getattr(workflow_object, field))
+
         if workflow_object.on_final_state:
             workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
@@ -63,4 +69,4 @@ class TransitionService(object):
         approvement.transaction_date = datetime.now()
         approvement.save()
 
-        return approvement
+        return approvement, approvement.tracks.create(previous_track=workflow_object.current_approvement_track)

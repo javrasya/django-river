@@ -1,7 +1,8 @@
+from datetime import datetime
 from django.db.models import Min, Q
 
 from river.models import FORWARD
-from river.models.approvement import Approvement, PENDING
+from river.models.approvement import Approvement, PENDING, APPROVED
 from river.models.approvement_meta import ApprovementMeta
 from river.models.state import State
 from river.services.config import RiverConfig
@@ -91,13 +92,13 @@ class ApprovementService:
         return suitable_approvements
 
     @staticmethod
-    def get_next_approvements(workflow_object, field, approvements=Approvement.objects.none(), current_states=None):
-
+    def get_next_approvements(workflow_object, field, approvements=Approvement.objects.none(), current_states=None, index=0, limit=None):
+        index += 1
         current_states = current_states or [getattr(workflow_object, field)]
         next_approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state__in=current_states)
-        if next_approvements and not next_approvements.filter(pk__in=approvements.values_list('pk')):
+        if next_approvements and not next_approvements.filter(pk__in=approvements.values_list('pk')) and (not limit or index < limit):
             approvements = ApprovementService.get_next_approvements(workflow_object, field, approvements=approvements | next_approvements, current_states=State.objects.filter(
-                pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)))
+                pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)), index=index, limit=limit)
 
         return approvements
 
@@ -133,3 +134,4 @@ class ApprovementService:
     def get_final_approvements(content_type, field):
         final_states = StateService.get_final_states(content_type, field)
         return Approvement.objects.filter(meta__transition__destination_state__in=final_states, meta__transition__direction=FORWARD)
+
