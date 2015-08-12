@@ -95,7 +95,7 @@ class ApprovementService:
 
         current_states = current_states or [getattr(workflow_object, field)]
         next_approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state__in=current_states)
-        if next_approvements:
+        if next_approvements and not next_approvements.filter(pk__in=approvements.values_list('pk')):
             approvements = ApprovementService.get_next_approvements(workflow_object, field, approvements=approvements | next_approvements, current_states=State.objects.filter(
                 pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)))
 
