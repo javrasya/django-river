@@ -20,7 +20,7 @@ class TransitionService(object):
     @atomic
     def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
         approvement, track = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
-        workflow_object.current_approvement_track = track
+        workflow_object.approvement_track = track
 
         current_state = getattr(workflow_object, field)
         # Any other approvement is left?
@@ -69,4 +69,4 @@ class TransitionService(object):
         approvement.transaction_date = datetime.now()
         approvement.save()
 
-        return approvement, approvement.tracks.create(previous_track=workflow_object.current_approvement_track)
+        return approvement, approvement.tracks.create(previous_track=workflow_object.approvement_track)

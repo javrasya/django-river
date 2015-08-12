@@ -79,7 +79,7 @@ class StateField(models.ForeignKey):
         self.model = cls
 
         self.__add_to_class(cls, "approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier))
-        self.__add_to_class(cls, "current_approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
+        self.__add_to_class(cls, "approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
 
         self.__add_to_class(cls, "objects", self.object_manager(name))
         self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
