@@ -91,6 +91,17 @@ class ApprovementService:
         return suitable_approvements
 
     @staticmethod
+    def get_next_approvements(workflow_object, field, approvements=Approvement.objects.none(), current_states=None):
+
+        current_states = current_states or [getattr(workflow_object, field)]
+        next_approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state__in=current_states)
+        if next_approvements:
+            approvements = ApprovementService.get_next_approvements(workflow_object, field, approvements=approvements | next_approvements, current_states=State.objects.filter(
+                pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)))
+
+        return approvements
+
+    @staticmethod
     def has_user_any_action(content_type, field, user):
         """
         :param content_type_id:

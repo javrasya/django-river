@@ -23,6 +23,38 @@ class test_ApprovementService(ApprovementServiceBasedTest):
         approvements = ApprovementService.get_approvements_object_waiting_for_approval(self.objects[0], self.field, [self.objects[0].my_field], user=self.user4)
         self.assertEqual(0, approvements.count())
 
+    def test_get_next_approvements(self):
+        ObjectService.register_object(self.objects[0], self.field)
+        ObjectService.register_object(self.objects[1], self.field)
+
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(9, approvements.count())
+
+        self.objects[0].approve(self.user1)
+
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(8, approvements.count())
+
+        self.objects[0].approve(self.user2)
+
+
+        # Two approvements exist on same level
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(8, approvements.count())
+
+        self.objects[0].approve(self.user3)
+
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(6, approvements.count())
+
+        self.objects[0].approve(self.user4, next_state=State.objects.get(label='s4'))
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(2, approvements.count())
+
+        self.objects[0].approve(self.user4, next_state=State.objects.get(label='s4.1'))
+        approvements = ApprovementService.get_next_approvements(self.objects[0], self.field)
+        self.assertEqual(0, approvements.count())
+
     def test_get_approvements_object_waiting_for_approval_with_skip(self):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
