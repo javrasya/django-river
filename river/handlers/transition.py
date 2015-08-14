@@ -1,5 +1,5 @@
 from river.handlers.handler import Handler
-from river.signals import on_transition
+from river.signals import pre_transition, post_transition
 
 __author__ = 'ahmetdal'
 
@@ -22,4 +22,13 @@ class TransitionHandler(Handler):
             'destination_state' + str(destination_state.pk) if destination_state else '') + ('approvement' + str(approvement.pk) if approvement else '')
 
 
-on_transition.connect(TransitionHandler.dispatch)
+class PreTransitionHandler(TransitionHandler):
+    handlers = {}
+
+
+class PostTransitionHandler(TransitionHandler):
+    handlers = {}
+
+
+pre_transition.connect(PreTransitionHandler.dispatch)
+post_transition.connect(PostTransitionHandler.dispatch)

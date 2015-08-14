@@ -1,5 +1,5 @@
 from unittest import skip
-from river.handlers.transition import TransitionHandler
+from river.handlers.transition import TransitionHandler, PostTransitionHandler
 from river.models import State, Approvement
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
@@ -21,7 +21,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        TransitionHandler.register(test_handler)
+        PostTransitionHandler.register(test_handler)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -75,7 +75,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        TransitionHandler.register(test_handler, workflow_object=self.objects[1], field='my_field')
+        PostTransitionHandler.register(test_handler, workflow_object=self.objects[1], field='my_field')
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -90,7 +90,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field')
+        PostTransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field')
         TransitionService.approve_transition(self.objects[0], self.field, self.user3)
 
         self.assertEqual((), self.test_args)
@@ -114,7 +114,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        TransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field', source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
+        PostTransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field', source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
