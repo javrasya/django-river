@@ -1,5 +1,5 @@
 from unittest import skip
-from river.handlers.completed import CompletedHandler
+from river.handlers.completed import PostCompletedHandler
 from river.models import Transition
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
@@ -26,7 +26,7 @@ class test_CompletedHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        CompletedHandler.register(test_handler)
+        PostCompletedHandler.register(test_handler)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -62,7 +62,7 @@ class test_CompletedHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        CompletedHandler.register(test_handler, self.objects[0], 'my_field')
+        PostCompletedHandler.register(test_handler, self.objects[0], 'my_field')
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)

@@ -1,11 +1,11 @@
 from datetime import datetime
+
 from django.db.transaction import atomic
 
-from river.models.approvement import APPROVED, REJECTED, Approvement, PENDING
-from river.models.approvement_track import ApprovementTrack
+from river.models.approvement import APPROVED, REJECTED, PENDING
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
-from river.signals import workflow_is_completed, pre_transition, post_transition, pre_approved, post_approved
+from river.signals import pre_final, post_final, pre_transition, post_transition, pre_approved, post_approved
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -28,15 +28,20 @@ class TransitionService(object):
         # Any other approvement is left?
         required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state, god_mod=god_mod)
 
+        on_final_status = False
         transition_status = False
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
+            on_final_status = workflow_object.on_final_state
             transition_status = True
 
             # Next states should be PENDING back again if there is circle.
             ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
             pre_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
                                 destination_state=getattr(workflow_object, field))
+
+            if on_final_status:
+                pre_final.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
         workflow_object.save()
 
@@ -45,8 +50,8 @@ class TransitionService(object):
             post_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
                                  destination_state=getattr(workflow_object, field))
 
-        if workflow_object.on_final_state:
-            workflow_is_completed.send(sender=TransitionService, workflow_object=workflow_object, field=field)
+        if on_final_status:
+            post_final.send(sender=TransitionService, workflow_object=workflow_object, field=field)
 
     @staticmethod
     @atomic

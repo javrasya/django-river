@@ -1,11 +1,16 @@
 from river.handlers.handler import Handler
-from river.signals import workflow_is_completed
+from river.signals import pre_final, post_final
 
 __author__ = 'ahmetdal'
 
 
-class CompletedHandler(Handler):
+class PreCompletedHandler(Handler):
     handlers = {}
 
 
-workflow_is_completed.connect(CompletedHandler.dispatch)
+class PostCompletedHandler(Handler):
+    handlers = {}
+
+
+pre_final.connect(PreCompletedHandler.dispatch)
+post_final.connect(PostCompletedHandler.dispatch)
