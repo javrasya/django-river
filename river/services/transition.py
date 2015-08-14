@@ -5,7 +5,7 @@ from river.models.approvement import APPROVED, REJECTED, Approvement, PENDING
 from river.models.approvement_track import ApprovementTrack
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
-from river.signals import workflow_is_completed, on_transition
+from river.signals import workflow_is_completed, on_transition, pre_approved, post_approved
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -19,6 +19,8 @@ class TransitionService(object):
     @staticmethod
     @atomic
     def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
+
+        pre_approved.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field)
         approvement, track = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
         workflow_object.approvement_track = track
 
@@ -35,6 +37,8 @@ class TransitionService(object):
             ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
 
         workflow_object.save()
+        post_approved.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, track=track)
+
         if transition_status:
             on_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
                                destination_state=getattr(workflow_object, field))
@@ -69,4 +73,8 @@ class TransitionService(object):
         approvement.transaction_date = datetime.now()
         approvement.save()
 
-        return approvement, approvement.tracks.create(previous_track=workflow_object.approvement_track)
+        c = False
+        track = workflow_object.approvement_track
+        while not c:
+            track, c = approvement.tracks.get_or_create(previous_track=track)
+        return approvement, track
