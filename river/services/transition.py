@@ -5,11 +5,33 @@ from django.db.transaction import atomic
 from river.models.approvement import APPROVED, REJECTED, PENDING
 from river.services.approvement import ApprovementService
 from river.services.state import StateService
-from river.signals import pre_final, post_final, pre_transition, post_transition, pre_approved, post_approved
+from river.signals import pre_final, post_final, pre_transition, post_transition, pre_approved, post_approved, ApprovementSignal, TransitionSignal, FinalSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
+
+
+class TTSSignal(object):
+    def __init__(self, status, pre_signal, post_signal, **kwargs):
+        self.status = status
+        self.pre_signal = pre_signal
+        self.post_signal = post_signal
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        if self.status:
+            self.pre_signal.send(
+                sender=TTSSignal.__class__,
+                **self.kwargs
+            )
+
+    def __exit__(self, type, value, traceback):
+        if self.status:
+            self.post_signal.send(
+                sender=TTSSignal.__class__,
+                **self.kwargs
+            )
 
 
 class TransitionService(object):
@@ -20,7 +42,6 @@ class TransitionService(object):
     @atomic
     def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
 
-        pre_approved.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field)
         approvement, track = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
         workflow_object.approvement_track = track
 
@@ -28,30 +49,16 @@ class TransitionService(object):
         # Any other approvement is left?
         required_approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], destination_state=next_state, god_mod=god_mod)
 
-        on_final_status = False
         transition_status = False
         if required_approvements.count() == 0:
             setattr(workflow_object, field, approvement.meta.transition.destination_state)
-            on_final_status = workflow_object.on_final_state
             transition_status = True
 
             # Next states should be PENDING back again if there is circle.
             ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
-            pre_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
-                                destination_state=getattr(workflow_object, field))
 
-            if on_final_status:
-                pre_final.send(sender=TransitionService, workflow_object=workflow_object, field=field)
-
-        workflow_object.save()
-
-        post_approved.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, track=track)
-        if transition_status:
-            post_transition.send(sender=TransitionService.__class__, workflow_object=workflow_object, field=field, approvement=approvement, source_state=current_state,
-                                 destination_state=getattr(workflow_object, field))
-
-        if on_final_status:
-            post_final.send(sender=TransitionService, workflow_object=workflow_object, field=field)
+        with ApprovementSignal(workflow_object, field, approvement,track), TransitionSignal(transition_status, workflow_object, field, approvement), FinalSignal(workflow_object, field):
+            workflow_object.save()
 
     @staticmethod
     @atomic
