@@ -41,7 +41,7 @@ class MyModel(models.Model):
 That's it. Whenever your new model object is saved, it's state field will be initialized according to given meta data about workflow. To know how to do your workflow confirmation(states, transitions, permissions etc.), see the next part.
 
 
-## Usage	
+## Usage for End User
 
 1. Define your states.
 2. Define your state transitions.
@@ -50,6 +50,151 @@ That's it. Whenever your new model object is saved, it's state field will be ini
 We are now ready to workflowing :)
 
 Whenever an object of MyModel is inserted in your system, all its workflow initialization is done by `django-river`.
+
+## Usage for Developer
+
+###Signals:
+**`pre_transition`**: it is fired before any transition occured.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object on transition             |
+| field      			| Field which you registered object for |
+| source_state 		| Transition source state object        |
+| destination_state | Transition destination state object   |
+| appovement 			| Approvement object                    |
+
+**`post_transition`**: it is fired before any transition occured.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object on transition             |
+| field      			| Field which you registered object for |
+| source_state 		| Transition source state object        |
+| destination_state | Transition destination state object   |
+| appovement 			| Approvement object                    |
+
+
+**`pre_approved`**: it is fired before any approvement occured. Transition does not have to be occured.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object approved                  |
+| field      			| Field which you registered object for |
+| appovement 			| Approvement object                    |
+| track	 			| Approvement track object              |
+
+**`post_approved`**: it is fired before any approvement occured. Transition does not have to be occured.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object approved                  |
+| field      			| Field which you registered object for |
+| appovement 			| Approvement object                    |
+| track	 			| Approvement track object              |
+
+**`pre_final`**: it is fired before any workflow is completed.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object on final                  |
+| field      			| Field which you registered object for |
+
+**`post_final`**: it is fired before any workflow is completed.
+
+| Args          		| Description                           |
+| ----------------- |---------------------------------------|
+| workflow_object	| Your object on final                  |
+| field      			| Field which you registered object for |
+
+###Handlers:
+Handlers are different from `django-river` signals. These are for spesific object, spesific source_state, spesific destination_state etc. It is fired when the condition is matched.
+
+####`PreCompletedHandler`:
+--
+Before an object is on final state, if the condition is match; means object is suitable, it is fired;
+```python
+from river.handlers.completed import PreCompletedHandler
+
+def handler(my_object,field,*args,**kwargs):
+	do_something_with(object,field)
+
+PreCompletedHandler.register(handler,my_object,'my_state_field')
+```
+
+
+**`register` method parameter**
+
+| Args          		| Description                           |          |
+| ----------------- |---------------------------------------|----------|
+| workflow_object	| Your object                           | Required |
+| field      			| Field which you registered object for | Required |
+
+####`PostCompletedHandler`:
+--
+After an object is on final state, if the condition is match; means object is suitable, it is fired;
+```python
+from river.handlers.completed import PostCompletedHandler
+
+def handler(my_object,field,*args,**kwargs):
+	do_something_with(object,field)
+
+PostCompletedHandler.register(handler,my_object,'my_state_field')
+```
+
+
+**`register` method parameter**
+
+| Args          		| Description                           |          |
+| ----------------- |---------------------------------------|----------|
+| workflow_object	| Your object                           | Required |
+| field      			| Field which you registered object for | Required |
+
+
+####`PreTransitionHandler`:
+--
+Before any transition occurred, if the condition is match; means object, source_state,destination state are suitable, it is fired;
+```python
+from river.handlers.transition import PreTransitionHandler
+
+def handler(my_object,field,*args,**kwargs):
+	do_something_with(object,field)
+
+PreTransitionHandler.register(handler,my_object,'my_state_field')
+```
+
+
+**`register` method parameter**
+
+| Args          		| Description                           |          |
+| ----------------- |---------------------------------------|----------|
+| workflow_object	| Your object                           | Required |
+| field      			| Field which you registered object for | Required |
+| source_state      | Source state of the tranition         | Optional |
+| desination_satte  | Destinatio state of the tranition     | Optional |
+
+####`PostTransitionHandler`:
+--
+After any transition occurred, if the condition is match; means object, source_state,destination state are suitable, it is fired;
+```python
+from river.handlers.transition import PostTransitionHandler
+
+def handler(my_object,field,*args,**kwargs):
+	do_something_with(object,field)
+
+PostTransitionHandler.register(handler,my_object,'my_state_field')
+```
+
+
+
+**`register` method parameter**
+
+| Args          		| Description                           |          |
+| ----------------- |---------------------------------------|----------|
+| workflow_object	| Your object                           | Required |
+| field      			| Field which you registered object for | Required |
+| source_state      | Source state of the tranition         | Optional |
+| desination_satte  | Destinatio state of the tranition     | Optional |
 
 
 ##Models:

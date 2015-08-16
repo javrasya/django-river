@@ -12,7 +12,7 @@ class Handler(object):
         kwargs.pop('sender', None)
         handlers = cls.get_handlers(workflow_object, field, *args, **kwargs)
         for handler in handlers:
-            handler['handler'](object=workflow_object, field=field, *args, **kwargs)
+            handler['handler'](workflow_object, field, *args, **kwargs)
 
     @classmethod
     def register(cls, handler, workflow_object, field, override=False, *args, **kwargs):
