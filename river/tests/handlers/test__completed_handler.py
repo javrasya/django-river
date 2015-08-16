@@ -80,8 +80,4 @@ class test_CompletedHandler(ApprovementServiceBasedTest):
 
         TransitionService.approve_transition(self.objects[0], self.field, self.user3)
 
-        self.assertEqual((), self.test_args)
-        self.assertTrue('field' in self.test_kwargs)
-        self.assertEqual('my_field', self.test_kwargs.get('field'))
-        self.assertTrue('object' in self.test_kwargs)
-        self.assertEqual(self.objects[0], self.test_kwargs.get('object'))
+        self.assertEqual((self.objects[0], 'my_field'), self.test_args)

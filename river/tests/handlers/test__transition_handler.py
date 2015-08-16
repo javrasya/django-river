@@ -75,7 +75,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        PostTransitionHandler.register(test_handler, workflow_object=self.objects[1], field='my_field')
+        PostTransitionHandler.register(test_handler, self.objects[1], 'my_field')
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -90,14 +90,12 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        PostTransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field')
+        PostTransitionHandler.register(test_handler, self.objects[0], field='my_field')
         TransitionService.approve_transition(self.objects[0], self.field, self.user3)
 
-        self.assertEqual((), self.test_args)
+        self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
             {
-                'field': 'my_field',
-                'object': self.objects[0],
                 'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
@@ -114,7 +112,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
-        PostTransitionHandler.register(test_handler, workflow_object=self.objects[0], field='my_field', source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
+        PostTransitionHandler.register(test_handler, self.objects[0], 'my_field', source_state=State.objects.get(label='s2'), destination_state=State.objects.get(label='s3'))
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
@@ -131,11 +129,9 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
 
         TransitionService.approve_transition(self.objects[0], self.field, self.user3)
 
-        self.assertEqual((), self.test_args)
+        self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
             {
-                'field': 'my_field',
-                'object': self.objects[0],
                 'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
