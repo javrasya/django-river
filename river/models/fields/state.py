@@ -30,11 +30,11 @@ class StateField(models.ForeignKey):
         def is_workflow_completed(workflow_object):
             return ObjectService.is_workflow_completed(workflow_object, name)
 
-        def approve(self, user, next_state=None, god_mod=False):
-            TransitionService.approve_transition(self, name, user, next_state=next_state, god_mod=god_mod)
+        def approve(self, user, *args, **kwargs):
+            TransitionService.approve_transition(self, name, user, *args, **kwargs)
 
-        def reject(self, user, next_state=None):
-            TransitionService.reject_transition(self, name, user, next_state=next_state)
+        def reject(self, user, *args, **kwargs):
+            TransitionService.reject_transition(self, name, user, *args, **kwargs)
 
         @property
         def on_initial_state(self):
@@ -53,10 +53,10 @@ class StateField(models.ForeignKey):
 
             return StateService.get_initial_state(ContentType.objects.get_for_model(self), name)
 
-        def get_available_approvements(self, user):
+        def get_available_approvements(self, *args, **kwargs):
             from river.services.approvement import ApprovementService
 
-            return ApprovementService.get_approvements_object_waiting_for_approval(self, name, [getattr(self, name)], user)
+            return ApprovementService.get_approvements_object_waiting_for_approval(self, name, [getattr(self, name)], *args, **kwargs)
 
         @property
         def initial_approvements(self):
