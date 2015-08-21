@@ -9,6 +9,6 @@ __author__ = 'ahmetdal'
 class RiverConfig:
     # EMBEDDED = settings.get('RIVER_IS_EMBEDDED', True)
     CONTENT_TYPE_CLASS = getattr(settings, 'RIVER_CONTENT_TYPE_CLASS', ContentType)
-    USER_CLASS = getattr(settings, 'RIVER_USER_CLASS', User)
+    USER_CLASS = getattr(settings, 'RIVER_USER_CLASS', settings.AUTH_USER_MODEL)
     PERMISSION_CLASS = getattr(settings, 'RIVER_PERMISSION_CLASS', Permission)
     GROUP_CLASS = getattr(settings, 'RIVER_GROUP_CLASS', Group)
