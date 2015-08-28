@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db.models import Min, Q
+import logging
 
 from river.models import FORWARD
 from river.models.approvement import Approvement, PENDING, APPROVED
@@ -9,6 +10,8 @@ from river.services.config import RiverConfig
 from river.services.state import StateService
 
 __author__ = 'ahmetdal'
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ApprovementService:
@@ -34,6 +37,7 @@ class ApprovementService:
         init_state = StateService.get_initial_state(content_type, field)
         setattr(workflow_object, field, init_state)
         workflow_object.save()
+        LOGGER.debug("Approvements are initialized for workflow object %s and field %s" % (workflow_object, field))
 
     # @staticmethod
     # def apply_approvements(content_type_id, obj_id, field_id):
@@ -124,6 +128,7 @@ class ApprovementService:
     def override_groups(approvement, groups):
         approvement.groups.clear()
         approvement.groups.add(*groups)
+
 
     @staticmethod
     def get_initial_approvements(content_type, field):

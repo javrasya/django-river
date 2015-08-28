@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db.transaction import atomic
+import logging
 
 from river.models.approvement import APPROVED, REJECTED, PENDING
 from river.services.approvement import ApprovementService
@@ -34,6 +35,9 @@ class TTSSignal(object):
             )
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 class TransitionService(object):
     def __init__(self):
         pass
@@ -57,8 +61,10 @@ class TransitionService(object):
             # Next states should be PENDING back again if there is circle.
             ApprovementService.get_next_approvements(workflow_object, field).update(status=PENDING)
 
-        with ApprovementSignal(workflow_object, field, approvement,track), TransitionSignal(transition_status, workflow_object, field, approvement), FinalSignal(workflow_object, field):
+        with ApprovementSignal(workflow_object, field, approvement, track), TransitionSignal(transition_status, workflow_object, field, approvement), FinalSignal(workflow_object, field):
             workflow_object.save()
+
+        LOGGER.debug("Workflow object %s for field %s is approved for next transition. Transition: %s -> %s" % (workflow_object, field, current_state.label, getattr(workflow_object, field).label))
 
     @staticmethod
     @atomic

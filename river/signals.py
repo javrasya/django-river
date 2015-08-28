@@ -1,4 +1,5 @@
 from django.dispatch import Signal
+import logging
 
 __author__ = 'ahmetdal'
 
@@ -10,6 +11,8 @@ post_transition = Signal(providing_args=["workflow_object", "field", "source_sta
 
 pre_approved = Signal(providing_args=["workflow_object", "field", "approvement", "track"])
 post_approved = Signal(providing_args=["workflow_object", "field", "approvement", "track"])
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TransitionSignal(object):
@@ -29,6 +32,10 @@ class TransitionSignal(object):
                 destination_state=self.approvement.meta.transition.destination_state,
                 approvement=self.approvement,
             )
+            LOGGER.debug("Pre transition signal IS sent for workflow object %s for field %s for transition %s -> %s" % (
+                self.workflow_object, self.field, self.approvement.meta.transition.source_state.label, self.approvement.meta.transition.destination_state.label))
+        else:
+            LOGGER.debug("Pre transition signal IS NOT sent for workflow object %s for field %s. Although approvement is occurred, not transition is occurred." % (self.workflow_object, self.field))
 
     def __exit__(self, type, value, traceback):
         if self.status:
@@ -40,6 +47,10 @@ class TransitionSignal(object):
                 destination_state=self.approvement.meta.transition.destination_state,
                 approvement=self.approvement,
             )
+            LOGGER.debug("Post transition signal IS sent for workflow object %s for field %s for transition %s -> %s" % (
+                self.workflow_object, self.field, self.approvement.meta.transition.source_state.label, self.approvement.meta.transition.destination_state.label))
+        else:
+            LOGGER.debug("Post transition signal IS NOT sent for workflow object %s for field %s. Although approvement is occurred, not transition is occurred." % (self.workflow_object, self.field))
 
 
 class ApprovementSignal(object):
@@ -57,6 +68,8 @@ class ApprovementSignal(object):
             approvement=self.approvement,
             track=self.track
         )
+        LOGGER.debug("Pre approvement signal IS sent for workflow object %s for field %s for transition %s -> %s" % (
+            self.workflow_object, self.field, self.approvement.meta.transition.source_state.label, self.approvement.meta.transition.destination_state.label))
 
     def __exit__(self, type, value, traceback):
         post_approved.send(
@@ -66,6 +79,8 @@ class ApprovementSignal(object):
             approvement=self.approvement,
             track=self.track
         )
+        LOGGER.debug("Post approvement signal IS sent for workflow object %s for field %s for transition %s -> %s" % (
+            self.workflow_object, self.field, self.approvement.meta.transition.source_state.label, self.approvement.meta.transition.destination_state.label))
 
 
 class FinalSignal(object):
@@ -81,6 +96,7 @@ class FinalSignal(object):
                 workflow_object=self.workflow_object,
                 field=self.field
             )
+            LOGGER.debug("Pre final signal IS sent for workflow object %s for field %s for final state %s" % (self.workflow_object, self.field, getattr(self.workflow_object, self.field).label))
 
     def __exit__(self, type, value, traceback):
         if self.status:
@@ -89,3 +105,4 @@ class FinalSignal(object):
                 workflow_object=self.workflow_object,
                 field=self.field,
             )
+            LOGGER.debug("Post final signal IS sent for workflow object %s for field %s for final state %s" % (self.workflow_object, self.field, getattr(self.workflow_object, self.field).label))

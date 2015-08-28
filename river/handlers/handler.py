@@ -1,6 +1,9 @@
 from itertools import chain, combinations, permutations
+import logging
 
 __author__ = 'ahmetdal'
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Handler(object):
@@ -8,11 +11,14 @@ class Handler(object):
 
     @classmethod
     def dispatch(cls, workflow_object, field, *args, **kwargs):
+        LOGGER.debug("Handler %s is dispatched for workflow object %s for field %s" % (cls.__name__, workflow_object, field))
         kwargs.pop('signal', None)
         kwargs.pop('sender', None)
         handlers = cls.get_handlers(workflow_object, field, *args, **kwargs)
         for handler in handlers:
-            handler['handler'](workflow_object, field, *args, **kwargs)
+            method = handler['handler']
+            method(workflow_object, field, *args, **kwargs)
+            LOGGER.debug("Handler %s for workflow object %s for field %s is found as method %s with args %s and kwargs %s" % (cls.__name__, workflow_object, field, method.__name__, args, kwargs))
 
     @classmethod
     def register(cls, handler, workflow_object, field, override=False, *args, **kwargs):
