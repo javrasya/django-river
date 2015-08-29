@@ -9,7 +9,7 @@ except IOError:
 
 setup(
     name='django-river',
-    version='0.3.1',
+    version='0.3.2',
     author='Ahmet DAL',
     author_email='ceahmetdal@gmail.com',
     packages=find_packages(),
