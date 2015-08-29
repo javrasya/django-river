@@ -7,6 +7,9 @@ Main goal of developing this framework is **to be able to edit any workflow item
 
 There is ordering aprovments for a transition functionality in `django-river`. It also provides skipping specific transition of a specific objects.
 
+Documentation
+
+Online documentation is available at http://django-river.rtfd.org/.
 
 ## Installation
 
