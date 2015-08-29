@@ -10,4 +10,5 @@ junit-*.xml
 *egg-info*
 *sqlite3*
 .coverage
-
+docs/_*
+dist
