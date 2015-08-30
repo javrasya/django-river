@@ -3,9 +3,12 @@ __author__ = 'ahmetdal'
 from setuptools import setup, find_packages
 
 try:
-    long_description = open('README.md').read()
-except IOError:
-    long_description = ''
+    from pypandoc import convert
+
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    print("warning: pypandoc module not found, could not convert Markdown to RST")
+    read_md = lambda f: open(f, 'r').read()
 
 setup(
     name='django-river',
@@ -15,7 +18,7 @@ setup(
     packages=find_packages(),
     url='https://github.com/javrasya/django-river.git',
     description='Django Workflow Library',
-    long_description=long_description,
+    long_description=read_md('README.md'),
     dependency_links=[
         "https://bitbucket.org/ahmetdal/river.io-python/tarball/master/#egg=0.0.1"
     ],
