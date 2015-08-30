@@ -10,6 +10,11 @@ except ImportError:
     print("warning: pypandoc module not found, could not convert Markdown to RST")
     read_md = lambda f: open(f, 'r').read()
 
+try:
+    long_description = read_md('README.md')
+except IOError:
+    long_description = ''
+
 setup(
     name='django-river',
     version='0.3.3',
@@ -18,7 +23,7 @@ setup(
     packages=find_packages(),
     url='https://github.com/javrasya/django-river.git',
     description='Django Workflow Library',
-    long_description=read_md('README.md'),
+    long_description=long_description,
     install_requires=[
         "Django",
         "mock",
