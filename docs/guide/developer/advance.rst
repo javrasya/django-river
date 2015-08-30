@@ -5,13 +5,10 @@ Advance Guide
 
 StateField
 ----------
-``StateField`` is a model field defined in ``django-river``, which prepare everything for you. Whenever you put this field into a model object, the model converts into a workflow model. The model have some workflow specialized properties, methods and relations.
+``StateField`` is a model field defined in ``django-river``, which prepares everything for you. Whenever you put this field into a model object, the model converts into a workflow model. The model have some workflow specialized properties, methods and relations.
 
 Arguments
 ^^^^^^^^^
-
-
-This is paragraph text *before* the table.
 
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Arguments          | Description                                                                                                                                                                                        |
@@ -20,8 +17,6 @@ This is paragraph text *before* the table.
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | reverse_identifier | Approvements have generic foreign key to your model objects. If you want to filter like ``Approvements.objects.filter(my_model__field1='value1')``, you should give that argument as ``my_model``. |
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-This is paragraph text *after* the table.
 
 
 
