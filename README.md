@@ -21,7 +21,7 @@ pip install django-river
 
 * Configure settings
 ```python
-INSTALLED_APP=[
+INSTALLED_APPS=[
 	...
 	river
 	...
