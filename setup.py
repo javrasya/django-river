@@ -1,19 +1,17 @@
+import os
+import sys
+
 __author__ = 'ahmetdal'
 
 from setuptools import setup, find_packages
 
+readme_file = os.path.join(os.path.dirname(__file__), 'README.rst')
 try:
-    from pypandoc import convert
-
-    read_md = lambda f: convert(f, 'rst')
-except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r').read()
-
-try:
-    long_description = read_md('README.md')
-except IOError:
-    long_description = ''
+    long_description = open(readme_file).read()
+except IOError as err:
+    sys.stderr.write("[ERROR] Cannot find file specified as "
+                     "``long_description`` (%s)\n" % readme_file)
+    sys.exit(1)
 
 setup(
     name='django-river',
