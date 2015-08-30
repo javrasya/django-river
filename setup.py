@@ -19,9 +19,6 @@ setup(
     url='https://github.com/javrasya/django-river.git',
     description='Django Workflow Library',
     long_description=read_md('README.md'),
-    dependency_links=[
-        "https://bitbucket.org/ahmetdal/river.io-python/tarball/master/#egg=0.0.1"
-    ],
     install_requires=[
         "Django",
         "mock",
