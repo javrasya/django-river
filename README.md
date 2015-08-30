@@ -16,7 +16,7 @@ Online documentation is available at http://django-river.rtfd.org/.
 
 * Install it
 ```bash
-pip install git+https://github.com/javrasya/django-river.git
+pip install django-river
 ```
 
 * Configure settings
