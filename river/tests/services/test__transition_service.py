@@ -24,15 +24,15 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user2)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user2)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -41,15 +41,15 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user3)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user3)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -58,15 +58,15 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user4)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user4)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         # Approved by user has required permission for this transition
@@ -92,8 +92,8 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user1)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -106,24 +106,24 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user1)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         # Approved by user has no required permission for this transition
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user4)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         # Turn is User2(2002)s, not User3(2003)s. After User2(2002) approved, User3(2003) can approve.
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user3)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -149,8 +149,8 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user2)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         self.assertEqual(State.objects.get(label='s2'), getattr(self.objects[0], self.field))
@@ -177,8 +177,8 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user3)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -192,24 +192,24 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user1)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         # Approved by user has no required permission for this transition
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user2)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
         # Approved by user has no required permission for this transition
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user3)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'There is no available state for destination for the user.')
+        except RiverException as e:
+            self.assertEqual(str(e), 'There is no available state for destination for the user.')
             self.assertEqual(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, e.code)
 
 
@@ -217,8 +217,8 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user4)
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message, 'State must be given when there are multiple states for destination')
+        except RiverException as e:
+            self.assertEqual(str(e), 'State must be given when there are multiple states for destination')
             self.assertEqual(ErrorCode.NEXT_STATE_IS_REQUIRED, e.code)
 
 
@@ -226,8 +226,8 @@ class test__TransitionService(ApprovementServiceBasedTest):
         try:
             TransitionService.approve_transition(self.objects[0], self.field, self.user4, next_state=State.objects.get(label='s3'))
             self.fail('Exception was expected')
-        except RiverException, e:
-            self.assertEqual(e.message,
+        except RiverException as e:
+            self.assertEqual(str(e),
                              "Invalid state is given(%s). Valid states is(are) %s" % (
                                  State.objects.get(label='s3').__unicode__(), ','.join([ast.__unicode__() for ast in State.objects.filter(label__in=['s4', 's5'])])))
             self.assertEqual(ErrorCode.INVALID_NEXT_STATE_FOR_USER, e.code)

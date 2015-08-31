@@ -1,6 +1,3 @@
-from django.contrib.auth.models import User
-from mock import MagicMock
-
 from river.models import State
 from river.services.object import ObjectService
 from river.services.state import StateService
