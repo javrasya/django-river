@@ -160,7 +160,7 @@ Handlers
 --------
 Handlers are different from `django-river`. These are for spesific object, spesific source_state, spesific destination_state etc. It is fired when the condition is matched.
 
-PreCompletedHandler:
+PreCompletedHandler
 ^^^^^^^^^^^^^^^^^^^^
 Before an object is on final state, if the condition is match; means object is suitable, it is fired;
 
@@ -186,7 +186,7 @@ Before an object is on final state, if the condition is match; means object is s
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
-PostCompletedHandler:
+PostCompletedHandler
 ^^^^^^^^^^^^^^^^^^^^^
 After an object is on final state, if the condition is match; means object is suitable, it is fired;
 
@@ -211,7 +211,7 @@ After an object is on final state, if the condition is match; means object is su
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
-PreTransitionHandler:
+PreTransitionHandler
 ^^^^^^^^^^^^^^^^^^^^^
 Before any transition occurred, if the condition is match; means object, source_state,destination state are suitable, it is fired;
 
@@ -239,7 +239,7 @@ Before any transition occurred, if the condition is match; means object, source_
 | desination_satte | Destinatio state of the tranition     | Optional |
 +------------------+---------------------------------------+----------+
 
-PostTransitionHandler:
+PostTransitionHandler
 ^^^^^^^^^^^^^^^^^^^^^^
 After any transition occurred, if the condition is match; means object, source_state,destination state are suitable, it is fired;
 
@@ -266,3 +266,24 @@ After any transition occurred, if the condition is match; means object, source_s
 +------------------+---------------------------------------+----------+
 | desination_satte | Destinatio state of the tranition     | Optional |
 +------------------+---------------------------------------+----------+
+
+
+Handler Backends
+-----------------
+Handlers can be persisted into different sources. This functionality is added for multiprocessing. Now, backends supports multiprocessing can be implemented.
+
++----------------------------+-----------------+-------------------------------------------------------------+
+| Backend                    | Multiprocessing | Path                                                        |
++============================+=================+=============================================================+
+| ``MemoryHandlerBackend``   | No              | ``river.handlers.backends.memory.MemoryHandlerBackend``     |
++----------------------------+-----------------+-------------------------------------------------------------+
+| ``DatabaseHandlerBackend`` | Yes             | ``river.handlers.backends.database.DatabaseHandlerBackend`` |
++----------------------------+-----------------+-------------------------------------------------------------+
+
+Default backend is ``MemoryHandlerBackend`` which does not supports multiprocessing. It can be updated in settings file;
+
+.. code-block:: python
+
+    RIVER_HANDLER_BACKEND = {
+        'backend':'river.handlers.backends.database.DatabaseHandlerBackend'
+    }

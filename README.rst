@@ -63,12 +63,18 @@ Installation
     from river.models.fields.state import StateField
 
     class MyModel(models.Model):
-        my_state_field = StateField()    
+        my_state_field = StateField()
+
+.. code-block:: python
+
+    my_model=MyModel.objects.get(....)
+    
+    my_model.approve(transactioner_user)
+    my_model.approve(transactioner_user,next_state=State.objects.get(label='re-opened'))
+
 
 That's it. Whenever your new model object is saved, it's state field
-will be initialized according to given meta data about workflow. To know
-how to do your workflow confirmation(states, transitions, permissions
-etc.), see the next part.
+will be initialized according to given meta data about workflow. ``approve`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.
 
 Usage for End User
 ------------------
@@ -78,7 +84,9 @@ Usage for End User
 3. Define your approvement meta which contains permissions and groups
    authorization for transitions. Approvement order is also given here.
 
-We are now ready to workflowing :)
+.. note::
+   There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is gonna try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
+
 
 Whenever an object of MyModel is inserted in your system, all its
 workflow initialization is done by ``django-river``.
@@ -172,14 +180,15 @@ Transition does not have to be occured.
 +-----------------+---------------------------------------+
 
 Handlers:
-~~~~~~~~~
+---------
 
 Handlers are different from ``django-river`` signals. These are for
 spesific object, spesific source_state, spesific destination_state
 etc. It is fired when the condition is matched.
 
-``PreCompletedHandler``:
-------------------------
+PreCompletedHandler:
+~~~~~~~~~~~~~~~~~~~~
+
 
 Before an object is on final state, if the condition is match; means
 object is suitable, it is fired;
@@ -203,8 +212,8 @@ object is suitable, it is fired;
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
-``PostCompletedHandler``:
--------------------------
+PostCompletedHandler:
+~~~~~~~~~~~~~~~~~~~~~
 
 After an object is on final state, if the condition is match; means
 object is suitable, it is fired;
@@ -228,8 +237,8 @@ object is suitable, it is fired;
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
-``PreTransitionHandler``:
--------------------------
+PreTransitionHandler:
+~~~~~~~~~~~~~~~~~~~~~
 
 Before any transition occurred, if the condition is match; means object,
 source_state,destination state are suitable, it is fired;
@@ -257,8 +266,8 @@ source_state,destination state are suitable, it is fired;
 | desination_satte | Destinatio state of the tranition     | Optional |
 +------------------+---------------------------------------+----------+
 
-``PostTransitionHandler``:
---------------------------
+PostTransitionHandler:
+~~~~~~~~~~~~~~~~~~~~~~
 
 After any transition occurred, if the condition is match; means object,
 source_state,destination state are suitable, it is fired;
@@ -285,6 +294,27 @@ source_state,destination state are suitable, it is fired;
 +------------------+---------------------------------------+----------+
 | desination_satte | Destinatio state of the tranition     | Optional |
 +------------------+---------------------------------------+----------+
+
+Handler Backends:
+-----------------
+Handlers can be persisted into different sources. This functionality is added for multiprocessing. Now, backends supports multiprocessing can be implemented.
+
++----------------------------+-----------------+-------------------------------------------------------------+
+| Backend                    | Multiprocessing | Path                                                        |
++============================+=================+=============================================================+
+| ``MemoryHandlerBackend``   | No              | ``river.handlers.backends.memory.MemoryHandlerBackend``     |
++----------------------------+-----------------+-------------------------------------------------------------+
+| ``DatabaseHandlerBackend`` | Yes             | ``river.handlers.backends.database.DatabaseHandlerBackend`` |
++----------------------------+-----------------+-------------------------------------------------------------+
+
+Default backend is ``MemoryHandlerBackend`` which does not supports multiprocessing. It can be updated in settings file;
+
+.. code-block:: python
+
+    RIVER_HANDLER_BACKEND = {
+        'backend':'river.handlers.backends.database.DatabaseHandlerBackend'
+    }
+
 
 Models:
 -------
