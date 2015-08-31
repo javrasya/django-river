@@ -96,13 +96,23 @@ class ApprovementService:
         return suitable_approvements
 
     @staticmethod
-    def get_next_approvements(workflow_object, field, approvements=Approvement.objects.none(), current_states=None, index=0, limit=None):
+    def get_next_approvements(workflow_object, field, approvement_pks=None, current_states=None, index=0, limit=None):
+        if not approvement_pks:
+            approvement_pks = []
         index += 1
-        current_states = current_states or [getattr(workflow_object, field)]
+        current_states = list(current_states.values_list('pk', flat=True)) if current_states else [getattr(workflow_object, field)]
         next_approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state__in=current_states)
-        if next_approvements and not next_approvements.filter(pk__in=approvements.values_list('pk')) and (not limit or index < limit):
-            approvements = ApprovementService.get_next_approvements(workflow_object, field, approvements=approvements | next_approvements, current_states=State.objects.filter(
-                pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)), index=index, limit=limit)
+        if next_approvements.exists() and not next_approvements.filter(pk__in=approvement_pks).exists() and (not limit or index < limit):
+            approvements = ApprovementService.get_next_approvements(
+                workflow_object,
+                field,
+                approvement_pks=approvement_pks + list(next_approvements.values_list('pk', flat=True)),
+                current_states=State.objects.filter(pk__in=next_approvements.values_list('meta__transition__destination_state', flat=True)),
+                index=index,
+                limit=limit
+            )
+        else:
+            approvements = Approvement.objects.filter(pk__in=approvement_pks)
 
         return approvements
 
@@ -128,7 +138,6 @@ class ApprovementService:
     def override_groups(approvement, groups):
         approvement.groups.clear()
         approvement.groups.add(*groups)
-
 
     @staticmethod
     def get_initial_approvements(content_type, field):

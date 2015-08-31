@@ -30,7 +30,7 @@ class test_DatabaseHandlerBackend(ApprovementServiceBasedTest):
 
         self.assertEqual(1, Handler.objects.filter(hash='%s.%s_object%sfield%s' % (PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk, 'my_field')).count())
         self.assertTrue('%s.%s_object%sfield%s' % (PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk, 'my_field') in self.handler_backend.handlers)
-        self.assertTrue(test_handler.__name__, self.handler_backend.handlers.values()[0].__name__)
+        self.assertEqual(test_handler.__name__, list(self.handler_backend.handlers.values())[0].__name__)
 
     def test_register_in_multiprocessing(self):
         from multiprocessing import Process, Queue
@@ -48,7 +48,7 @@ class test_DatabaseHandlerBackend(ApprovementServiceBasedTest):
 
         p2.start()
 
-        handlers = q.get()
+        handlers = q.get(timeout=1)
         self.assertEqual(1, len(handlers))
         self.assertEqual(test_handler.__name__, handlers[0])
 
@@ -79,6 +79,6 @@ class test_DatabaseHandlerBackend(ApprovementServiceBasedTest):
 
         p2.start()
 
-        handlers = q.get()
+        handlers = q.get(timeout=1)
         self.assertEqual(1, len(handlers))
         self.assertEqual(test_handler.__name__, handlers[0])

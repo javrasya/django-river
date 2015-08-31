@@ -17,7 +17,7 @@ class BaseHandlerBackend(object):
         raise NotImplementedError()
 
     def get_handler_class(self, handler_cls):
-        if isinstance(handler_cls, basestring):
+        if isinstance(handler_cls, str):
             module, cls = handler_cls.rsplit('.', 1)
             handler_cls = getattr(__import__(module, fromlist=[cls]), cls)
         return handler_cls
