@@ -44,10 +44,6 @@ LOGGING = {
         }
 
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'ERROR'
-    },
     'loggers': {
         'river': {
             'handlers': ['console'],

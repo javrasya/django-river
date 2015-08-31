@@ -1,5 +1,3 @@
-from time import sleep
-from django.db import connection
 from river.handlers.backends.loader import load_handler_backend
 from river.handlers.transition import PostTransitionHandler
 from river.models import Handler

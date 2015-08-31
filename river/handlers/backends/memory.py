@@ -1,6 +1,9 @@
+import logging
 from river.handlers.backends.base import BaseHandlerBackend, powerset
 
 __author__ = 'ahmetdal'
+
+LOGGER = logging.getLogger(__name__)
 
 
 class MemoryHandlerBackend(BaseHandlerBackend):
@@ -11,6 +14,7 @@ class MemoryHandlerBackend(BaseHandlerBackend):
         hash = self.get_handler_class_prefix(handler_cls) + handler_cls.get_hash(workflow_object, field, *args, **kwargs)
         if override or hash not in self.handlers:
             self.handlers[hash] = handler
+            LOGGER.debug("Handler '%s'  is registered in memory as method '%s' and module '%s'. " % (hash, handler.__name__, handler.__module__))
         return hash
 
     def get_handlers(self, handler_cls, workflow_object, field, *args, **kwargs):

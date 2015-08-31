@@ -24,22 +24,28 @@ class DatabaseHandlerBackend(MemoryHandlerBackend):
                     if method:
                         self.handlers[handler.hash] = method
                         handlers.append(method)
+                        LOGGER.debug("Handler '%s' from database is registered initially from database as method '%s' and module '%s'. " % (handler.hash, method.__name__, module))
                     else:
-                        LOGGER.warning("Handler %s from database can not be registered. Because method %s is not in module %s. " % (handler.hash, method, module))
+                        LOGGER.warning("Handler '%s' from database can not be registered. Because method '%s' is not in module '%s'. " % (handler.hash, method.__name__, module))
                 except ImportError:
-                    LOGGER.warning("Handler %s from database can not be registered. Because module %s  does not exists. " % (handler.hash, module))
+                    LOGGER.warning("Handler '%s' from database can not be registered. Because module '%s'  does not exists. " % (handler.hash, module))
         return handlers
 
     def register(self, handler_cls, handler, workflow_object, field, override=False, *args, **kwargs):
         hash = super(DatabaseHandlerBackend, self).register(handler_cls, handler, workflow_object, field, override=override, *args, **kwargs)
-        Handler.objects.update_or_create(
+        handler_obj, created = Handler.objects.update_or_create(
             hash=hash,
             defaults={
                 'method': '%s.%s' % (handler.__module__, handler.__name__),
                 'handler_cls': '%s.%s' % (handler_cls.__module__, handler_cls.__name__),
             }
         )
-        return super(DatabaseHandlerBackend, self).register(handler_cls, handler, workflow_object, field, override=override, *args, **kwargs)
+        if created:
+            LOGGER.debug("Handler '%s' is registered in database as method %s and module %s. " % (handler_obj.hash, handler.__name__, handler.__module__))
+        else:
+            LOGGER.warning("Handler '%s' is already registered in database as method %s and module %s. " % (handler_obj.hash, handler.__name__, handler.__module__))
+
+        return hash
 
     def get_handlers(self, handler_cls, workflow_object, field, *args, **kwargs):
         handlers = super(DatabaseHandlerBackend, self).get_handlers(handler_cls, workflow_object, field, *args, **kwargs)
