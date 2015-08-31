@@ -1,14 +1,14 @@
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-
-from django.db.models.signals import pre_save
-
 from django.db.models.signals import post_save
+
+try:
+    from django.contrib.contenttypes.fields import GenericRelation
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericRelation
 
 from river.models import State, Approvement
 from river.models.approvement_track import ApprovementTrack
 from river.models.managers.wofkflow_object import WorkflowObjectManager
-from river.services.config import RiverConfig
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
 
@@ -18,10 +18,9 @@ from django.db import models
 
 
 class StateField(models.ForeignKey):
-    def __init__(self, state_model=State, reverse_identifier=None, object_manager=WorkflowObjectManager, *args, **kwargs):
+    def __init__(self, state_model=State, object_manager=WorkflowObjectManager, *args, **kwargs):
         kwargs['null'] = True
         kwargs['blank'] = True
-        self.reverse_identifier = reverse_identifier
         self.object_manager = object_manager
         kwargs['to'] = '%s.%s' % (state_model._meta.app_label, state_model._meta.object_name)
         super(StateField, self).__init__(*args, **kwargs)
@@ -78,7 +77,7 @@ class StateField(models.ForeignKey):
 
         self.model = cls
 
-        self.__add_to_class(cls, "approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name), related_query_name=self.reverse_identifier))
+        self.__add_to_class(cls, "approvements", GenericRelation('%s.%s' % (Approvement._meta.app_label, Approvement._meta.object_name)))
         self.__add_to_class(cls, "approvement_track", models.ForeignKey('%s.%s' % (ApprovementTrack._meta.app_label, ApprovementTrack._meta.object_name), null=True, blank=True))
 
         self.__add_to_class(cls, "objects", self.object_manager(name))
