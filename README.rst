@@ -36,9 +36,6 @@ Requirements
 * Pypy (2,3)
 * Django (1.7, 1.8)
 
-PyPy (1.8, 1.9)
-Jython (2.5, 2.7).
-
 Installation
 ------------
 
