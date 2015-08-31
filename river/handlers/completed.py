@@ -5,11 +5,11 @@ __author__ = 'ahmetdal'
 
 
 class PreCompletedHandler(Handler):
-    handlers = {}
+    pass
 
 
 class PostCompletedHandler(Handler):
-    handlers = {}
+    pass
 
 
 pre_final.connect(PreCompletedHandler.dispatch)

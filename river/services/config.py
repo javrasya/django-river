@@ -12,3 +12,6 @@ class RiverConfig:
     USER_CLASS = getattr(settings, 'RIVER_USER_CLASS', settings.AUTH_USER_MODEL)
     PERMISSION_CLASS = getattr(settings, 'RIVER_PERMISSION_CLASS', Permission)
     GROUP_CLASS = getattr(settings, 'RIVER_GROUP_CLASS', Group)
+    HANDLER_BACKEND = getattr(settings, 'RIVER_HANDLER_BACKEND', {'backend': 'river.handlers.backends.memory.MemoryHandlerBackend'})
+    HANDLER_BACKEND_CLASS = HANDLER_BACKEND.get('backend')
+    HANDLER_BACKEND_CONFIG = HANDLER_BACKEND.get('config', {})
