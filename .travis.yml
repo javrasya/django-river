@@ -5,11 +5,17 @@ env:
   global:
     PYTHONUNBUFFERED=yes
   matrix:
-    - TOXENV=2.7
-    - TOXENV=3.3
-    - TOXENV=3.4
-    - TOXENV=pypy
-    - TOXENV=pypy3
+    - TOXENV=py2.7-dj1.7
+    - TOXENV=py2.7-dj1.8
+    - TOXENV=py3.3-dj1.7
+    - TOXENV=py3.3-dj1.8
+    - TOXENV=py3.4-dj1.7
+    - TOXENV=py3.4-dj1.8
+    - TOXENV=pypy-dj1.7
+    - TOXENV=pypy-dj1.8
+    - TOXENV=pypy3-dj1.7
+    - TOXENV=pypy3-dj1.8
+    - TOXENV=cov
 install:
   - pip install tox
   - pip install coveralls
