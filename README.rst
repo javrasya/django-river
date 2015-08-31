@@ -32,9 +32,9 @@ Online documentation is available at http://django-river.rtfd.org/.
 
 Requirements
 ------------
-* Python (2.7, 3.2, 3.3, 3.4)
-* Pypy (2,3)
-* Django (1.7, 1.8)
+* Python (``2.7``, ``3.2``, ``3.3``, ``3.4``)
+* Pypy (``2``, ``3``)
+* Django (``1.7``, ``1.8``)
 
 Installation
 ------------
