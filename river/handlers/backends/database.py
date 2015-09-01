@@ -18,15 +18,15 @@ class DatabaseHandlerBackend(MemoryHandlerBackend):
         handlers = []
         if handler_objs.exists():
             for handler in handler_objs:
-                module, method = handler.method.rsplit('.', 1)
+                module, method_name = handler.method.rsplit('.', 1)
                 try:
                     method = getattr(__import__(module, fromlist=[method]), method, None)
                     if method:
                         self.handlers[handler.hash] = method
                         handlers.append(method)
-                        LOGGER.debug("Handler '%s' from database is registered initially from database as method '%s' and module '%s'. " % (handler.hash, method.__name__, module))
+                        LOGGER.debug("Handler '%s' from database is registered initially from database as method '%s' and module '%s'. " % (handler.hash, method_name, module))
                     else:
-                        LOGGER.warning("Handler '%s' from database can not be registered. Because method '%s' is not in module '%s'. " % (handler.hash, method.__name__, module))
+                        LOGGER.warning("Handler '%s' from database can not be registered. Because method '%s' is not in module '%s'. " % (handler.hash, method_name, module))
                 except ImportError:
                     LOGGER.warning("Handler '%s' from database can not be registered. Because module '%s'  does not exists. " % (handler.hash, module))
         return handlers
