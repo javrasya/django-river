@@ -3,17 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. |Build Status| image:: https://travis-ci.org/javrasya/django-river.svg
+   :target: https://travis-ci.org/javrasya/django-river
+.. |Coverage Status| image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/javrasya/django-river?branch=master
+.. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
+   :target: https://readthedocs.org/projects/django-river/?badge=latest   
+
 django-river - Workflow Library for Django!
 ===========================================
 
-.. image:: https://travis-ci.org/javrasya/django-river.svg?branch=0.3.1
-    :target: https://travis-ci.org/javrasya/django-river
+.. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
-.. image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=0.3.1&service=github
-  :target: https://coveralls.io/github/javrasya/django-river?branch=0.3.1
-
-``django-river`` is a open source workflow system for ``Django`` which support on the fly changes on every item in workflow instead of hardcoding states and transitions.
-
+|Build Status| |Coverage Status| |Documentation Status|
 
 Contents:
 

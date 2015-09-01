@@ -8,6 +8,8 @@
 Django River
 ============
 
+.. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
+
 |Build Status| |Coverage Status| |Documentation Status|
 
 River is a open source workflow system for ``Django`` which support on
