@@ -20,7 +20,7 @@ class DatabaseHandlerBackend(MemoryHandlerBackend):
             for handler in handler_objs:
                 module, method = handler.method.rsplit('.', 1)
                 try:
-                    method = getattr(__import__(module, fromlist=[method]), method)
+                    method = getattr(__import__(module, fromlist=[method]), method, None)
                     if method:
                         self.handlers[handler.hash] = method
                         handlers.append(method)
