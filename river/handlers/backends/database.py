@@ -10,25 +10,26 @@ LOGGER = logging.getLogger(__name__)
 
 
 class DatabaseHandlerBackend(MemoryHandlerBackend):
-    def __init__(self):
-        super(DatabaseHandlerBackend, self).__init__()
+
+    def initialize_handlers(self):
         self.__register(Handler.objects.filter(enabled=True))
 
     def __register(self, handler_objs):
         handlers = []
         if handler_objs.exists():
             for handler in handler_objs:
-                module, method_name = handler.method.rsplit('.', 1)
-                try:
-                    method = getattr(__import__(module, fromlist=[method_name]), method_name, None)
-                    if method:
-                        self.handlers[handler.hash] = method
-                        handlers.append(method)
-                        LOGGER.debug("Handler '%s' from database is registered initially from database as method '%s' and module '%s'. " % (handler.hash, method_name, module))
-                    else:
-                        LOGGER.warning("Handler '%s' from database can not be registered. Because method '%s' is not in module '%s'. " % (handler.hash, method_name, module))
-                except ImportError:
-                    LOGGER.warning("Handler '%s' from database can not be registered. Because module '%s'  does not exists. " % (handler.hash, module))
+                if handler.hash not in self.handlers:
+                    module, method_name = handler.method.rsplit('.', 1)
+                    try:
+                        method = getattr(__import__(module, fromlist=[method_name]), method_name, None)
+                        if method:
+                            self.handlers[handler.hash] = method
+                            handlers.append(method)
+                            LOGGER.debug("Handler '%s' from database is registered initially from database as method '%s' and module '%s'. " % (handler.hash, method_name, module))
+                        else:
+                            LOGGER.warning("Handler '%s' from database can not be registered. Because method '%s' is not in module '%s'. " % (handler.hash, method_name, module))
+                    except ImportError:
+                        LOGGER.warning("Handler '%s' from database can not be registered. Because module '%s'  does not exists. " % (handler.hash, module))
         return handlers
 
     def register(self, handler_cls, handler, workflow_object, field, override=False, *args, **kwargs):
