@@ -11,37 +11,37 @@ from river.services.config import RiverConfig
 __author__ = 'ahmetdal'
 
 
-class ApprovementMeta(BaseModel):
+class ProceedingMeta(BaseModel):
     class Meta:
-        verbose_name = _("Approvement Meta")
-        verbose_name_plural = _("Approvement Metas")
+        verbose_name = _("Proceeding Meta")
+        verbose_name_plural = _("Proceeding Metas")
         unique_together = [('transition', 'order')]
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
     permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'))
     groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'))
     order = models.IntegerField(default=0, verbose_name=_('Order'))
-    action_text = models.TextField(_("Approve Text"), max_length=200, null=True, blank=True)
+    action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 
     def __unicode__(self):
         return 'Transition:%s, Permissions:%s, Order:%s' % (self.transition, ','.join(self.permissions.values_list('name', flat=True)), self.order)
 
 
 def post_group_change(sender, instance, *args, **kwargs):
-    from river.services.approvement import ApprovementService
-    from river.models.approvement import PENDING
+    from river.services.proceeding import ProceedingService
+    from river.models.proceeding import PENDING
 
-    for approvement_pending in instance.approvements.filter(status=PENDING):
-        ApprovementService.override_groups(approvement_pending, instance.groups.all())
+    for proceeding_pending in instance.proceedings.filter(status=PENDING):
+        ProceedingService.override_groups(proceeding_pending, instance.groups.all())
 
 
 def post_permissions_change(sender, instance, *args, **kwargs):
-    from river.models.approvement import PENDING
-    from river.services.approvement import ApprovementService
+    from river.models.proceeding import PENDING
+    from river.services.proceeding import ProceedingService
 
-    for approvement_pending in instance.approvements.filter(status=PENDING):
-        ApprovementService.override_permissions(approvement_pending, instance.permissions.all())
+    for proceeding_pending in instance.proceedings.filter(status=PENDING):
+        ProceedingService.override_permissions(proceeding_pending, instance.permissions.all())
 
 
-m2m_changed.connect(post_group_change, sender=ApprovementMeta.groups.through)
-m2m_changed.connect(post_permissions_change, sender=ApprovementMeta.permissions.through)
+m2m_changed.connect(post_group_change, sender=ProceedingMeta.groups.through)
+m2m_changed.connect(post_permissions_change, sender=ProceedingMeta.permissions.through)

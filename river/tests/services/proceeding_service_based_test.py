@@ -8,17 +8,17 @@ from river.tests.models.factories import TestModelObjectFactory
 __author__ = 'ahmetdal'
 
 
-class ApprovementServiceBasedTest(BaseTestCase):
+class ProceedingServiceBasedTest(BaseTestCase):
     def setUp(self):
         from river.models.factories import \
             TransitionObjectFactory, \
             UserObjectFactory, \
             PermissionObjectFactory, \
-            ApprovementMetaObjectFactory, \
+            ProceedingMetaObjectFactory, \
             StateObjectFactory
 
         TransitionObjectFactory.reset_sequence(0)
-        ApprovementMetaObjectFactory.reset_sequence(0)
+        ProceedingMetaObjectFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
         TestModel.objects.all().delete()
 
@@ -41,13 +41,13 @@ class ApprovementServiceBasedTest(BaseTestCase):
                                                                     lambda n: self.states[n] if n <= 2 else (self.states[n - 1]) if n <= 4 else (self.states[n - 2] if n <= 6 else self.states[4])),
                                                                 destination_state=factory.Sequence(lambda n: self.states[n + 1]))
 
-        self.approvement_metas = ApprovementMetaObjectFactory.create_batch(
+        self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
             9,
             transition=factory.Sequence(lambda n: self.transitions[n] if n <= 1 else self.transitions[n - 1]),
             order=factory.Sequence(lambda n: 1 if n == 2 else 0)
         )
 
-        for n, approvement_meta in enumerate(self.approvement_metas):
-            approvement_meta.permissions.add(self.permissions[n] if n <= 3 else self.permissions[3])
+        for n, proceeding_meta in enumerate(self.proceeding_metas):
+            proceeding_meta.permissions.add(self.permissions[n] if n <= 3 else self.permissions[3])
 
         self.objects = TestModelObjectFactory.create_batch(2)

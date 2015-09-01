@@ -2,7 +2,7 @@ from river.handlers.backends.loader import load_handler_backend
 from river.handlers.transition import PostTransitionHandler
 from river.services.config import RiverConfig
 from river.services.object import ObjectService
-from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
+from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
 __author__ = 'ahmetdal'
 
@@ -11,7 +11,7 @@ def test_handler(*args, **kwargs):
     pass
 
 
-class test_MemoryHandlerBackend(ApprovementServiceBasedTest):
+class test_MemoryHandlerBackend(ProceedingServiceBasedTest):
     def setUp(self):
         super(test_MemoryHandlerBackend, self).setUp()
         RiverConfig.HANDLER_BACKEND_CLASS = 'river.handlers.backends.memory.MemoryHandlerBackend'

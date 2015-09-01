@@ -22,7 +22,7 @@ After :ref:`configuration <configuration>` we can now simply use it;
     my_model.proceed(transactioner_user,next_state=State.objects.get(label='re-opened'))
         
 
-``approve`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.
+``proceed`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.
 
 .. note::
    If you want to know more about ``StateField`` in advanced model, look at :ref:`advance <advance>`
@@ -39,15 +39,15 @@ Transitions:
 ^^^^^^^^^^^^
 These are transition between your states. **There must be only one initial state** which is in a transition as destionation state but no source state to make `django-river` find it on object creation.
 
-Approvement Meta:
+Proceeding Meta:
 ^^^^^^^^^^^^^^^^^
-These are approvement meta of transitions that describes which user permission or user group will be allowed to approve the transition. These are kind of template for approvements will be created for each object. An order can also be given here for the transition. This means, If you want to order approvement for a transition, you can define it. Assume **s1** and **s2** are our states and there is a transition defined between them and we have two approvement meta on this transition. They shall be for**permission1** and **permission2**. If you want object is on approval first **permission1** and after it is approved by permission1, then it is on approval the second permission which is **permission2**, you can do it with `djang-river` by defining order in this model.
+These are proceeding meta of transitions that describes which user permission or user group will be allowed to proceed the transition. These are kind of template for proceedings will be created for each object. An order can also be given here for the transition. This means, If you want to order proceeding for a transition, you can define it. Assume **s1** and **s2** are our states and there is a transition defined between them and we have two proceeding meta on this transition. They shall be for**permission1** and **permission2**. If you want object is on approval first **permission1** and after it is proceeded by permission1, then it is on approval the second permission which is **permission2**, you can do it with `djang-river` by defining order in this model.
 
-Approvement:
+Proceeding:
 ^^^^^^^^^^^^
-There are state machines paths which is needed to be approved for every particular object. Approvements are generated on your model object creation by using `approvement meta`. This is whole path for the created object. Do not add or edit this model data unless you don't need specific objects editing like skiping, overriding permissions and groups.
+There are state machines paths which is needed to be proceeded for every particular object. Proceedings are generated on your model object creation by using `proceeding meta`. This is whole path for the created object. Do not add or edit this model data unless you don't need specific objects editing like skiping, overriding permissions and groups.
 
-Approvement Track:
+Proceeding Track:
 ^^^^^^^^^^^^^^^^^^
-In some scenarios, especially state machines contains circularity, approvements can be stated for multiple times. This is the model for the model of approvements. This is definite path of workflow for your objects.
+In some scenarios, especially state machines contains circularity, proceedings can be stated for multiple times. This is the model for the model of proceedings. This is definite path of workflow for your objects.
     

@@ -82,15 +82,15 @@ Installation
 
 
 That's it. Whenever your new model object is saved, it's state field
-will be initialized according to given meta data about workflow. ``approve`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.
+will be initialized according to given meta data about workflow. ``proceed`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.
 
 Usage for End User
 ------------------
 
 1. Define your states.
 2. Define your state transitions.
-3. Define your approvement meta which contains permissions and groups
-   authorization for transitions. Approvement order is also given here.
+3. Define your proceeding metas which contains permissions and groups
+   authorization for transitions. Proceeding order is also given here.
 
 .. note::
    There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is gonna try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
@@ -118,7 +118,7 @@ Signals:
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
 +-------------------+---------------------------------------+
-| appovement        | Approvement object                    |
+| proceeding        | Proceeding object                     |
 +-------------------+---------------------------------------+
 
 ``post_transition``: it is fired before any transition occured.
@@ -134,37 +134,37 @@ Signals:
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
 +-------------------+---------------------------------------+
-| appovement        | Approvement object                    |
+| proceeding        | Proceeding object                     |
 +-------------------+---------------------------------------+
 
-``pre_approved``: it is fired before any approvement occured. Transition
+``pre_proceed``: it is fired before any is proceeded. Transition
 does not have to be occured.
 
 +-----------------+---------------------------------------+
 | Args            | Description                           |
 +=================+=======================================+
-| workflow_object | Your object approved                  |
+| workflow_object | Your object proceeded                 |
 +-----------------+---------------------------------------+
 | field           | Field which you registered object for |
 +-----------------+---------------------------------------+
-| appovement      | Approvement object                    |
+| proceeding      | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Approvement track object              |
+| track           | Proceeding track object               |
 +-----------------+---------------------------------------+
 
-``post_approved``: it is fired before any approvement occured.
+``post_proceed``: it is fired before any is proceeded occured.
 Transition does not have to be occured.
 
 +-----------------+---------------------------------------+
 | Args            | Description                           |
 +=================+=======================================+
-| workflow_object | Your object approved                  |
+| workflow_object | Your object proceeded                 |
 +-----------------+---------------------------------------+
 | field           | Field which you registered object for |
 +-----------------+---------------------------------------+
-| appovement      | Approvement object                    |
+| proceeding      | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Approvement track object              |
+| track           | Proceeding track object               |
 +-----------------+---------------------------------------+
 
 ``pre_final``: it is fired before any workflow is completed.
@@ -215,7 +215,7 @@ object is suitable, it is fired;
 +-----------------+---------------------------------------+----------+
 | Args            | Description                           |          |
 +=================+=======================================+==========+
-| workflow_object | Your object                           | Required |
+| workflow_object | Your object proceeded                 | Required |
 +-----------------+---------------------------------------+----------+
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
@@ -240,7 +240,7 @@ object is suitable, it is fired;
 +-----------------+---------------------------------------+----------+
 | Args            | Description                           |          |
 +=================+=======================================+==========+
-| workflow_object | Your object                           | Required |
+| workflow_object | Your object proceeded                 | Required |
 +-----------------+---------------------------------------+----------+
 | field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
@@ -265,7 +265,7 @@ source_state,destination state are suitable, it is fired;
 +------------------+---------------------------------------+----------+
 | Args             | Description                           |          |
 +==================+=======================================+==========+
-| workflow_object  | Your object                           | Required |
+| workflow_object  | Your object proceeded                 | Required |
 +------------------+---------------------------------------+----------+
 | field            | Field which you registered object for | Required |
 +------------------+---------------------------------------+----------+
@@ -294,7 +294,7 @@ source_state,destination state are suitable, it is fired;
 +------------------+---------------------------------------+----------+
 | Args             | Description                           |          |
 +==================+=======================================+==========+
-| workflow_object  | Your object                           | Required |
+| workflow_object  | Your object   proceeded               | Required |
 +------------------+---------------------------------------+----------+
 | field            | Field which you registered object for | Required |
 +------------------+---------------------------------------+----------+
@@ -339,28 +339,28 @@ These are transition between your states. **There must be only one
 initial state** which is in a transition as destination state but no
 source state to make ``django-river`` find it on object creation.
 
-Approvement Meta:
+Proceeding Meta:
 ~~~~~~~~~~~~~~~~~
 
-These are approvement meta of transitions that describes which user
-permission or user group will be allowed to approve the transition.
-These are kind of template for approvements will be created for each
+These are proceeding meta of transitions that describes which user
+permission or user group will be allowed to proceed the transition.
+These are kind of template for proceedings will be created for each
 object. An order can also be given here for the transition. This means,
-If you want to order approvement for a transition, you can define it.
+If you want to order proceeding for a transition, you can define it.
 Assume **s1** and **s2** are our states and there is a transition
-defined between them and we have two approvement meta on this
+defined between them and we have two proceeding meta on this
 transition. They shall be for\ **permission1** and **permission2**. If
-you want object is on approval first **permission1** and after it is
-approved by permission1, then it is on approval the second permission
+you want object available for proceeding; first **permission1** and after it is
+proceeded by permission1, then it is on approval the second permission
 which is **permission2**, you can do it with ``djang-river`` by defining
 order in this model.
 
-Approvement:
+Proceeding:
 ~~~~~~~~~~~~
 
-There are state machines paths which is needed to be approved for every
-particular object. Approvements are generated on your model object
-creation by using ``approvement meta``. This is whole path for the
+There are state machines paths which is needed to be proceeded for every
+particular object. Proceedings are generated on your model object
+creation by using ``proceeding meta``. This is whole path for the
 created object. Do not add or edit this model data unless you don't need
 specific objects editing like skiping, overriding permissions and
 groups.

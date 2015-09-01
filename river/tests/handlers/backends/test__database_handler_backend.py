@@ -3,7 +3,7 @@ from river.handlers.transition import PostTransitionHandler
 from river.models import Handler
 from river.services.config import RiverConfig
 from river.services.object import ObjectService
-from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
+from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
 __author__ = 'ahmetdal'
 
@@ -12,7 +12,7 @@ def test_handler(*args, **kwargs):
     pass
 
 
-class test_DatabaseHandlerBackend(ApprovementServiceBasedTest):
+class test_DatabaseHandlerBackend(ProceedingServiceBasedTest):
     def setUp(self):
         super(test_DatabaseHandlerBackend, self).setUp()
 

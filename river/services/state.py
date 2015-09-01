@@ -1,6 +1,6 @@
 from django.db.models import Q
 from river.models import FORWARD, BACKWARD
-from river.models.approvement import Approvement
+from river.models.proceeding import Proceeding
 from river.models.state import State
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
@@ -24,16 +24,16 @@ class StateService:
     @staticmethod
     def get_available_states(workflow_object, field, user, include_user=True):
         current_state = getattr(workflow_object, field)
-        approvements = Approvement.objects.filter(
+        proceedings = Proceeding.objects.filter(
             field=field,
             workflow_object=workflow_object,
             meta__transition__source_state=current_state,
         )
         if include_user:
-            approvements = approvements.filter(
+            proceedings = proceedings.filter(
                 meta__permissions__in=user.user_permissions.all()
             )
-        destination_states = approvements.values_list('meta__transition__destination_state', flat=True)
+        destination_states = proceedings.values_list('meta__transition__destination_state', flat=True)
         return State.objects.filter(pk__in=destination_states)
 
     @staticmethod

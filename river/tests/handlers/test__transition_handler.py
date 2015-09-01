@@ -1,14 +1,14 @@
 from unittest import skip
 from river.handlers.transition import TransitionHandler, PostTransitionHandler
-from river.models import State, Approvement
+from river.models import State, Proceeding
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
+from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
 __author__ = 'ahmetdal'
 
 
-class test_TransitionHandler(ApprovementServiceBasedTest):
+class test_TransitionHandler(ProceedingServiceBasedTest):
     @skip("workflow object is now required to register")
     def test_register_for_all(self):
         self.test_args = None
@@ -33,13 +33,13 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
-                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
+                'proceeding': Proceeding.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
                 'source_state': State.objects.get(label='s1'),
                 'destination_state': State.objects.get(label='s2')
             }, self.test_kwargs)
 
 
-        # Approved but no transition
+        # Proceeded but no transition
         TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertEqual((), self.test_args)
@@ -47,7 +47,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
-                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
+                'proceeding': Proceeding.objects.filter(meta__transition__source_state=State.objects.get(label='s1'), meta__transition__destination_state=State.objects.get(label='s2'))[0],
                 'source_state': State.objects.get(label='s1'),
                 'destination_state': State.objects.get(label='s2')
             }, self.test_kwargs)
@@ -59,7 +59,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
             {
                 'field': 'my_field',
                 'object': self.objects[0],
-                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
+                'proceeding': Proceeding.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)
@@ -96,7 +96,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
             {
-                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
+                'proceeding': Proceeding.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)
@@ -132,7 +132,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
             {
-                'approvement': Approvement.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
+                'proceeding': Proceeding.objects.filter(meta__transition__source_state=State.objects.get(label='s2'), meta__transition__destination_state=State.objects.get(label='s3'))[2],
                 'source_state': State.objects.get(label='s2'),
                 'destination_state': State.objects.get(label='s3')
             }, self.test_kwargs)

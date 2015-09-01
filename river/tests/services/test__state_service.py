@@ -1,12 +1,12 @@
 from river.models import State
 from river.services.object import ObjectService
 from river.services.state import StateService
-from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
+from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
 __author__ = 'ahmetdal'
 
 
-class test__StateService(ApprovementServiceBasedTest):
+class test__StateService(ProceedingServiceBasedTest):
     def test_get_available_states(self):
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)

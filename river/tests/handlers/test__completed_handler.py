@@ -3,12 +3,12 @@ from river.handlers.completed import PostCompletedHandler
 from river.models import Transition
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.tests.services.approvement_service_based_test import ApprovementServiceBasedTest
+from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
 __author__ = 'ahmetdal'
 
 
-class test_CompletedHandler(ApprovementServiceBasedTest):
+class test_CompletedHandler(ProceedingServiceBasedTest):
     def setUp(self):
         super(test_CompletedHandler, self).setUp()
         transition = Transition.objects.get(source_state__label='s2', destination_state__label='s3')
@@ -36,7 +36,7 @@ class test_CompletedHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        # Approved but no transition
+        # Proceeded but no transition
         TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertIsNone(self.test_args)
@@ -72,7 +72,7 @@ class test_CompletedHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        # Approved but no transition
+        # Proceeded but no transition
         TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertIsNone(self.test_args)

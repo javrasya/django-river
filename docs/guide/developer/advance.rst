@@ -10,13 +10,11 @@ StateField
 Arguments
 ^^^^^^^^^
 
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Arguments          | Description                                                                                                                                                                                        |
-+====================+====================================================================================================================================================================================================+
-| state_model        | You can change your state model. State model in ``django-river`` is used as default. It is recomended to use default one.                                                                          |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| reverse_identifier | Approvements have generic foreign key to your model objects. If you want to filter like ``Approvements.objects.filter(my_model__field1='value1')``, you should give that argument as ``my_model``. |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------+---------------------------------------------------------------------------------------------------------------------------+
+| Arguments   | Description                                                                                                               |
++=============+===========================================================================================================================+
+| state_model | You can change your state model. State model in ``django-river`` is used as default. It is recomended to use default one. |
++-------------+---------------------------------------------------------------------------------------------------------------------------+
 
 
 
@@ -28,44 +26,43 @@ The Model Injections
 Properties:
 """""""""""
 
-+------------------------------+--------------------------+-------------------------------------------------------------------+
-| Name                         | Return Type              | Description                                                       |
-+==============================+==========================+===================================================================+
-| ``on_initial_state:``        | ``boolean``              | Defines your model object is on initial states or not.            |
-+------------------------------+--------------------------+-------------------------------------------------------------------+
-| ``on_final_state:``          | ``boolean``              | Defines your model object is on final states or not.              |
-+------------------------------+--------------------------+-------------------------------------------------------------------+
-| ``on_initial_approvements:`` | ``Approvement Queryset`` | Returns initial approvement objects.                              |
-+------------------------------+--------------------------+-------------------------------------------------------------------+
-| ``on_final_approvements:``   | ``Approvement Queryset`` | Returns final approvement objects.                                |
-+------------------------------+--------------------------+-------------------------------------------------------------------+
-| ``next_approvements:``       | ``Approvement Queryset`` | Returns next approvements objects according to the current state. |
-+------------------------------+--------------------------+-------------------------------------------------------------------+
++-----------------------------+-------------------------+------------------------------------------------------------------+
+| Name                        | Return Type             | Description                                                      |
++=============================+=========================+==================================================================+
+| ``on_initial_state:``       | ``boolean``             | Defines your model object is on initial states or not.           |
++-----------------------------+-------------------------+------------------------------------------------------------------+
+| ``on_final_state:``         | ``boolean``             | Defines your model object is on final states or not.             |
++-----------------------------+-------------------------+------------------------------------------------------------------+
+| ``on_initial_proceedings:`` | ``Proceeding Queryset`` | Returns initial proceeding objects.                              |
++-----------------------------+-------------------------+------------------------------------------------------------------+
+| ``on_final_proceedings:``   | ``Proceeding Queryset`` | Returns final proceeding objects.                                |
++-----------------------------+-------------------------+------------------------------------------------------------------+
+| ``next_proceedings:``       | ``Proceeding Queryset`` | Returns next proceedings objects according to the current state. |
++-----------------------------+-------------------------+------------------------------------------------------------------+
 
 
 
 Methods:
 """"""""
 
-+--------------+-------------+-----------------------------------------------------------+--------------------------------------------------------+
-| Name         | Return Type | Parameters                                                | Description                                            |
-+==============+=============+===========================================================+========================================================+
-| ``approve:`` | ``boolean`` | ``user``(must): Approved user, ``next_state``(not always) | Defines your model object is on initial states or not. |
-+--------------+-------------+-----------------------------------------------------------+--------------------------------------------------------+
-| ``reject:``  | ``boolean`` | ``user``(must): Approved user, ``next_state``(not always) | Defines your model object is on final states or not.   |
-+--------------+-------------+-----------------------------------------------------------+--------------------------------------------------------+
++--------------+-------------+-------------------------------------------------------------------+--------------------------------------------------------+
+| Name         | Return Type | Parameters                                                        | Description                                            |
++==============+=============+===================================================================+========================================================+
+| ``proceed:`` | ``boolean`` | ``user``(must): User is gonna proceed, ``next_state``(not always) | Defines your model object is on initial states or not. |
++--------------+-------------+-------------------------------------------------------------------+--------------------------------------------------------+
+
 
 
 Relations:
 """"""""""
 
-+------------------------+---------------------+----------------------------+
-| Name                   | Type                | Description                |
-+========================+=====================+============================+
-| ``approvements:``      | ``GenericRelation`` | To Approvement model.      |
-+------------------------+---------------------+----------------------------+
-| ``approvement_tract:`` | ``ForeignKey``      | To Approvement Track model |
-+------------------------+---------------------+----------------------------+
++-----------------------+---------------------+---------------------------+
+| Name                  | Type                | Description               |
++=======================+=====================+===========================+
+| ``proceedings:``      | ``GenericRelation`` | To Proceeding model.      |
++-----------------------+---------------------+---------------------------+
+| ``proceeding_tract:`` | ``ForeignKey``      | To Proceeding Track model |
++-----------------------+---------------------+---------------------------+
 
 
 Signals
@@ -84,7 +81,7 @@ Signals
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
 +-------------------+---------------------------------------+
-| appovement        | Approvement object                    |
+| proceeder         | Proceeding object                     |
 +-------------------+---------------------------------------+
 
 ``post_transition``: it is fired before any transition occured.
@@ -100,36 +97,36 @@ Signals
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
 +-------------------+---------------------------------------+
-| appovement        | Approvement object                    |
+| proceeder        | Proceeding object                    |
 +-------------------+---------------------------------------+
 
 
-``pre_approved``: it is fired before any approvement occured. Transition does not have to be occured.
+``pre_proceeded``: it is fired before any is proceeded. Transition does not have to be occured.
 
 +-----------------+---------------------------------------+
 | **Args**        | **Description**                       |
 +=================+=======================================+
-| workflow_object | Your object approved                  |
+| workflow_object | Your object proceeded                 |
 +-----------------+---------------------------------------+
 | field           | Field which you registered object for |
 +-----------------+---------------------------------------+
-| appovement      | Approvement object                    |
+| proceeder       | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Approvement track object              |
+| track           | Proceeding track object               |
 +-----------------+---------------------------------------+
 
-``post_approved``: it is fired before any approvement occured. Transition does not have to be occured.
+``post_proceeded``: it is fired before any is proceeded. Transition does not have to be occured.
 
 +-----------------+---------------------------------------+
 | **Args**        | **Description**                       |
 +=================+=======================================+
-| workflow_object | Your object approved                  |
+| workflow_object | Your object proceeded                 |
 +-----------------+---------------------------------------+
 | field           | Field which you registered object for |
 +-----------------+---------------------------------------+
-| appovement      | Approvement object                    |
+| proceeder       | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Approvement track object              |
+| track           | Proceeding track object               |
 +-----------------+---------------------------------------+
 
 ``pre_final``: it is fired before any workflow is completed.
@@ -230,7 +227,7 @@ Before any transition occurred, if the condition is match; means object, source_
 +------------------+---------------------------------------+----------+
 | **Args**         | **Description**                       |          |
 +==================+=======================================+==========+
-| workflow_object  | Your object                           | Required |
+| workflow_object  | Your object  proceeded                | Required |
 +------------------+---------------------------------------+----------+
 | field            | Field which you registered object for | Required |
 +------------------+---------------------------------------+----------+
@@ -258,7 +255,7 @@ After any transition occurred, if the condition is match; means object, source_s
 +------------------+---------------------------------------+----------+
 | **Args**         | **Description**                       |          |
 +==================+=======================================+==========+
-| workflow_object  | Your object                           | Required |
+| workflow_object  | Your object proceeded                 | Required |
 +------------------+---------------------------------------+----------+
 | field            | Field which you registered object for | Required |
 +------------------+---------------------------------------+----------+

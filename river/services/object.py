@@ -1,5 +1,5 @@
-from river.models.approvement import Approvement
-from river.services.approvement import ApprovementService
+from river.models.proceeding import Proceeding
+from river.services.proceeding import ProceedingService
 
 __author__ = 'ahmetdal'
 
@@ -8,9 +8,9 @@ __author__ = 'ahmetdal'
 class ObjectService:
     @staticmethod
     def register_object(workflow_object, field):
-        approvements = Approvement.objects.filter(workflow_object=workflow_object, field=field)
-        if approvements.count() == 0:
-            ApprovementService.init_approvements(workflow_object, field)
+        proceedings = Proceeding.objects.filter(workflow_object=workflow_object, field=field)
+        if proceedings.count() == 0:
+            ProceedingService.init_proceedings(workflow_object, field)
 
         return {'state': getattr(workflow_object, field).details()}
 
@@ -20,8 +20,8 @@ class ObjectService:
         WorkflowObjectClass = content_type.model_class()
         for workflow_object in WorkflowObjectClass.objects.all():
             current_state = getattr(workflow_object, field)
-            approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user)
-            if approvements.count():
+            proceedings = ProceedingService.get_available_proceedings(workflow_object, field, [current_state], user=user)
+            if proceedings.count():
                 object_pks.append(workflow_object.pk)
         return WorkflowObjectClass.objects.filter(pk__in=object_pks)
 
@@ -32,4 +32,4 @@ class ObjectService:
     @staticmethod
     def is_workflow_completed(workflow_object, field):
         current_state = getattr(workflow_object, field)
-        return Approvement.objects.filter(workflow_object=workflow_object, meta__transition__source_state=current_state).count() == 0
+        return Proceeding.objects.filter(workflow_object=workflow_object, meta__transition__source_state=current_state).count() == 0
