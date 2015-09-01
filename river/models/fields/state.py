@@ -29,11 +29,8 @@ class StateField(models.ForeignKey):
         def is_workflow_completed(workflow_object):
             return ObjectService.is_workflow_completed(workflow_object, name)
 
-        def approve(self, user, *args, **kwargs):
-            TransitionService.approve_transition(self, name, user, *args, **kwargs)
-
-        def reject(self, user, *args, **kwargs):
-            TransitionService.reject_transition(self, name, user, *args, **kwargs)
+        def proceed(self, user, *args, **kwargs):
+            TransitionService.proceed(self, name, user, *args, **kwargs)
 
         @property
         def on_initial_state(self):
@@ -82,8 +79,7 @@ class StateField(models.ForeignKey):
 
         self.__add_to_class(cls, "objects", self.object_manager(name))
         self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
-        self.__add_to_class(cls, "approve", approve)
-        self.__add_to_class(cls, "reject", reject)
+        self.__add_to_class(cls, "proceed", proceed)
 
         self.__add_to_class(cls, "on_initial_state", on_initial_state)
         self.__add_to_class(cls, "on_final_state", on_final_state)

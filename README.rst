@@ -77,8 +77,8 @@ Installation
 
     my_model=MyModel.objects.get(....)
     
-    my_model.approve(transactioner_user)
-    my_model.approve(transactioner_user,next_state=State.objects.get(label='re-opened'))
+    my_model.proceed(transactioner_user)
+    my_model.proceed(transactioner_user,next_state=State.objects.get(label='re-opened'))
 
 
 That's it. Whenever your new model object is saved, it's state field

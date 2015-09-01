@@ -18,8 +18,8 @@ After :ref:`configuration <configuration>` we can now simply use it;
 
     my_model=MyModel.objects.get(....)
     
-    my_model.approve(transactioner_user)
-    my_model.approve(transactioner_user,next_state=State.objects.get(label='re-opened'))
+    my_model.proceed(transactioner_user)
+    my_model.proceed(transactioner_user,next_state=State.objects.get(label='re-opened'))
         
 
 ``approve`` methods is injected into your model objects. The object will be in next state if the given user is authorized to do that transaction. When there is two destination states available from current state, ``next_state`` must be given to the function. If there is only one state can be at, no needs to give it; ``django-river`` will detect it.

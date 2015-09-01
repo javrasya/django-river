@@ -44,9 +44,36 @@ class TransitionService(object):
 
     @staticmethod
     @atomic
-    def approve_transition(workflow_object, field, user, next_state=None, god_mod=False):
+    def proceed(workflow_object, field, user, next_state=None, god_mod=False):
 
-        approvement, track = TransitionService.process(workflow_object, field, user, APPROVED, next_state, god_mod)
+        def process(workflow_object, field, user, action, next_state=None, god_mod=False):
+            current_state = getattr(workflow_object, field)
+            approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user, god_mod=god_mod)
+            c = approvements.count()
+            if c == 0:
+                raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
+            if c > 1:
+                if next_state:
+                    approvements = approvements.filter(meta__transition__destination_state=next_state)
+                    if approvements.count() == 0:
+                        available_states = StateService.get_available_states(workflow_object, field, user)
+                        raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,
+                                             "Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
+                else:
+                    raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED, "State must be given when there are multiple states for destination")
+            approvement = approvements[0]
+            approvement.status = action
+            approvement.transactioner = user
+            approvement.transaction_date = datetime.now()
+            approvement.save()
+
+            c = False
+            track = workflow_object.approvement_track
+            while not c:
+                track, c = approvement.tracks.get_or_create(previous_track=track)
+            return approvement, track
+
+        approvement, track = process(workflow_object, field, user, APPROVED, next_state, god_mod)
         workflow_object.approvement_track = track
 
         current_state = getattr(workflow_object, field)
@@ -65,36 +92,3 @@ class TransitionService(object):
             workflow_object.save()
 
         LOGGER.debug("Workflow object %s for field %s is approved for next transition. Transition: %s -> %s" % (workflow_object, field, current_state.label, getattr(workflow_object, field).label))
-
-    @staticmethod
-    @atomic
-    def reject_transition(workflow_object, field, user, next_state=None):
-        TransitionService.process(workflow_object, field, user, REJECTED, next_state)
-
-    @staticmethod
-    def process(workflow_object, field, user, action, next_state=None, god_mod=False):
-        current_state = getattr(workflow_object, field)
-        approvements = ApprovementService.get_approvements_object_waiting_for_approval(workflow_object, field, [current_state], user=user, god_mod=god_mod)
-        c = approvements.count()
-        if c == 0:
-            raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
-        if c > 1:
-            if next_state:
-                approvements = approvements.filter(meta__transition__destination_state=next_state)
-                if approvements.count() == 0:
-                    available_states = StateService.get_available_states(workflow_object, field, user)
-                    raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,
-                                         "Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
-            else:
-                raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED, "State must be given when there are multiple states for destination")
-        approvement = approvements[0]
-        approvement.status = action
-        approvement.transactioner = user
-        approvement.transaction_date = datetime.now()
-        approvement.save()
-
-        c = False
-        track = workflow_object.approvement_track
-        while not c:
-            track, c = approvement.tracks.get_or_create(previous_track=track)
-        return approvement, track

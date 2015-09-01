@@ -26,7 +26,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user1)
+        TransitionService.proceed(self.objects[0], self.field, self.user1)
 
         self.assertEqual((), self.test_args)
         self.assertDictEqual(
@@ -40,7 +40,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
 
 
         # Approved but no transition
-        TransitionService.approve_transition(self.objects[0], self.field, self.user2)
+        TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertEqual((), self.test_args)
         self.assertDictEqual(
@@ -52,7 +52,7 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
                 'destination_state': State.objects.get(label='s2')
             }, self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user3)
+        TransitionService.proceed(self.objects[0], self.field, self.user3)
 
         self.assertEqual((), self.test_args)
         self.assertDictEqual(
@@ -80,18 +80,18 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user1)
+        TransitionService.proceed(self.objects[0], self.field, self.user1)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user2)
+        TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
         PostTransitionHandler.register(test_handler, self.objects[0], field='my_field')
-        TransitionService.approve_transition(self.objects[0], self.field, self.user3)
+        TransitionService.proceed(self.objects[0], self.field, self.user3)
 
         self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
@@ -117,17 +117,17 @@ class test_TransitionHandler(ApprovementServiceBasedTest):
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user1)
+        TransitionService.proceed(self.objects[0], self.field, self.user1)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user2)
+        TransitionService.proceed(self.objects[0], self.field, self.user2)
 
         self.assertIsNone(self.test_args)
         self.assertIsNone(self.test_kwargs)
 
-        TransitionService.approve_transition(self.objects[0], self.field, self.user3)
+        TransitionService.proceed(self.objects[0], self.field, self.user3)
 
         self.assertEqual((self.objects[0], 'my_field'), self.test_args)
         self.assertDictEqual(
