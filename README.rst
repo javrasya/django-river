@@ -5,6 +5,13 @@
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest
 
+.. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
+
+.. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
+
+.. |Closed With Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624968/88b5f278-515a-11e5-996b-b62d6e224357.png
+
+
 Django River
 ============
 
@@ -37,6 +44,37 @@ Requirements
 * Python (``2.7``, ``3.2``, ``3.3``, ``3.4``)
 * Pypy (``2``, ``3``)
 * Django (``1.7``, ``1.8``)
+  
+Features
+--------
+* Unlimited states
+* Multiple destination
+* Multiple end-point
+* Circular state machines
+* Transition authorization
+* Skiping or disabling spesific step
+* Custom transition hooks
+  
+Example Scenarios
+^^^^^^^^^^^^^^^^^
+
+Something Like JIRA
+"""""""""""""""""""
+
+Re-Open case
+++++++++++++
+|Re Open Case|
+
+
+
+Closed without Re-Open case
++++++++++++++++++++++++++++
+|Closed Without Re Open Case|
+
+
+Closed with Re-Open case
+++++++++++++++++++++++++
+|Closed With Re Open Case|  
 
 Installation
 ------------
@@ -103,7 +141,7 @@ Usage for Developer
 -------------------
 
 Signals:
-~~~~~~~~
+^^^^^^^^
 
 ``pre_transition``: it is fired before any transition occured.
 
@@ -195,7 +233,7 @@ spesific object, spesific source_state, spesific destination_state
 etc. It is fired when the condition is matched.
 
 PreCompletedHandler:
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 
 Before an object is on final state, if the condition is match; means
@@ -221,7 +259,7 @@ object is suitable, it is fired;
 +-----------------+---------------------------------------+----------+
 
 PostCompletedHandler:
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 After an object is on final state, if the condition is match; means
 object is suitable, it is fired;
@@ -246,7 +284,7 @@ object is suitable, it is fired;
 +-----------------+---------------------------------------+----------+
 
 PreTransitionHandler:
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 Before any transition occurred, if the condition is match; means object,
 source_state,destination state are suitable, it is fired;
@@ -275,7 +313,7 @@ source_state,destination state are suitable, it is fired;
 +------------------+---------------------------------------+----------+
 
 PostTransitionHandler:
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 After any transition occurred, if the condition is match; means object,
 source_state,destination state are suitable, it is fired;
@@ -328,19 +366,19 @@ Models:
 -------
 
 States:
-~~~~~~~
+^^^^^^^
 
 Indicates states in your state machine.
 
 Transitions:
-~~~~~~~~~~~~
+^^^^^^^^^^^^
 
 These are transition between your states. **There must be only one
 initial state** which is in a transition as destination state but no
 source state to make ``django-river`` find it on object creation.
 
 Proceeding Meta:
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 These are proceeding meta of transitions that describes which user
 permission or user group will be allowed to proceed the transition.
@@ -356,7 +394,7 @@ which is **permission2**, you can do it with ``djang-river`` by defining
 order in this model.
 
 Proceeding:
-~~~~~~~~~~~~
+^^^^^^^^^^^
 
 There are state machines paths which is needed to be proceeded for every
 particular object. Proceedings are generated on your model object

@@ -1,3 +1,9 @@
+.. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
+
+.. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
+
+.. |Closed With Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624968/88b5f278-515a-11e5-996b-b62d6e224357.png
+
 
 Overview
 ========
@@ -10,3 +16,33 @@ Requirements
 * Python (``2.7``, ``3.2``, ``3.3``, ``3.4``)
 * Pypy (``2``, ``3``)
 * Django (``1.7``, ``1.8``)
+  
+Features
+--------
+* Unlimited states
+* Multiple destination
+* Multiple end-point
+* Circular state machines
+* Transition authorization
+* Skiping or disabling spesific step
+* Custom transition hooks
+  
+Example Scenarios
+^^^^^^^^^^^^^^^^^
+Something Like JIRA
+"""""""""""""""""""
+
+Re-Open case
+++++++++++++
+|Re Open Case|
+
+
+
+Closed without Re-Open case
++++++++++++++++++++++++++++
+|Closed Without Re Open Case|
+
+
+Closed with Re-Open case
+++++++++++++++++++++++++
+|Closed With Re Open Case|  
