@@ -55,26 +55,23 @@ Features
 * Skiping or disabling spesific step
 * Custom transition hooks
   
+
 Example Scenarios
-^^^^^^^^^^^^^^^^^
-
+-----------------
 Something Like JIRA
-"""""""""""""""""""
-
+^^^^^^^^^^^^^^^^^^^
 Re-Open case
-++++++++++++
+""""""""""""
 |Re Open Case|
 
-
-
 Closed without Re-Open case
-+++++++++++++++++++++++++++
+"""""""""""""""""""""""""""
 |Closed Without Re Open Case|
 
-
 Closed with Re-Open case
-++++++++++++++++++++++++
+""""""""""""""""""""""""
 |Closed With Re Open Case|  
+
 
 Installation
 ------------
