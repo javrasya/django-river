@@ -12,4 +12,4 @@ After :ref:`installation <installation>` we can configure our project for it. In
    )
 
 .. note::
-   Once project is configured to work with ``django-river``, calling ``syncdb`` or ``migrate`` management command would create all its model instances.
+   Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it migt require migrating.

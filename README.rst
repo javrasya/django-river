@@ -92,12 +92,6 @@ Installation
        ...
        ]
 
--  Migrate your application
-
-   .. code:: bash
-
-       python manage.py migrate
-
 -  In your model class which will be processing in workflow;
 
 .. code:: python
@@ -107,6 +101,9 @@ Installation
 
     class MyModel(models.Model):
         my_state_field = StateField()
+
+.. note::
+   Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it migt require migrating.
 
 .. code-block:: python
 
