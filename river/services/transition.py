@@ -74,7 +74,6 @@ class TransitionService(object):
             return proceeding, track
 
         proceeding, track = process(workflow_object, field, user, APPROVED, next_state, god_mod)
-        workflow_object.proceeding_track = track
 
         current_state = getattr(workflow_object, field)
         # Any other proceeding is left?

@@ -8,6 +8,7 @@ __author__ = 'ahmetdal'
 
 class Handler(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("Handler")
         verbose_name_plural = _("Handlers")
 

@@ -18,6 +18,7 @@ DIRECTIONS = [
 
 class Transition(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("Transition")
         verbose_name_plural = _("Transitions")
 

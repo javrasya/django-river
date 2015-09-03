@@ -10,6 +10,7 @@ __author__ = 'ahmetdal'
 
 class ProceedingTrack(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("Proceeding Track")
         verbose_name_plural = _("Proceeding Tracks")
 
@@ -18,3 +19,5 @@ class ProceedingTrack(BaseModel):
     process_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     previous_track = TreeOneToOneField("self", verbose_name=_('Previous track'), related_name="next_track", null=True, blank=True)
+
+

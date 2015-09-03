@@ -11,6 +11,7 @@ LOGGER = logging.getLogger(__name__)
 
 class RiverApp(AppConfig):
     name = 'river'
+    label = 'river'
 
     def ready(self):
         if isinstance(handler_backend, DatabaseHandlerBackend):

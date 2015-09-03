@@ -25,7 +25,8 @@ setup(
     install_requires=[
         "Django",
         "mock",
-        "factory-boy"
+        "factory-boy",
+        "django-mptt"
     ],
     include_package_data=True,
     zip_safe=False,

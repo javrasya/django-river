@@ -13,6 +13,7 @@ __author__ = 'ahmetdal'
 
 class ProceedingMeta(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("Proceeding Meta")
         verbose_name_plural = _("Proceeding Metas")
         unique_together = [('transition', 'order')]

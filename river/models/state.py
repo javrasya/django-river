@@ -7,6 +7,7 @@ __author__ = 'ahmetdal'
 
 class State(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("State")
         verbose_name_plural = _("States")
 

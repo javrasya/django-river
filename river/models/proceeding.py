@@ -27,6 +27,7 @@ PROCEEDING_STATUSES = [
 
 class Proceeding(BaseModel):
     class Meta:
+        app_label = 'river'
         verbose_name = _("Proceeding")
         verbose_name_plural = _("Proceedings")
 
