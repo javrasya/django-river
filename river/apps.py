@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import AppConfig
-from django.db.utils import OperationalError
+from django.db.utils import OperationalError, ProgrammingError
 from river.handlers.backends.database import DatabaseHandlerBackend
 from river.handlers.backends.loader import handler_backend
 
@@ -19,7 +19,7 @@ class RiverApp(AppConfig):
             try:
                 self.get_model('Handler').objects.exists()
                 handler_backend.initialize_handlers()
-            except OperationalError:
+            except (OperationalError, ProgrammingError):
                 LOGGER.debug('Database handlers are not registered. Because database is not created yet.')
 
         LOGGER.debug('RiverApp is loaded.')
