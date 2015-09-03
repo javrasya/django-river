@@ -5,6 +5,10 @@
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest
 
+.. |Gitter| image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/javrasya/django-river
+   :target: https://gitter.im/javrasya/django-river?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge  
+
 .. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
 
 .. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
@@ -17,7 +21,7 @@ Django River
 
 .. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
-|Build Status| |Coverage Status| |Documentation Status|
+|Build Status| |Coverage Status| |Documentation Status| |Gitter|
 
 River is a open source workflow system for ``Django`` which support on
 the fly changes on every item in workflow instead of hardcoding states
