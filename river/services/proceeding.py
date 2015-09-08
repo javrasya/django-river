@@ -8,6 +8,7 @@ from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 from river.services.config import RiverConfig
 from river.services.state import StateService
+from django.contrib import auth
 
 __author__ = 'ahmetdal'
 
@@ -53,14 +54,20 @@ class ProceedingService(object):
             for g in user.groups.all():
                 group_q = group_q | Q(groups__in=[g])
 
+            permissions = []
+            for backend in auth.get_backends():
+                permissions.extend(backend.get_all_permissions(user))
+
             permission_q = Q()
-            for p in user.user_permissions.all():
-                permission_q = permission_q | Q(permissions__in=[p])
+            for p in permissions:
+                label, codename = p.split('.')
+                permission_q = permission_q | Q(permissions__content_type__app_label=label, permissions__codename=codename)
 
             return proceedings.filter(
                 (
                     (Q(transactioner__isnull=True) | Q(transactioner=user)) &
-                    (Q(permissions__isnull=True, groups__isnull=True) | permission_q | group_q)
+                    (Q(permissions__isnull=True) | permission_q) &
+                    (Q(groups__isnull=True) | group_q)
                 )
             )
 
