@@ -49,11 +49,19 @@ class ProceedingService(object):
             return proceedings
 
         def authorize_proceedings(proceedings):
+            group_q = Q()
+            for g in user.groups.all():
+                group_q = group_q | Q(groups__in=[g])
+
+            permission_q = Q()
+            for p in user.user_permissions.all():
+                permission_q = permission_q | Q(permissions__in=[p])
+
             return proceedings.filter(
                 (
                     (Q(transactioner__isnull=True) | Q(transactioner=user)) &
-                    (Q(permissions__isnull=True) | Q(permissions__in=user.user_permissions.all())) &
-                    (Q(groups__isnull=True) | Q(groups__in=user.groups.all()))
+                    (Q(permissions__isnull=True) | permission_q) &
+                    (Q(groups__isnull=True) | group_q)
                 )
             )
 
@@ -74,7 +82,7 @@ class ProceedingService(object):
         if skipped_proceedings:
             source_state_pks = list(skipped_proceedings.values_list('meta__transition__destination_state', flat=True))
             suitable_proceedings = suitable_proceedings | ProceedingService.get_available_proceedings(workflow_object, field, State.objects.filter(pk__in=source_state_pks),
-                                                                                                                           user=user, destination_state=destination_state, god_mod=god_mod)
+                                                                                                      user=user, destination_state=destination_state, god_mod=god_mod)
         return suitable_proceedings
 
     @staticmethod
@@ -108,7 +116,7 @@ class ProceedingService(object):
           accepted, rejected or pending for the user, means the user in active for the content type and field.
         """
         proceedings = Proceeding.objects.filter(Q(transactioner=user) | Q(permissions__in=user.user_permissions.all()) | Q(groups__in=user.groups.all())).filter(content_type=content_type,
-                                                                                                                                                                  field=field)
+                                                                                                                                                                 field=field)
         return proceedings.count() != 0
 
     @staticmethod
