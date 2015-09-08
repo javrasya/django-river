@@ -60,8 +60,7 @@ class ProceedingService(object):
             return proceedings.filter(
                 (
                     (Q(transactioner__isnull=True) | Q(transactioner=user)) &
-                    (Q(permissions__isnull=True) | permission_q) &
-                    (Q(groups__isnull=True) | group_q)
+                    (Q(permissions__isnull=True, groups__isnull=True) | permission_q | group_q)
                 )
             )
 
