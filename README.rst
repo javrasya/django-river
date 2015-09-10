@@ -407,3 +407,8 @@ groups.
    :alt: Bitdeli badge
    :target: https://bitdeli.com/free
 
+
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/javrasya/django-river
+   :target: https://gitter.im/javrasya/django-river?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
