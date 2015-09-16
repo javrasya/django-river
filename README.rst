@@ -402,14 +402,6 @@ specific objects editing like skiping, overriding permissions and
 groups.
 
 
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/javrasya/django-river/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
-
-
-
-
 Change Logs
 ===========
 
@@ -445,3 +437,12 @@ Change Logs
 
 * **Improvement** - Example scenario diagrams are added into documentation.
 * **Bug** - Migrations was failing because of injected ``ProceedingTrack`` relation. Relation is not injected anymore. But property ``proceeing_track`` remains. It still returns current one.
+  
+
+
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/javrasya/django-river/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+  
