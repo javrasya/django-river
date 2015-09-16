@@ -83,8 +83,6 @@ class TransitionObjectFactory(DjangoModelFactory):
     class Meta:
         model = Transition
 
-    content_type = factory.SubFactory(ContentTypeObjectFactory)
-    field = 'my_field'
     source_state = factory.SubFactory(StateObjectFactory)
     destination_state = factory.SubFactory(StateObjectFactory)
     direction = FORWARD
@@ -94,6 +92,8 @@ class ProceedingMetaObjectFactory(DjangoModelFactory):
     class Meta:
         model = ProceedingMeta
 
+    content_type = factory.SubFactory(ContentTypeObjectFactory)
+    field = 'my_field'
     transition = factory.SubFactory(TransitionObjectFactory)
 
     @factory.post_generation

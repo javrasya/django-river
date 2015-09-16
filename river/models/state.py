@@ -1,8 +1,14 @@
+from uuid import uuid4
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from river.models import BaseModel
 
 __author__ = 'ahmetdal'
+
+
+class StateManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
 
 
 class State(BaseModel):
@@ -11,11 +17,17 @@ class State(BaseModel):
         verbose_name = _("State")
         verbose_name_plural = _("States")
 
+    objects = StateManager()
+
+    slug = models.SlugField(unique=True, default=uuid4)
     label = models.CharField(max_length=50)
     description = models.CharField(_("Description"), max_length=200, null=True, blank=True)
 
     def __unicode__(self):
         return self.label
+
+    def natural_key(self):
+        return (self.slug,)
 
     def details(self):
         detail = super(State, self).details()

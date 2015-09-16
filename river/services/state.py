@@ -43,15 +43,11 @@ class StateService:
         """
         initial_state_candidates = State.objects.filter(
             Q(transitions_as_source__isnull=False,
-              transitions_as_source__content_type=content_type,
-              transitions_as_source__field=field,
               transitions_as_destination__isnull=True,
               ) &
             ~Q(
                 transitions_as_destination__isnull=False,
                 transitions_as_destination__direction=FORWARD,
-                transitions_as_destination__content_type=content_type,
-                transitions_as_destination__field=field
             )
         ).distinct()
         c = initial_state_candidates.count()
@@ -70,14 +66,10 @@ class StateService:
         final_states = State.objects.filter(
             Q(transitions_as_source__isnull=True,
               transitions_as_destination__isnull=False,
-              transitions_as_destination__content_type=content_type,
-              transitions_as_destination__field=field
               ) &
             ~Q(
                 transitions_as_source__isnull=False,
                 transitions_as_source__direction=FORWARD,
-                transitions_as_source__content_type=content_type,
-                transitions_as_source__field=field
             )
         ).distinct()
         c = final_states.count()

@@ -7,6 +7,12 @@ from river.services.config import RiverConfig
 
 __author__ = 'ahmetdal'
 
+
+class TransitionManager(models.Manager):
+    def get_by_natural_key(self, source_state, destination_state):
+        return self.get(source_state=State.objects.get_by_natural_key(source_state), destination_state=State.objects.get_by_natural_key(destination_state))
+
+
 BACKWARD = 0
 FORWARD = 1
 
@@ -21,12 +27,16 @@ class Transition(BaseModel):
         app_label = 'river'
         verbose_name = _("Transition")
         verbose_name_plural = _("Transitions")
+        unique_together = (('source_state', 'destination_state'),)
 
-    content_type = models.ForeignKey(RiverConfig.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
-    field = models.CharField(verbose_name=_('Field'), max_length=200)
+    objects = TransitionManager()
+
     source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transitions_as_source')
     destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='transitions_as_destination')
     direction = models.SmallIntegerField(_("Transition Direction"), default=FORWARD)
 
+    def natural_key(self):
+        return self.source_state.slug, self.destination_state.slug
+
     def __unicode__(self):
-        return '%s -> %s (%s)' % (self.source_state, self.destination_state, self.content_type)
+        return '%s -> %s' % (self.source_state, self.destination_state)

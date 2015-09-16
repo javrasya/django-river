@@ -19,7 +19,7 @@ class ProceedingService(object):
     @staticmethod
     def init_proceedings(workflow_object, field):
         content_type = RiverConfig.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
-        for proceeding_meta in ProceedingMeta.objects.filter(transition__content_type=content_type, transition__field=field):
+        for proceeding_meta in ProceedingMeta.objects.filter(content_type=content_type, field=field):
             proceeding, created = Proceeding.objects.update_or_create(
                 meta=proceeding_meta,
                 workflow_object=workflow_object,

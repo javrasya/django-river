@@ -27,6 +27,7 @@ Contents:
    configuration
    guide/developer/index
    guide/end-user/index
+   changelog
 
 
 

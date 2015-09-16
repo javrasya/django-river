@@ -20,24 +20,24 @@ class test_ProceedingMetaService(BaseTestCase):
         self.state3 = StateObjectFactory()
         self.content_type = ContentType.objects.get_for_model(TestModel)
 
-        self.proceeding_meta = ProceedingMetaObjectFactory(transition__content_type=self.content_type, transition__source_state=self.state1, transition__destination_state=self.state2)
+        self.proceeding_meta = ProceedingMetaObjectFactory(content_type=self.content_type, transition__source_state=self.state1, transition__destination_state=self.state2)
         self.object = TestModelObjectFactory().model
         self.field = "my_field"
 
     def test_apply_new_proceed_definition(self):
         from river.models.factories import ProceedingMetaObjectFactory, TransitionObjectFactory
 
-        ct = self.proceeding_meta.transition.content_type
+        ct = self.proceeding_meta.content_type
         # self.assertEqual(0, Proceeding.objects.filter(workflow_object=self.object).count())
         # ObjectService.register_object(self.object, self.field)
         self.assertEqual(1, Proceeding.objects.filter(workflow_object=self.object).count())
 
-        transition = TransitionObjectFactory(content_type=ct, field=self.field, source_state=self.state2, destination_state=self.state3)
+        transition = TransitionObjectFactory(source_state=self.state2, destination_state=self.state3)
 
         m2m_changed.disconnect(post_group_change, ProceedingMeta.groups.through)
         m2m_changed.disconnect(post_permissions_change, ProceedingMeta.permissions.through)
 
-        proceeding_meta = ProceedingMetaObjectFactory(transition=transition, permissions__in=self.proceeding_meta.permissions.all())
+        proceeding_meta = ProceedingMetaObjectFactory(content_type=ct, field=self.field, transition=transition, permissions__in=self.proceeding_meta.permissions.all())
 
         self.assertEqual(1, Proceeding.objects.filter(workflow_object=self.object, field=self.field).count())
 

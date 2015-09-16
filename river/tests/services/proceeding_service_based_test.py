@@ -35,14 +35,14 @@ class ProceedingServiceBasedTest(BaseTestCase):
             label=factory.Sequence(lambda n: "s%s" % str(n + 1) if n <= 4 else ("s4.%s" % str(n - 4) if n <= 6 else "s5.%s" % str(n - 6)))
         )
         self.transitions = TransitionObjectFactory.create_batch(8,
-                                                                content_type=self.content_type,
-                                                                field=self.field,
                                                                 source_state=factory.Sequence(
                                                                     lambda n: self.states[n] if n <= 2 else (self.states[n - 1]) if n <= 4 else (self.states[n - 2] if n <= 6 else self.states[4])),
                                                                 destination_state=factory.Sequence(lambda n: self.states[n + 1]))
 
         self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
             9,
+            content_type=self.content_type,
+            field=self.field,
             transition=factory.Sequence(lambda n: self.transitions[n] if n <= 1 else self.transitions[n - 1]),
             order=factory.Sequence(lambda n: 1 if n == 2 else 0)
         )
