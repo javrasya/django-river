@@ -97,7 +97,7 @@ Signals
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
 +-------------------+---------------------------------------+
-| proceeder        | Proceeding object                    |
+| proceeder         | Proceeding object                     |
 +-------------------+---------------------------------------+
 
 
