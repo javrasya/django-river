@@ -8,7 +8,7 @@ from river.services.proceeding_meta import ProceedingMetaService
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('river', '0002_auto_20150916_0144'),
+        ('river', '0002_part_3'),
     ]
 
     operations = [
