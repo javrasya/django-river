@@ -6,26 +6,6 @@ from django.db import models, migrations
 from django.utils.text import slugify
 
 
-def move_from_transition_to_meta(apps, schema_editor):
-    # We can't import the Person model directly as it may be a newer
-    # version than this migration expects. We use the historical version.
-    ProceedingMeta = apps.get_model("river", "ProceedingMeta")
-    for pm in ProceedingMeta.objects.all():
-        pm.content_type = pm.transition.content_type
-        pm.field = pm.transition.field
-        pm.save()
-
-
-def set_slug(apps, schema_editor):
-    # We can't import the Person model directly as it may be a newer
-    # version than this migration expects. We use the historical version.
-    State = apps.get_model("river", "State")
-
-    for s in State.objects.all():
-        s.slug = slugify(s.label)
-        s.save()
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ('river', '0001_initial'),
@@ -68,7 +48,6 @@ class Migration(migrations.Migration):
             field=models.SlugField(null=True, blank=True, unique=True),
             preserve_default=True
         ),
-        migrations.RunPython(set_slug),
         migrations.AlterField(
             model_name='handler',
             name='date_created',
