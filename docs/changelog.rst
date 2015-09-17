@@ -3,9 +3,13 @@
 Change Logs
 ===========
 
+0.6.2 (Development)
+-------------------
 
-0.6.1
------
+* **Improvement** - Timeline section is added into documentation.
+
+0.6.1 (Stable)
+--------------
 
 * **Bug** - After ``content_type`` and ``field`` are moved into ``ProceedingMeta`` model from ``Transition`` model in version ``0.6.0``, finding initial and final states was failing. This is fixed.
 * **Bug** - ``0002`` migrations was trying to set default slug field of State model. There was a unique problem. It is fixed. ``0002`` can be migrated now.
