@@ -1,12 +1,12 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from river.models import BaseModel
 from river.models.managers.state import StateManager
 
 __author__ = 'ahmetdal'
-
-
 
 
 class State(BaseModel):
@@ -36,3 +36,14 @@ class State(BaseModel):
             }
         )
         return detail
+
+
+def on_pre_save(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.label)
+    else:
+        # To be sure it is slug
+        instance.slug = slugify(instance.slug)
+
+
+pre_save.connect(on_pre_save, State)

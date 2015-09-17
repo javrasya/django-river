@@ -417,7 +417,7 @@ Change Logs
 -------------------
 
 * **Improvement** - Timeline section is added into documentation.
-
+* **Improvement** - State slug field is set as slug version of its label if it is not given on saving.
 
 0.6.1 (Stable)
 --------------
