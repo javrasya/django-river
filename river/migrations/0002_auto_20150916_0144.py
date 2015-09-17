@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
             field=models.CharField(default='state', max_length=200, verbose_name='Field'),
             preserve_default=False,
         ),
-        migrations.RunPython(move_from_transition_to_meta),
 
         migrations.RemoveField(
             model_name='transition',
