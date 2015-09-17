@@ -12,8 +12,6 @@ class ObjectService:
         if proceedings.count() == 0:
             ProceedingService.init_proceedings(workflow_object, field)
 
-        return {'state': getattr(workflow_object, field).details()}
-
     @staticmethod
     def get_objects_waiting_for_approval(content_type, field, user):
         object_pks = []

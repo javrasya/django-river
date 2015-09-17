@@ -1,14 +1,12 @@
 import logging
 
 from django.db.models import Min, Q
+from django.contrib import auth
 
-from river.models import FORWARD
 from river.models.proceeding import Proceeding, PENDING
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 from river.services.config import RiverConfig
-from river.services.state import StateService
-from django.contrib import auth
 
 __author__ = 'ahmetdal'
 
@@ -18,12 +16,13 @@ LOGGER = logging.getLogger(__name__)
 class ProceedingService(object):
     @staticmethod
     def init_proceedings(workflow_object, field):
+
         content_type = RiverConfig.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
         for proceeding_meta in ProceedingMeta.objects.filter(content_type=content_type, field=field):
             proceeding, created = Proceeding.objects.update_or_create(
                 meta=proceeding_meta,
+                field=proceeding_meta.field,
                 workflow_object=workflow_object,
-                field=field,
                 defaults={
                     'order': proceeding_meta.order,
                     'status': PENDING,
@@ -32,8 +31,6 @@ class ProceedingService(object):
             proceeding.permissions.add(*proceeding_meta.permissions.all())
             proceeding.groups.add(*proceeding_meta.groups.all())
 
-        init_state = StateService.get_initial_state(content_type, field)
-        setattr(workflow_object, field, init_state)
         workflow_object.save()
         LOGGER.debug("Proceedings are initialized for workflow object %s and field %s" % (workflow_object, field))
 
@@ -137,10 +134,8 @@ class ProceedingService(object):
 
     @staticmethod
     def get_initial_proceedings(content_type, field):
-        initial_state = StateService.get_initial_state(content_type, field)
-        return Proceeding.objects.filter(meta__transition__source_state=initial_state, meta__transition__direction=FORWARD)
+        return Proceeding.objects.filter(meta__parents__isnull=True)
 
     @staticmethod
     def get_final_proceedings(content_type, field):
-        final_states = StateService.get_final_states(content_type, field)
-        return Proceeding.objects.filter(meta__transition__destination_state__in=final_states, meta__transition__direction=FORWARD)
+        return Proceeding.objects.filter(meta__children__isnull=True)

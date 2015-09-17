@@ -9,5 +9,6 @@ class TestModelObjectFactory():
 
     @staticmethod
     def create_batch(size):
-        TestModel.objects.bulk_create(list(TestModel(test_field=str(i)) for i in range(size)))
+        for i in range(size):
+            TestModel.objects.create(test_field=i)
         return TestModel.objects.all()

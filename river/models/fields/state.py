@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 
 try:
     from django.contrib.contenttypes.fields import GenericRelation
@@ -120,8 +120,13 @@ def _post_save(sender, instance, created, *args, **kwargs):  # signal, sender, i
     :param kwargs:
     :return:
     """
+    from river.services.state import StateService
 
-    if created:
-        for f in instance._meta.fields:
-            if isinstance(f, StateField):
+    for f in instance._meta.fields:
+        if isinstance(f, StateField):
+            if created:
                 ObjectService.register_object(instance, f.name)
+            if not getattr(instance, f.name):
+                init_state = StateService.get_initial_state(ContentType.objects.get_for_model(instance), f.name)
+                setattr(instance, f.name, init_state)
+                instance.save()

@@ -1,8 +1,11 @@
 from django.db import models
 
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, post_save
 
 from django.utils.translation import ugettext_lazy as _
+from mptt.fields import TreeForeignKey, TreeManyToManyField
+from mptt.managers import TreeManager
+from mptt.models import MPTTModel
 
 from river.models.base_model import BaseModel
 from river.models.transition import Transition
@@ -34,6 +37,8 @@ class ProceedingMeta(BaseModel):
     order = models.IntegerField(default=0, verbose_name=_('Order'))
     action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 
+    parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False, db_index=True)
+
     def natural_key(self):
         return self.content_type, self.field, self.transition, self.order
 
@@ -57,5 +62,12 @@ def post_permissions_change(sender, instance, *args, **kwargs):
         ProceedingService.override_permissions(proceeding_pending, instance.permissions.all())
 
 
+def post_save_model(sender, instance, *args, **kwargs):
+    from river.services.proceeding_meta import ProceedingMetaService
+    ProceedingMetaService.build_tree(instance)
+
+
 m2m_changed.connect(post_group_change, sender=ProceedingMeta.groups.through)
 m2m_changed.connect(post_permissions_change, sender=ProceedingMeta.permissions.through)
+
+post_save.connect(post_save_model, sender=ProceedingMeta)

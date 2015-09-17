@@ -1,3 +1,4 @@
+from river.models import ProceedingMeta
 from river.models.proceeding import Proceeding
 
 __author__ = 'ahmetdal'
@@ -21,3 +22,14 @@ class ProceedingMetaService(object):
                     for workflow_object in WorkflowObjectClass.objects.all()
                 )
             )
+
+    @staticmethod
+    def build_tree(instance):
+        parents = ProceedingMeta.objects.filter(transition__destination_state__pk=instance.transition.source_state.pk).exclude(pk__in=instance.parents.values_list('pk', flat=True))
+        children = ProceedingMeta.objects.filter(transition__source_state__pk=instance.transition.destination_state.pk).exclude(parents__in=[instance.pk])
+
+        if parents:
+            instance.parents.add(*parents)
+
+        for child in children:
+            child.parents.add(instance)

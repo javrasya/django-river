@@ -19,11 +19,6 @@ class test_ObjectService(ProceedingServiceBasedTest):
 
     def test_get_objects_waiting_for_approval_for_user(self):
         on_approval_objects = ObjectService.get_objects_waiting_for_approval(self.content_type, self.field, self.user1)
-        self.assertEqual(0, on_approval_objects.count())
-
-        ObjectService.register_object(self.objects[0], self.field)
-        ObjectService.register_object(self.objects[1], self.field)
-        on_approval_objects = ObjectService.get_objects_waiting_for_approval(self.content_type, self.field, self.user1)
         self.assertEqual(2, on_approval_objects.count())
         self.assertEqual(self.objects[0], on_approval_objects[0])
 

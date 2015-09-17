@@ -4,6 +4,13 @@ Change Logs
 ===========
 
 
+0.6.1
+-----
+
+* **Bug** - After ``content_type`` and ``field`` are moved into ``ProceedingMeta`` model from ``Transition`` model, finding initial and final states was failing. This is fixed.
+* **Improvement** The way of finding initial and final states is changed. ProceedingMeta now has parent-child tree structure to present state machine. This tree structure is used to define the way. This requires to migrate ``0003``. This migration will build the tree of your existed ProceedingMeta data.
+
+
 0.6.0
 -----
 
