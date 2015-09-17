@@ -413,15 +413,15 @@ Timeline
 Change Logs
 ===========
 
-0.6.2 (Development)
--------------------
+0.6.2 (Stable)
+--------------
 
 * **Bug** - Migration ``0002`` and ``0003`` were not working properly for postgresql (maybe oracle). For these databases, data can not be fixed. Because, django migrates each in a transactional block and schema migration and data migration can not be done in a transactional block. To fix this, data fixing and schema fixing are seperated.
 * **Improvement** - Timeline section is added into documentation.
 * **Improvement** - State slug field is set as slug version of its label if it is not given on saving.
 
-0.6.1 (Stable)
---------------
+0.6.1
+-----
 
 * **Bug** - After ``content_type`` and ``field`` are moved into ``ProceedingMeta`` model from ``Transition`` model in version ``0.6.0``, finding initial and final states was failing. This is fixed.
 * **Bug** - ``0002`` migrations was trying to set default slug field of State model. There was a unique problem. It is fixed. ``0002`` can be migrated now.
