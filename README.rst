@@ -416,6 +416,7 @@ Change Logs
 0.6.2 (Development)
 -------------------
 
+* **Bug** - Migration ``0002`` and ``0003`` were not working properly for postgresql (maybe oracle). For these databases, data can not be fixed. Because, django migrates each in a transactional block and schema migration and data migration can not be done in a transactional block. To fix this, data fixing and schema fixing are seperated.
 * **Improvement** - Timeline section is added into documentation.
 * **Improvement** - State slug field is set as slug version of its label if it is not given on saving.
 
