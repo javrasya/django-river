@@ -19,7 +19,7 @@ class State(BaseModel):
 
     objects = StateManager()
 
-    slug = models.SlugField(unique=True, default=uuid4)
+    slug = models.SlugField(unique=True, default=uuid4, null=True, blank=True)
     label = models.CharField(max_length=50)
     description = models.CharField(_("Description"), max_length=200, null=True, blank=True)
 

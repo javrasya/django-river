@@ -65,7 +65,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='state',
             name='slug',
-            field=models.SlugField(default=uuid.uuid4, unique=True),
+            field=models.SlugField(null=True, default=uuid.uuid4, blank=True, unique=True),
+            preserve_default=True
         ),
         migrations.RunPython(set_slug),
         migrations.AlterField(
