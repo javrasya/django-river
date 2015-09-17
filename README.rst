@@ -4,6 +4,9 @@
    :target: https://coveralls.io/github/javrasya/django-river?branch=master
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest
+.. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
+
+
 
 .. |Gitter| image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/javrasya/django-river
@@ -400,6 +403,11 @@ creation by using ``proceeding meta``. This is whole path for the
 created object. Do not add or edit this model data unless you don't need
 specific objects editing like skiping, overriding permissions and
 groups.
+
+Timeline
+--------
+
+|Timeline|
 
 
 Change Logs

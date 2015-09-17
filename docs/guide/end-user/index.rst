@@ -1,4 +1,5 @@
 .. _enduser_guide:
+.. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
 End User Guide
 ==============
@@ -12,6 +13,11 @@ End User Guide
 
 Whenever an object of your model class is inserted in your system, all its workflow initialization is done by ``django-river``.
 
+
+Timeline
+--------
+
+|Timeline|
 
 .. toctree::
     :maxdepth: 2

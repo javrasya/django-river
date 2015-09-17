@@ -2,6 +2,7 @@ import logging
 
 from django.apps import AppConfig
 from django.db.utils import OperationalError, ProgrammingError
+from river.config import app_config
 from river.handlers.backends.database import DatabaseHandlerBackend
 from river.handlers.backends.loader import handler_backend
 

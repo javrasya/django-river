@@ -2,15 +2,11 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
+from river.models.managers.transition import TransitionManager
 from river.models.state import State
-from river.services.config import RiverConfig
 
 __author__ = 'ahmetdal'
 
-
-class TransitionManager(models.Manager):
-    def get_by_natural_key(self, source_state, destination_state):
-        return self.get(source_state=State.objects.get_by_natural_key(source_state), destination_state=State.objects.get_by_natural_key(destination_state))
 
 
 BACKWARD = 0

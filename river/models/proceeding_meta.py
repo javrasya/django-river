@@ -9,14 +9,11 @@ from mptt.models import MPTTModel
 
 from river.models.base_model import BaseModel
 from river.models.transition import Transition
-from river.services.config import RiverConfig
+from river.config import app_config
+
+from river.models.managers.proceeding_meta import ProceedingMetaManager
 
 __author__ = 'ahmetdal'
-
-
-class ProceedingMetaManager(models.Manager):
-    def get_by_natural_key(self, content_type, field, transition, order):
-        return self.get(content_type=content_type, field=field, transition=transition, order=order)
 
 
 class ProceedingMeta(BaseModel):
@@ -28,12 +25,12 @@ class ProceedingMeta(BaseModel):
 
     objects = ProceedingMetaManager()
 
-    content_type = models.ForeignKey(RiverConfig.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
     field = models.CharField(verbose_name=_('Field'), max_length=200)
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
-    permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'))
-    groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'))
+    permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'))
+    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'))
     order = models.IntegerField(default=0, verbose_name=_('Order'))
     action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 

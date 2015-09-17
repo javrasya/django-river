@@ -6,7 +6,7 @@ from django.contrib import auth
 from river.models.proceeding import Proceeding, PENDING
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
-from river.services.config import RiverConfig
+from river.config import app_config
 
 __author__ = 'ahmetdal'
 
@@ -17,7 +17,7 @@ class ProceedingService(object):
     @staticmethod
     def init_proceedings(workflow_object, field):
 
-        content_type = RiverConfig.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
+        content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
         for proceeding_meta in ProceedingMeta.objects.filter(content_type=content_type, field=field):
             proceeding, created = Proceeding.objects.update_or_create(
                 meta=proceeding_meta,

@@ -4,13 +4,12 @@ except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 
 from django.db import models
-
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.base_model import BaseModel
 from river.models.managers.proceeding import ProceedingManager
-from river.services.config import RiverConfig
+from river.config import app_config
 
 __author__ = 'ahmetdal'
 
@@ -33,21 +32,21 @@ class Proceeding(BaseModel):
 
     objects = ProceedingManager()
 
-    content_type = models.ForeignKey(RiverConfig.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
     object_id = models.PositiveIntegerField(verbose_name=_('Related Object'))
     field = models.CharField(verbose_name=_('Field'), max_length=200)
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
     meta = models.ForeignKey(ProceedingMeta, verbose_name=_('Meta'), related_name="proceedings")
-    transactioner = models.ForeignKey(RiverConfig.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True)
+    transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True)
     transaction_date = models.DateTimeField(null=True, blank=True)
 
     status = models.IntegerField(_('Status'), choices=PROCEEDING_STATUSES, default=PENDING)
 
     skip = models.BooleanField(_('Skip'), default=False)
 
-    permissions = models.ManyToManyField(RiverConfig.PERMISSION_CLASS, verbose_name=_('Permissions'))
-    groups = models.ManyToManyField(RiverConfig.GROUP_CLASS, verbose_name=_('Groups'))
+    permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'))
+    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'))
     order = models.IntegerField(default=0, verbose_name=_('Order'))
 
     enabled = models.BooleanField(_('Enabled?'), default=True)

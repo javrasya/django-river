@@ -1,14 +1,12 @@
-from uuid import uuid4
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
 from river.models import BaseModel
+from river.models.managers.state import StateManager
 
 __author__ = 'ahmetdal'
 
 
-class StateManager(models.Manager):
-    def get_by_natural_key(self, slug):
-        return self.get(slug=slug)
 
 
 class State(BaseModel):

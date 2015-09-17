@@ -84,7 +84,7 @@ class StateField(models.ForeignKey):
         self.__add_to_class(cls, "proceedings", GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
         self.__add_to_class(cls, "proceeding_track", proceeding_track)
 
-        self.__add_to_class(cls, "objects", self.object_manager(name))
+        self.__add_to_class(cls, "workflow", self.object_manager(name))
         self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
         self.__add_to_class(cls, "proceed", proceed)
 

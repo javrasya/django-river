@@ -1,7 +1,7 @@
 from river.handlers.backends.loader import load_handler_backend
 from river.handlers.transition import PostTransitionHandler
 from river.models import Handler
-from river.services.config import RiverConfig
+from river.config import app_config
 from river.services.object import ObjectService
 from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 
@@ -16,7 +16,7 @@ class test_DatabaseHandlerBackend(ProceedingServiceBasedTest):
     def setUp(self):
         super(test_DatabaseHandlerBackend, self).setUp()
 
-        RiverConfig.HANDLER_BACKEND_CLASS = 'river.handlers.backends.database.DatabaseHandlerBackend'
+        app_config.HANDLER_BACKEND_CLASS = 'river.handlers.backends.database.DatabaseHandlerBackend'
         self.handler_backend = load_handler_backend()
         self.handler_backend.handlers = {}
 
