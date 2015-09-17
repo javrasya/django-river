@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proceedingmeta',
             name='content_type',
-            field=models.ForeignKey(default=-1, verbose_name='Content Type', to='contenttypes.ContentType'),
+            field=models.ForeignKey(default=1, verbose_name='Content Type', to='contenttypes.ContentType'),
             preserve_default=False,
         ),
         migrations.AddField(
