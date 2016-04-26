@@ -1,6 +1,6 @@
 language: python
 sudo: false
-python: 2.7
+python: 3.5
 env:
   global:
     PYTHONUNBUFFERED=yes
