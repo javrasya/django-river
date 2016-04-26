@@ -1,4 +1,5 @@
-from river.models import State, Proceeding
+from river.models.state import State
+from river.models.proceeding import Proceeding
 from river.services.proceeding import ProceedingService
 from river.services.object import ObjectService
 from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest

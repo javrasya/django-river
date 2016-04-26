@@ -1,6 +1,6 @@
 from river.handlers.backends.loader import load_handler_backend
 from river.handlers.transition import PostTransitionHandler
-from river.models import Handler
+from river.models.handler import Handler
 from river.config import app_config
 from river.services.object import ObjectService
 from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest

@@ -1,4 +1,4 @@
-from river.models import ProceedingMeta
+from river.models.proceeding_meta import ProceedingMeta
 from river.models.proceeding import Proceeding
 
 __author__ = 'ahmetdal'

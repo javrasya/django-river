@@ -3,7 +3,7 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from river.models import BaseModel
+from river.models.base_model import BaseModel
 from river.models.managers.state import StateManager
 
 __author__ = 'ahmetdal'

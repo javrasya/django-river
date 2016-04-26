@@ -1,5 +1,5 @@
 from django.test import TestCase
-from river.models import State
+from river.models.state import State
 
 __author__ = 'ahmetdal'
 

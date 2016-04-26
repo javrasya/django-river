@@ -1,4 +1,5 @@
-from river.models import State, Proceeding, APPROVED
+from river.models.state import State
+from river.models.proceeding import Proceeding, APPROVED
 
 from river.services.object import ObjectService
 from river.services.transition import TransitionService

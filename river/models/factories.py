@@ -3,7 +3,9 @@ from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 import factory
 
-from river.models import State, Transition, ProceedingMeta, FORWARD
+from river.models.state import State
+from river.models.transition import Transition,FORWARD
+from river.models.proceeding_meta import ProceedingMeta
 
 __author__ = 'ahmetdal'
 

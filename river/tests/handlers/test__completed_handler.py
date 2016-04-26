@@ -1,6 +1,6 @@
 from unittest import skip
 from river.handlers.completed import PostCompletedHandler
-from river.models import Transition
+from river.models.transition import Transition
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
 from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest

@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import m2m_changed
 
-from river.models import Proceeding
+from river.models.proceeding import Proceeding
 from river.models.proceeding_meta import ProceedingMeta, post_group_change, post_permissions_change
 from river.services.proceeding_meta import ProceedingMetaService
 from river.tests.base_test import BaseTestCase

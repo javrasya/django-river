@@ -1,6 +1,6 @@
 from django.db.models import Q
 
-from river.models import FORWARD
+from river.models.transition import FORWARD
 from river.models.proceeding import Proceeding
 from river.models.state import State
 from river.utils.error_code import ErrorCode

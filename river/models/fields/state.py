@@ -6,7 +6,8 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import GenericRelation
 
-from river.models import State, Proceeding
+from river.models.state import State
+from river.models.proceeding import Proceeding
 from river.models.proceeding_track import ProceedingTrack
 from river.models.managers.wofkflow_object import WorkflowObjectManager
 from river.services.object import ObjectService

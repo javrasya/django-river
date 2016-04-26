@@ -1,5 +1,5 @@
 from django.db import models
-from river.models import State
+from river.models.state import State
 
 __author__ = 'ahmetdal'
 

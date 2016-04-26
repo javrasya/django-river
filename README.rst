@@ -48,9 +48,11 @@ Online documentation is available at http://django-river.rtfd.org/.
 
 Requirements
 ------------
-* Python (``2.7``, ``3.2``, ``3.3``, ``3.4``)
-* Pypy (``2``, ``3``)
-* Django (``1.7``, ``1.8``)
+* Python (``2.7``, ``3.4``, ``3.5``)
+* Pypy (``2``)
+* Django (``1.7``, ``1.8``, ``1.9``)
+* **Django 1.7 is not for Python3.5 **
+* **Django 1.9 is not for Python3.3 and PyPy3 ** (Because of Django deprecation)
   
 Features
 --------
@@ -413,8 +415,14 @@ Timeline
 Change Logs
 ===========
 
-0.6.2 (Stable)
+0.7.0 (Stable)
 --------------
+
+* **Improvement** - Python version 3.5 support is added. (not for Django1.7)
+* **Improvement** - Django version 1.9 support is added. (not for Python3.3 and PyPy3)
+
+0.6.2
+-----
 
 * **Bug** - Migration ``0002`` and ``0003`` were not working properly for postgresql (maybe oracle). For these databases, data can not be fixed. Because, django migrates each in a transactional block and schema migration and data migration can not be done in a transactional block. To fix this, data fixing and schema fixing are seperated.
 * **Improvement** - Timeline section is added into documentation.

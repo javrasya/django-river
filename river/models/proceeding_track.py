@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from mptt.fields import TreeOneToOneField
 
-from river.models import Proceeding
+from river.models.proceeding import Proceeding
 from river.models.base_model import BaseModel
 
 __author__ = 'ahmetdal'
