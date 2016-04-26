@@ -13,9 +13,9 @@ There is ordering aprovments for a transition functionality in ``django-river``.
 
 Requirements
 ------------
-* Python (``2.7``, ``3.3``, ``3.4``, ``3.5``)
-* Pypy (``2``, ``3``)
-* Django (``1.7``, ``1.8``, ``1.9``) 
+* Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)
+* PyPy (``2``, ``3``)
+* Django (``1.7``, ``1.8``, ``1.9``)
 * Django 1.7 is not for Python3.5
 * Django 1.9 is not for Python3.3 and PyPy3 (Because of Django deprecation)
   
