@@ -75,12 +75,6 @@ class StateField(models.ForeignKey):
             return getattr(self, name) in ProceedingService.get_next_proceedings(
                 ContentType.objects.get_for_model(self), name)
 
-        # @property
-        # def proceeding_track(self):
-        #     try:
-        #         return ProceedingTrack.objects.filter(proceeding__in=self.proceedings.all()).latest('date_created')
-        #     except ProceedingTrack.DoesNotExist:
-        #         return None
 
         @property
         def proceeding(self):
@@ -93,7 +87,6 @@ class StateField(models.ForeignKey):
 
         self.__add_to_class(cls, "proceedings",
                             GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
-        # self.__add_to_class(cls, "proceeding_track", proceeding_track)
         self.__add_to_class(cls, "proceeding", proceeding)
 
         self.__add_to_class(cls, "workflow", self.object_manager(name))

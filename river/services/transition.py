@@ -74,11 +74,6 @@ class TransitionService(object):
                 proceeding.previous = workflow_object.proceeding
             proceeding.save()
 
-            # c = False
-            # track = workflow_object.proceeding_track
-            # while not c:
-            #     track, c = proceeding.tracks.get_or_create(previous_track=track)
-            # return proceeding, track
 
             return proceeding
 
