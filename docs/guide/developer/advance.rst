@@ -61,8 +61,6 @@ Relations:
 +=======================+=====================+===========================+
 | ``proceedings:``      | ``GenericRelation`` | To Proceeding model.      |
 +-----------------------+---------------------+---------------------------+
-| ``proceeding_tract:`` | ``ForeignKey``      | To Proceeding Track model |
-+-----------------------+---------------------+---------------------------+
 
 
 Signals
@@ -112,8 +110,6 @@ Signals
 +-----------------+---------------------------------------+
 | proceeder       | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Proceeding track object               |
-+-----------------+---------------------------------------+
 
 ``post_proceeded``: it is fired before any is proceeded. Transition does not have to be occured.
 
@@ -125,8 +121,6 @@ Signals
 | field           | Field which you registered object for |
 +-----------------+---------------------------------------+
 | proceeder       | Proceeding object                     |
-+-----------------+---------------------------------------+
-| track           | Proceeding track object               |
 +-----------------+---------------------------------------+
 
 ``pre_final``: it is fired before any workflow is completed.

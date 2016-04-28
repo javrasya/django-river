@@ -1,3 +1,5 @@
+from mptt.fields import TreeOneToOneField
+
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
@@ -50,3 +52,8 @@ class Proceeding(BaseModel):
     order = models.IntegerField(default=0, verbose_name=_('Order'))
 
     enabled = models.BooleanField(_('Enabled?'), default=True)
+
+    previous = TreeOneToOneField("self", verbose_name=_('Previous Proceeding'), related_name="next_proceeding",
+                                 null=True, blank=True)
+
+    cloned = models.BooleanField(_('Cloned?'), default=False)

@@ -1,12 +1,13 @@
 import logging
 
-from django.db.models import Min, Q
 from django.contrib import auth
+from django.db.models import Min, Q
+from django.db.transaction import atomic
 
+from river.config import app_config
 from river.models.proceeding import Proceeding, PENDING
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
-from river.config import app_config
 
 __author__ = 'ahmetdal'
 
@@ -35,7 +36,8 @@ class ProceedingService(object):
         LOGGER.debug("Proceedings are initialized for workflow object %s and field %s" % (workflow_object, field))
 
     @staticmethod
-    def get_available_proceedings(workflow_object, field, source_states, user=None, destination_state=None, god_mod=False):
+    def get_available_proceedings(workflow_object, field, source_states, user=None, destination_state=None,
+                                  god_mod=False):
 
         def get_proceeding(proceedings):
             min_order = proceedings.aggregate(Min('order'))['order__min']
@@ -58,7 +60,8 @@ class ProceedingService(object):
             permission_q = Q()
             for p in permissions:
                 label, codename = p.split('.')
-                permission_q = permission_q | Q(permissions__content_type__app_label=label, permissions__codename=codename)
+                permission_q = permission_q | Q(permissions__content_type__app_label=label,
+                                                permissions__codename=codename)
 
             return proceedings.filter(
                 (
@@ -84,8 +87,13 @@ class ProceedingService(object):
         skipped_proceedings = get_proceeding(proceedings.filter(skip=True))
         if skipped_proceedings:
             source_state_pks = list(skipped_proceedings.values_list('meta__transition__destination_state', flat=True))
-            suitable_proceedings = suitable_proceedings | ProceedingService.get_available_proceedings(workflow_object, field, State.objects.filter(pk__in=source_state_pks),
-                                                                                                      user=user, destination_state=destination_state, god_mod=god_mod)
+            suitable_proceedings = suitable_proceedings | ProceedingService.get_available_proceedings(workflow_object,
+                                                                                                      field,
+                                                                                                      State.objects.filter(
+                                                                                                          pk__in=source_state_pks),
+                                                                                                      user=user,
+                                                                                                      destination_state=destination_state,
+                                                                                                      god_mod=god_mod)
         return suitable_proceedings
 
     @staticmethod
@@ -93,14 +101,20 @@ class ProceedingService(object):
         if not proceeding_pks:
             proceeding_pks = []
         index += 1
-        current_states = list(current_states.values_list('pk', flat=True)) if current_states else [getattr(workflow_object, field)]
-        next_proceedings = Proceeding.objects.filter(workflow_object=workflow_object, field=field, meta__transition__source_state__in=current_states)
-        if next_proceedings.exists() and not next_proceedings.filter(pk__in=proceeding_pks).exists() and (not limit or index < limit):
+        current_states = list(current_states.values_list('pk', flat=True)) if current_states else [
+            getattr(workflow_object, field)]
+        next_proceedings = Proceeding.objects.filter(workflow_object=workflow_object, field=field,
+                                                     meta__transition__source_state__in=current_states)
+        if workflow_object.proceeding:
+            next_proceedings = next_proceedings.exclude(pk=workflow_object.proceeding.pk)
+        if next_proceedings.exists() and not next_proceedings.filter(pk__in=proceeding_pks).exists() and (
+                    not limit or index < limit):
             proceedings = ProceedingService.get_next_proceedings(
                 workflow_object,
                 field,
                 proceeding_pks=proceeding_pks + list(next_proceedings.values_list('pk', flat=True)),
-                current_states=State.objects.filter(pk__in=next_proceedings.values_list('meta__transition__destination_state', flat=True)),
+                current_states=State.objects.filter(
+                    pk__in=next_proceedings.values_list('meta__transition__destination_state', flat=True)),
                 index=index,
                 limit=limit
             )
@@ -108,6 +122,32 @@ class ProceedingService(object):
             proceedings = Proceeding.objects.filter(pk__in=proceeding_pks)
 
         return proceedings
+
+    @staticmethod
+    @atomic
+    def cycle_proceedings(workflow_object, field):
+        """
+         Finds next proceedings and clone them for cycling if it exists.
+        """
+        proceeded_next_proceedings = ProceedingService.get_next_proceedings(workflow_object, field).exclude(
+            status=PENDING).exclude(cloned=True)
+        for p in proceeded_next_proceedings:
+            clone_p, c = Proceeding.objects.get_or_create(
+                meta=p.meta,
+                content_type=p.content_type,
+                object_id=p.object_id,
+                field=p.field,
+                skip=p.skip,
+                order=p.order,
+                enabled=p.enabled,
+                status=PENDING)
+
+            if c:
+                clone_p.permissions.add(*p.permissions.all())
+                clone_p.groups.add(*p.groups.all())
+        proceeded_next_proceedings.update(cloned=True)
+
+        return True if proceeded_next_proceedings.count() else False
 
     @staticmethod
     def has_user_any_action(content_type, field, user):
@@ -118,8 +158,10 @@ class ProceedingService(object):
         :return: Boolean value indicates whether the user has any role for the content type and field are sent. Any elements existence
           accepted, rejected or pending for the user, means the user in active for the content type and field.
         """
-        proceedings = Proceeding.objects.filter(Q(transactioner=user) | Q(permissions__in=user.user_permissions.all()) | Q(groups__in=user.groups.all())).filter(content_type=content_type,
-                                                                                                                                                                 field=field)
+        proceedings = Proceeding.objects.filter(
+            Q(transactioner=user) | Q(permissions__in=user.user_permissions.all()) | Q(
+                groups__in=user.groups.all())).filter(content_type=content_type,
+                                                      field=field)
         return proceedings.count() != 0
 
     @staticmethod

@@ -1,9 +1,9 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from django.db.transaction import atomic
 
-from river.models.proceeding import APPROVED, PENDING
+from river.models.proceeding import APPROVED
 from river.services.proceeding import ProceedingService
 from river.services.state import StateService
 from river.signals import ProceedingSignal, TransitionSignal, FinalSignal
@@ -48,36 +48,48 @@ class TransitionService(object):
 
         def process(workflow_object, field, user, action, next_state=None, god_mod=False):
             current_state = getattr(workflow_object, field)
-            proceedings = ProceedingService.get_available_proceedings(workflow_object, field, [current_state], user=user, god_mod=god_mod)
+            proceedings = ProceedingService.get_available_proceedings(workflow_object, field, [current_state],
+                                                                      user=user, god_mod=god_mod)
             c = proceedings.count()
             if c == 0:
-                raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
+                raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER,
+                                     "There is no available state for destination for the user.")
             if c > 1:
                 if next_state:
                     proceedings = proceedings.filter(meta__transition__destination_state=next_state)
                     if proceedings.count() == 0:
                         available_states = StateService.get_available_states(workflow_object, field, user)
                         raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,
-                                             "Invalid state is given(%s). Valid states is(are) %s" % (next_state.__unicode__(), ','.join([ast.__unicode__() for ast in available_states])))
+                                             "Invalid state is given(%s). Valid states is(are) %s" % (
+                                                 next_state.__unicode__(),
+                                                 ','.join([ast.__unicode__() for ast in available_states])))
                 else:
-                    raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED, "State must be given when there are multiple states for destination")
+                    raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED,
+                                         "State must be given when there are multiple states for destination")
             proceeding = proceedings[0]
             proceeding.status = action
             proceeding.transactioner = user
             proceeding.transaction_date = datetime.now()
+            if workflow_object.proceeding:
+                proceeding.previous = workflow_object.proceeding
             proceeding.save()
 
-            c = False
-            track = workflow_object.proceeding_track
-            while not c:
-                track, c = proceeding.tracks.get_or_create(previous_track=track)
-            return proceeding, track
+            # c = False
+            # track = workflow_object.proceeding_track
+            # while not c:
+            #     track, c = proceeding.tracks.get_or_create(previous_track=track)
+            # return proceeding, track
 
-        proceeding, track = process(workflow_object, field, user, APPROVED, next_state, god_mod)
+            return proceeding
+
+        proceeding = process(workflow_object, field, user, APPROVED, next_state, god_mod)
 
         current_state = getattr(workflow_object, field)
+
         # Any other proceeding is left?
-        required_proceedings = ProceedingService.get_available_proceedings(workflow_object, field, [current_state], destination_state=next_state, god_mod=god_mod)
+        required_proceedings = ProceedingService.get_available_proceedings(workflow_object, field, [current_state],
+                                                                           destination_state=next_state,
+                                                                           god_mod=god_mod)
 
         transition_status = False
         if required_proceedings.count() == 0:
@@ -85,9 +97,14 @@ class TransitionService(object):
             transition_status = True
 
             # Next states should be PENDING back again if there is circle.
-            ProceedingService.get_next_proceedings(workflow_object, field).update(status=PENDING)
+            ProceedingService.cycle_proceedings(workflow_object, field)
+            # ProceedingService.get_next_proceedings(workflow_object, field).update(status=PENDING)
 
-        with ProceedingSignal(workflow_object, field, proceeding, track), TransitionSignal(transition_status, workflow_object, field, proceeding), FinalSignal(workflow_object, field):
+        with ProceedingSignal(workflow_object, field, proceeding), TransitionSignal(transition_status,
+                                                                                    workflow_object, field,
+                                                                                    proceeding), FinalSignal(
+            workflow_object, field):
             workflow_object.save()
 
-        LOGGER.debug("Workflow object %s for field %s is proceeded for next transition. Transition: %s -> %s" % (workflow_object, field, current_state.label, getattr(workflow_object, field).label))
+        LOGGER.debug("Workflow object %s for field %s is proceeded for next transition. Transition: %s -> %s" % (
+            workflow_object, field, current_state.label, getattr(workflow_object, field).label))

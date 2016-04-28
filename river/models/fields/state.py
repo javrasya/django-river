@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save
 
 try:
     from django.contrib.contenttypes.fields import GenericRelation
@@ -8,7 +8,6 @@ except ImportError:
 
 from river.models.state import State
 from river.models.proceeding import Proceeding
-from river.models.proceeding_track import ProceedingTrack
 from river.models.managers.wofkflow_object import WorkflowObjectManager
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
@@ -59,31 +58,43 @@ class StateField(models.ForeignKey):
         def initial_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_initial_proceedings(ContentType.objects.get_for_model(self), name)
+            return getattr(self, name) in ProceedingService.get_initial_proceedings(
+                ContentType.objects.get_for_model(self), name)
 
         @property
         def final_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_final_proceedings(ContentType.objects.get_for_model(self), name)
+            return getattr(self, name) in ProceedingService.get_final_proceedings(
+                ContentType.objects.get_for_model(self), name)
 
         @property
         def next_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_next_proceedings(ContentType.objects.get_for_model(self), name)
+            return getattr(self, name) in ProceedingService.get_next_proceedings(
+                ContentType.objects.get_for_model(self), name)
+
+        # @property
+        # def proceeding_track(self):
+        #     try:
+        #         return ProceedingTrack.objects.filter(proceeding__in=self.proceedings.all()).latest('date_created')
+        #     except ProceedingTrack.DoesNotExist:
+        #         return None
 
         @property
-        def proceeding_track(self):
+        def proceeding(self):
             try:
-                return ProceedingTrack.objects.filter(proceeding__in=self.proceedings.all()).latest('date_created')
-            except ProceedingTrack.DoesNotExist:
+                return self.proceedings.filter(transaction_date__isnull=False).latest('transaction_date')
+            except Proceeding.DoesNotExist:
                 return None
 
         self.model = cls
 
-        self.__add_to_class(cls, "proceedings", GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
-        self.__add_to_class(cls, "proceeding_track", proceeding_track)
+        self.__add_to_class(cls, "proceedings",
+                            GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
+        # self.__add_to_class(cls, "proceeding_track", proceeding_track)
+        self.__add_to_class(cls, "proceeding", proceeding)
 
         self.__add_to_class(cls, "workflow", self.object_manager(name))
         self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
@@ -101,7 +112,8 @@ class StateField(models.ForeignKey):
 
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 
-        post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, self.name))
+        post_save.connect(_post_save, self.model, False,
+                          dispatch_uid='%s_%s_riverstatefield_post' % (self.model, self.name))
         # self.model.__metaclass__ = WorkflowObjectMetaclass
 
     def get_state(self, instance):

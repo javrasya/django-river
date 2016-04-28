@@ -190,8 +190,6 @@ does not have to be occured.
 +-----------------+---------------------------------------+
 | proceeding      | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Proceeding track object               |
-+-----------------+---------------------------------------+
 
 ``post_proceed``: it is fired before any is proceeded occured.
 Transition does not have to be occured.
@@ -205,8 +203,7 @@ Transition does not have to be occured.
 +-----------------+---------------------------------------+
 | proceeding      | Proceeding object                     |
 +-----------------+---------------------------------------+
-| track           | Proceeding track object               |
-+-----------------+---------------------------------------+
+
 
 ``pre_final``: it is fired before any workflow is completed.
 
@@ -415,6 +412,12 @@ Timeline
 Change Logs
 ===========
 
+0.8.0 (Dev)
+-----------
+
+* **Deprecation** - ProceedingTrack is removed. ProceedingTracks were being used to keep any transaction track to handle even circular one. This was a workaround. So, it can be handled with Proceeding now by cloning them if there is circle. ProceedingTracks was just causing confusion. To fix this, ProceedingTrack model and its functions are removed from django-river.
+* **Improvement** - Circular scenario test is added.
+
 0.7.0 (Stable)
 --------------
 
@@ -468,14 +471,6 @@ Change Logs
 
 * **Improvement** - Example scenario diagrams are added into documentation.
 * **Bug** - Migrations was failing because of injected ``ProceedingTrack`` relation. Relation is not injected anymore. But property ``proceeing_track`` remains. It still returns current one.
-  
-
-
-
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/javrasya/django-river/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
   
 
 

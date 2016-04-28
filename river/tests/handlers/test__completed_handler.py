@@ -1,21 +1,24 @@
 from unittest import skip
+
 from river.handlers.completed import PostCompletedHandler
 from river.models.transition import Transition
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
+from river.tests.base_test import BaseTestCase
 
 __author__ = 'ahmetdal'
 
 
-class test_CompletedHandler(ProceedingServiceBasedTest):
+class test_CompletedHandler(BaseTestCase):
     def setUp(self):
         super(test_CompletedHandler, self).setUp()
+        self.initialize_normal_scenario()
         transition = Transition.objects.get(source_state__label='s2', destination_state__label='s3')
         Transition.objects.filter(pk__gt=transition.pk).delete()
 
     @skip("workflow object is now required to register")
     def test_register_for_all(self):
+        self.initialize_normal_scenario()
         self.test_args = None
         self.test_kwargs = None
 
@@ -52,6 +55,7 @@ class test_CompletedHandler(ProceedingServiceBasedTest):
             }, self.test_kwargs)
 
     def test_register_for_an_object(self):
+
         self.test_args = None
         self.test_kwargs = None
 

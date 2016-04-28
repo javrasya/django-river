@@ -47,7 +47,4 @@ Proceeding:
 ^^^^^^^^^^^^
 There are state machines paths which is needed to be proceeded for every particular object. Proceedings are generated on your model object creation by using `proceeding meta`. This is whole path for the created object. Do not add or edit this model data unless you don't need specific objects editing like skiping, overriding permissions and groups.
 
-Proceeding Track:
-^^^^^^^^^^^^^^^^^^
-In some scenarios, especially state machines contains circularity, proceedings can be stated for multiple times. This is the model for the model of proceedings. This is definite path of workflow for your objects.
     

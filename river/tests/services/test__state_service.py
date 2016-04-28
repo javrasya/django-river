@@ -1,13 +1,15 @@
 from river.models.state import State
 from river.services.object import ObjectService
 from river.services.state import StateService
-from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
+from river.tests.base_test import BaseTestCase
 
 __author__ = 'ahmetdal'
 
 
-class test__StateService(ProceedingServiceBasedTest):
+class test__StateService(BaseTestCase):
     def test_get_available_states(self):
+        self.initialize_normal_scenario()
+
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)
 
@@ -47,7 +49,11 @@ class test__StateService(ProceedingServiceBasedTest):
         self.assertEqual(State.objects.get(label='s2'), available_states[0])
 
     def test_get_initial_state(self):
+        self.initialize_normal_scenario()
+
         self.assertEqual(State.objects.get(label='s1'), StateService.get_initial_state(self.content_type, self.field))
 
     def test_get_final_states(self):
+        self.initialize_normal_scenario()
+
         self.assertListEqual(list(State.objects.filter(label__in=['s4.1', 's4.2', 's5.1', 's5.2'])), list(StateService.get_final_states(self.content_type, self.field)))

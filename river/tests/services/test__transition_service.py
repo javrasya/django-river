@@ -3,15 +3,16 @@ from river.models.proceeding import Proceeding, APPROVED
 
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
+from river.tests.base_test import BaseTestCase
 
 __author__ = 'ahmetdal'
 
 
-class test__TransitionService(ProceedingServiceBasedTest):
+class test__TransitionService(BaseTestCase):
     def test_proceed(self):
+        self.initialize_normal_scenario()
 
         ObjectService.register_object(self.objects[0], self.field)
         ObjectService.register_object(self.objects[1], self.field)

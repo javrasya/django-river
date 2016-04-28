@@ -4,14 +4,15 @@ from river.models.state import State
 from river.models.proceeding import Proceeding
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
-from river.tests.services.proceeding_service_based_test import ProceedingServiceBasedTest
+from river.tests.base_test import BaseTestCase
 
 __author__ = 'ahmetdal'
 
 
-class test_TransitionHandler(ProceedingServiceBasedTest):
+class test_TransitionHandler(BaseTestCase):
     @skip("workflow object is now required to register")
     def test_register_for_all(self):
+        self.initialize_normal_scenario()
         self.test_args = None
         self.test_kwargs = None
 
@@ -66,6 +67,7 @@ class test_TransitionHandler(ProceedingServiceBasedTest):
             }, self.test_kwargs)
 
     def test_register_for_an_object(self):
+        self.initialize_normal_scenario()
         self.test_args = None
         self.test_kwargs = None
 
@@ -103,6 +105,7 @@ class test_TransitionHandler(ProceedingServiceBasedTest):
             }, self.test_kwargs)
 
     def test_register_for_a_transition(self):
+        self.initialize_normal_scenario()
         self.test_args = None
         self.test_kwargs = None
 
