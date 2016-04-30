@@ -146,83 +146,83 @@ Usage for Developer
 Signals:
 ^^^^^^^^
 
-``pre_transition``: it is fired before any transition occured.
+``pre_transition``: fired before any transition occurrence.
 
 +-------------------+---------------------------------------+
 | Args              | Description                           |
 +===================+=======================================+
-| workflow_object   | Your object on transition             |
+| workflow_object   | Your object on transition.            |
 +-------------------+---------------------------------------+
-| field             | Field which you registered object for |
+| field             | Field which you registered object for.|
 +-------------------+---------------------------------------+
-| source_state      | Transition source state object        |
+| source_state      | Transition source state object.       |
 +-------------------+---------------------------------------+
-| destination_state | Transition destination state object   |
+| destination_state | Transition destination state object.  |
 +-------------------+---------------------------------------+
-| proceeding        | Proceeding object                     |
+| proceeding        | Proceeding object.                    |
 +-------------------+---------------------------------------+
 
-``post_transition``: it is fired before any transition occured.
+``post_transition``: fired after any transition occurrence.
 
 +-------------------+---------------------------------------+
 | Args              | Description                           |
 +===================+=======================================+
-| workflow_object   | Your object on transition             |
+| workflow_object   | Your object on transition.            |
 +-------------------+---------------------------------------+
-| field             | Field which you registered object for |
+| field             | Field which you registered object for.|
 +-------------------+---------------------------------------+
-| source_state      | Transition source state object        |
+| source_state      | Transition source state object.       |
 +-------------------+---------------------------------------+
-| destination_state | Transition destination state object   |
+| destination_state | Transition destination state object.  |
 +-------------------+---------------------------------------+
-| proceeding        | Proceeding object                     |
+| proceeding        | Proceeding object.                    |
 +-------------------+---------------------------------------+
 
-``pre_proceed``: it is fired before any is proceeded. Transition
-does not have to be occured.
+``pre_proceed``: fired before any is proceeded. Transition
+does not have to occur.
 
 +-----------------+---------------------------------------+
 | Args            | Description                           |
 +=================+=======================================+
-| workflow_object | Your object proceeded                 |
+| workflow_object | Your object proceeded.                |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for |
+| field           | Field which you registered object for.|
 +-----------------+---------------------------------------+
-| proceeding      | Proceeding object                     |
-+-----------------+---------------------------------------+
-
-``post_proceed``: it is fired before any is proceeded occured.
-Transition does not have to be occured.
-
-+-----------------+---------------------------------------+
-| Args            | Description                           |
-+=================+=======================================+
-| workflow_object | Your object proceeded                 |
-+-----------------+---------------------------------------+
-| field           | Field which you registered object for |
-+-----------------+---------------------------------------+
-| proceeding      | Proceeding object                     |
+| proceeding      | Proceeding object.                    |
 +-----------------+---------------------------------------+
 
-
-``pre_final``: it is fired before any workflow is completed.
+``post_proceed``: fired before any is proceeded occured.
+Transition does not have to occur.
 
 +-----------------+---------------------------------------+
 | Args            | Description                           |
 +=================+=======================================+
-| workflow_object | Your object on final                  |
+| workflow_object | Your object proceeded.                |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for |
+| field           | Field which you registered object for.|
++-----------------+---------------------------------------+
+| proceeding      | Proceeding object.                    |
 +-----------------+---------------------------------------+
 
-``post_final``: it is fired before any workflow is completed.
+
+``pre_final``: fired before any workflow is completed.
 
 +-----------------+---------------------------------------+
 | Args            | Description                           |
 +=================+=======================================+
-| workflow_object | Your object on final                  |
+| workflow_object | Your object on final.                 |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for |
+| field           | Field which you registered object for.|
++-----------------+---------------------------------------+
+
+``post_final``: fired after any workflow is completed.
+
++-----------------+---------------------------------------+
+| Args            | Description                           |
++=================+=======================================+
+| workflow_object | Your object on final.                 |
++-----------------+---------------------------------------+
+| field           | Field which you registered object for.|
 +-----------------+---------------------------------------+
 
 Handlers:
