@@ -112,7 +112,7 @@ Installation
         my_state_field = StateField()
 
 .. note::
-   Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it migt require migrating.
+   Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it might require migrating.
 
 .. code-block:: python
 
