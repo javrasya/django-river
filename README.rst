@@ -134,7 +134,7 @@ Usage for End User
    authorization for transitions. Proceeding order is also given here.
 
 .. note::
-   There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is gonna try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
+   There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is going to try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
 
 
 Whenever an object of MyModel is inserted in your system, all its
