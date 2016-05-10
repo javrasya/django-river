@@ -37,7 +37,7 @@ authorization are editable. To do this, all data about the workflow item
 is persisted into DB. **Hence, they can be changed without touching the
 code and re-deploying your application.**
 
-There is ordering aprovments for a transition functionality in
+There are ordering approvements for a transition functionality in
 ``django-river``. It also provides skipping specific transition of a
 specific objects.
 
@@ -61,7 +61,7 @@ Features
 * Multiple end-point
 * Circular state machines
 * Transition authorization
-* Skiping or disabling spesific step
+* Skipping or disabling specific step
 * Custom transition hooks
   
 
@@ -191,7 +191,7 @@ does not have to occur.
 | proceeding      | Proceeding object.                    |
 +-----------------+---------------------------------------+
 
-``post_proceed``: fired before any is proceeded occured.
+``post_proceed``: fired before any is proceeded occurred.
 Transition does not have to occur.
 
 +-----------------+---------------------------------------+
@@ -229,7 +229,7 @@ Handlers:
 ---------
 
 Handlers are different from ``django-river`` signals. These are for
-spesific object, spesific source_state, spesific destination_state
+specific object, specific source_state, specific destination_state
 etc. It is fired when the condition is matched.
 
 PreCompletedHandler:
@@ -300,17 +300,17 @@ source_state,destination state are suitable, it is fired;
 
 ``register`` method parameter
 
-+------------------+---------------------------------------+----------+
-| Args             | Description                           |          |
-+==================+=======================================+==========+
-| workflow_object  | Your object proceeded                 | Required |
-+------------------+---------------------------------------+----------+
-| field            | Field which you registered object for | Required |
-+------------------+---------------------------------------+----------+
-| source_state     | Source state of the tranition         | Optional |
-+------------------+---------------------------------------+----------+
-| desination_satte | Destinatio state of the tranition     | Optional |
-+------------------+---------------------------------------+----------+
++-------------------+---------------------------------------+----------+
+| Args              | Description                           |          |
++===================+=======================================+==========+
+| workflow_object   | Your object proceeded                 | Required |
++-------------------+---------------------------------------+----------+
+| field             | Field which you registered object for | Required |
++-------------------+---------------------------------------+----------+
+| source_state      | Source state of the transition        | Optional |
++-------------------+---------------------------------------+----------+
+| destination_state | Destination state of the transition   | Optional |
++-------------------+---------------------------------------+----------+
 
 PostTransitionHandler:
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -329,17 +329,17 @@ source_state,destination state are suitable, it is fired;
 
 ``register`` method parameter
 
-+------------------+---------------------------------------+----------+
-| Args             | Description                           |          |
-+==================+=======================================+==========+
-| workflow_object  | Your object   proceeded               | Required |
-+------------------+---------------------------------------+----------+
-| field            | Field which you registered object for | Required |
-+------------------+---------------------------------------+----------+
-| source_state     | Source state of the tranition         | Optional |
-+------------------+---------------------------------------+----------+
-| desination_satte | Destinatio state of the tranition     | Optional |
-+------------------+---------------------------------------+----------+
++-------------------+---------------------------------------+----------+
+| Args              | Description                           |          |
++===================+=======================================+==========+
+| workflow_object   | Your object   proceeded               | Required |
++-------------------+---------------------------------------+----------+
+| field             | Field which you registered object for | Required |
++-------------------+---------------------------------------+----------+
+| source_state      | Source state of the transition        | Optional |
++-------------------+---------------------------------------+----------+
+| destination_state | Destination state of the transition   | Optional |
++-------------------+---------------------------------------+----------+
 
 Handler Backends:
 -----------------
@@ -400,7 +400,7 @@ There are state machines paths which is needed to be proceeded for every
 particular object. Proceedings are generated on your model object
 creation by using ``proceeding meta``. This is whole path for the
 created object. Do not add or edit this model data unless you don't need
-specific objects editing like skiping, overriding permissions and
+specific objects editing like skipping, overriding permissions and
 groups.
 
 Timeline
@@ -427,7 +427,7 @@ Change Logs
 0.6.2
 -----
 
-* **Bug** - Migration ``0002`` and ``0003`` were not working properly for postgresql (maybe oracle). For these databases, data can not be fixed. Because, django migrates each in a transactional block and schema migration and data migration can not be done in a transactional block. To fix this, data fixing and schema fixing are seperated.
+* **Bug** - Migration ``0002`` and ``0003`` were not working properly for postgresql (maybe oracle). For these databases, data can not be fixed. Because, django migrates each in a transactional block and schema migration and data migration can not be done in a transactional block. To fix this, data fixing and schema fixing are separated.
 * **Improvement** - Timeline section is added into documentation.
 * **Improvement** - State slug field is set as slug version of its label if it is not given on saving.
 
@@ -454,7 +454,7 @@ Change Logs
 -----
 
 * **Bug** - Authorization was not working properly when the user has irrelevant permissions and groups. This is fixed.
-* **Improvement** - User permissions are now retreived from registered authentication backends instead of ``user.user_permissions``
+* **Improvement** - User permissions are now retrieved from registered authentication backends instead of ``user.user_permissions``
   
 
 0.5.2
@@ -470,7 +470,7 @@ Change Logs
 -----
 
 * **Improvement** - Example scenario diagrams are added into documentation.
-* **Bug** - Migrations was failing because of injected ``ProceedingTrack`` relation. Relation is not injected anymore. But property ``proceeing_track`` remains. It still returns current one.
+* **Bug** - Migrations was failing because of injected ``ProceedingTrack`` relation. Relation is not injected anymore. But property ``proceeding_track`` remains. It still returns current one.
   
 
 
