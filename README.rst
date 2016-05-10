@@ -37,7 +37,7 @@ authorization are editable. To do this, all data about the workflow item
 is persisted into DB. **Hence, they can be changed without touching the
 code and re-deploying your application.**
 
-There are ordering improvements for a transition functionality in
+There are ordering approvements for a transition functionality in
 ``django-river``. It also provides skipping specific transition of a
 specific objects.
 
