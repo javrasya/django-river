@@ -37,7 +37,7 @@ authorization are editable. To do this, all data about the workflow item
 is persisted into DB. **Hence, they can be changed without touching the
 code and re-deploying your application.**
 
-There are ordering approvements for a transition functionality in
+There are lining up approvements functionality for a transition in
 ``django-river``. It also provides skipping specific transition of a
 specific objects.
 
@@ -383,8 +383,8 @@ Proceeding Meta:
 These are proceeding meta of transitions that describes which user
 permission or user group will be allowed to proceed the transition.
 These are kind of template for proceedings will be created for each
-object. An order can also be given here for the transition. This means,
-If you want to order proceeding for a transition, you can define it.
+object. Putting transitions in order can also be done here. This means,
+If you want to put proceeding in order for a transition, you can define it.
 Assume **s1** and **s2** are our states and there is a transition
 defined between them and we have two proceeding meta on this
 transition. They shall be for\ **permission1** and **permission2**. If
