@@ -7,8 +7,6 @@ from river.models.state import State
 
 __author__ = 'ahmetdal'
 
-
-
 BACKWARD = 0
 FORWARD = 1
 
@@ -28,8 +26,9 @@ class Transition(BaseModel):
     objects = TransitionManager()
 
     source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transitions_as_source')
-    destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='transitions_as_destination')
-    direction = models.SmallIntegerField(_("Transition Direction"), default=FORWARD)
+    destination_state = models.ForeignKey(State, verbose_name=_("Next State"),
+                                          related_name='transitions_as_destination')
+    direction = models.SmallIntegerField(_("Transition Direction"), choices=DIRECTIONS, default=FORWARD)
 
     def natural_key(self):
         return self.source_state.slug, self.destination_state.slug

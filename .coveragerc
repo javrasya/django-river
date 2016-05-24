@@ -1,5 +1,6 @@
 [run]
 omit =
+    river/admin/*
     river/tests/*
     river/migrations/*
     */__init__*

@@ -1,17 +1,11 @@
 from django.db import models
-
 from django.db.models.signals import m2m_changed, post_save
-
 from django.utils.translation import ugettext_lazy as _
-from mptt.fields import TreeForeignKey, TreeManyToManyField
-from mptt.managers import TreeManager
-from mptt.models import MPTTModel
 
-from river.models.base_model import BaseModel
-from river.models.transition import Transition
 from river.config import app_config
-
+from river.models.base_model import BaseModel
 from river.models.managers.proceeding_meta import ProceedingMetaManager
+from river.models.transition import Transition
 
 __author__ = 'ahmetdal'
 
@@ -29,18 +23,21 @@ class ProceedingMeta(BaseModel):
     field = models.CharField(verbose_name=_('Field'), max_length=200)
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
-    permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'))
-    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'))
-    order = models.IntegerField(default=0, verbose_name=_('Order'))
+    permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
+    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), null=True, blank=True)
+    order = models.IntegerField(default=0, verbose_name=_('Order'), null=True)
     action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 
-    parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False, db_index=True)
+    parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False,
+                                     db_index=True, null=True, blank=True)
 
     def natural_key(self):
         return self.content_type, self.field, self.transition, self.order
 
     def __unicode__(self):
-        return 'Transition:%s, Permissions:%s, Order:%s' % (self.transition, ','.join(self.permissions.values_list('name', flat=True)), self.order)
+        return 'Transition:%s, Permissions:%s, Groups:%s, Order:%s' % (
+            self.transition, ','.join(self.permissions.values_list('name', flat=True)),
+            ','.join(self.groups.values_list('name', flat=True)), self.order)
 
 
 def post_group_change(sender, instance, *args, **kwargs):
