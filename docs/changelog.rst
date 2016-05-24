@@ -3,15 +3,15 @@
 Change Logs
 ===========
 
-0.8.0 (Dev)
------------
+0.8.0 (Stable)
+--------------
 
 * **Deprecation** - ProceedingTrack is removed. ProceedingTracks were being used to keep any transaction track to handle even circular one. This was a workaround. So, it can be handled with Proceeding now by cloning them if there is circle. ProceedingTracks was just causing confusion. To fix this, ProceedingTrack model and its functions are removed from django-river.
 * **Improvement** - Circular scenario test is added.
 * **Improvement** - Admins of the workflow components such as State, Transition and ProceedingMeta are registered automatically now. Issue #14 is fixed.
 
-0.7.0 (Stable)
---------------
+0.7.0
+-----
 
 * **Improvement** - Python version 3.5 support is added. (not for Django1.7)
 * **Improvement** - Django version 1.9 support is added. (not for Python3.3 and PyPy3) 
