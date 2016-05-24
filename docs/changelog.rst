@@ -3,8 +3,13 @@
 Change Logs
 ===========
 
-0.8.0 (Stable)
+0.8.1 (Stable)
 --------------
+
+* **Bug** - ProceedingMeta form was causing a problem on migrations. Accessing content type before migrations was the problem. This is fixed by defining choices in init function instead of in field
+
+0.8.0
+-----
 
 * **Deprecation** - ProceedingTrack is removed. ProceedingTracks were being used to keep any transaction track to handle even circular one. This was a workaround. So, it can be handled with Proceeding now by cloning them if there is circle. ProceedingTracks was just causing confusion. To fix this, ProceedingTrack model and its functions are removed from django-river.
 * **Improvement** - Circular scenario test is added.

@@ -19,7 +19,7 @@ def get_field_choices():
 class ProceedingMetaForm(forms.ModelForm):
     content_type = forms.HiddenInput()
     field = forms.HiddenInput()
-    field_ct = forms.ChoiceField(label=_('Field'), choices=get_field_choices())
+    field_ct = forms.ChoiceField(label=_('Field'))
 
     class Meta:
         model = ProceedingMeta
@@ -27,6 +27,7 @@ class ProceedingMetaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
+        self.declared_fields['field_ct'].choices = get_field_choices()
         if instance and instance.pk:
             self.declared_fields['field_ct'].initial = "%s__%s" % (instance.field, instance.content_type.pk)
 
