@@ -3,6 +3,12 @@
 Change Logs
 ===========
 
+0.8.2 (Dev)
+-----------
+
+* **Bug** - Features providing multiple state field in a model was causing a problem. When there are multiple state field, injected attributes in model class are owerriten. This feature is also unpractical. So, it is dropped to fix the bug.
+
+
 0.8.1 (Stable)
 --------------
 

@@ -1,6 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 
+from river.utils.error_code import ErrorCode
+from river.utils.exceptions import RiverException
+
 try:
     from django.contrib.contenttypes.fields import GenericRelation
 except ImportError:
@@ -15,6 +18,8 @@ from river.services.transition import TransitionService
 __author__ = 'ahmetdal'
 
 from django.db import models
+
+classes = []
 
 
 class StateField(models.ForeignKey):
@@ -75,7 +80,6 @@ class StateField(models.ForeignKey):
             return getattr(self, name) in ProceedingService.get_next_proceedings(
                 ContentType.objects.get_for_model(self), name)
 
-
         @property
         def proceeding(self):
             try:
@@ -84,6 +88,11 @@ class StateField(models.ForeignKey):
                 return None
 
         self.model = cls
+
+        if id(cls) in classes:
+            raise RiverException(ErrorCode.MULTIPLE_STATE_FIELDS, "There can be only one state field in a model class.")
+
+        classes.append(id(cls))
 
         self.__add_to_class(cls, "proceedings",
                             GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))

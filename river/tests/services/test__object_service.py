@@ -2,6 +2,7 @@ from river.models.proceeding import Proceeding
 from river.services.object import ObjectService
 from river.services.state import StateService
 from river.tests.base_test import BaseTestCase
+from river.tests.models.testmodel import TestModel
 
 __author__ = 'ahmetdal'
 
@@ -34,3 +35,12 @@ class test_ObjectService(BaseTestCase):
 
         on_approval_objects = ObjectService.get_objects_waiting_for_approval(self.content_type, self.field, self.user4)
         self.assertEqual(0, on_approval_objects.count())
+
+    def test_get_the_fields(self):
+        fields = ObjectService.get_the_fields(TestModel)
+        self.assertEqual(1, len(fields))
+        self.assertEqual('my_field', fields[0].name)
+
+    def test_get_only_fields(self):
+        field = ObjectService.get_only_field(TestModel)
+        self.assertEqual('my_field', field.name)

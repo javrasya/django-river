@@ -1,44 +1,39 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
 
 from river.models import ProceedingMeta
 from river.models.fields.state import StateField
+from river.services.object import ObjectService
 
 
-def get_field_choices():
-    choices = ((None, "-------------"),)
+def get_content_types():
+    content_type_pks = []
     for ct in ContentType.objects.all():
         model = ct.model_class()
-        choices += tuple(
-            ("%s__%s" % (f.name, ct.pk), "%s - %s" % (f.name, ct)) for f in model._meta.fields if type(f) is StateField)
-    return choices
+        for f in model._meta.fields:
+            if type(f) is StateField:
+                content_type_pks.append(ct.pk)
+    return content_type_pks
 
 
 class ProceedingMetaForm(forms.ModelForm):
-    content_type = forms.HiddenInput()
-    field = forms.HiddenInput()
-    field_ct = forms.ChoiceField(label=_('Field'))
+    content_type = forms.ModelChoiceField(queryset=ContentType.objects.none())
 
     class Meta:
         model = ProceedingMeta
-        fields = ('field_ct', 'transition', 'permissions', 'groups', 'order', 'action_text', 'parents')
+        fields = ('content_type', 'transition', 'permissions', 'groups', 'order', 'action_text', 'parents')
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get('instance', None)
-        self.declared_fields['field_ct'].choices = get_field_choices()
-        if instance and instance.pk:
-            self.declared_fields['field_ct'].initial = "%s__%s" % (instance.field, instance.content_type.pk)
+        self.declared_fields['content_type'].queryset = ContentType.objects.filter(pk__in=get_content_types())
 
         super(ProceedingMetaForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        field, content_type_id = self.cleaned_data['field_ct'].split('__')
-        ct = ContentType.objects.get(pk=content_type_id)
+        content_type = self.cleaned_data['content_type']
+        field = ObjectService.get_only_field(content_type.model_class())
         instance = super(ProceedingMetaForm, self).save(commit=False)
-        instance.field = field
-        instance.content_type = ct
+        instance.field = field.name
         return super(ProceedingMetaForm, self).save(*args, **kwargs)
 
 
