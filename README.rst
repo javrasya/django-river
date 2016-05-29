@@ -46,6 +46,15 @@ Documentation
 
 Online documentation is available at http://django-river.rtfd.org/.
 
+Video Tutorials
+---------------
+
+Simple Jira Example
+^^^^^^^^^^^^^^^^^^^
+
+[![Simple Jira Example](http://img.youtube.com/vi/5EZGnTf39aI/0.jpg)](https://www.youtube.com/watch?v=5EZGnTf39aI)
+
+
 Requirements
 ------------
 * Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)

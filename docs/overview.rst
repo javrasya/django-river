@@ -11,6 +11,12 @@ Main goal of developing this framework is **to be able to edit any workflow item
 
 There is ordering aprovments for a transition functionality in ``django-river``. It also provides skipping specific transition of a specific objects.
 
+
+Simple Jira Example
+-------------------
+
+[![Simple Jira Example](http://img.youtube.com/vi/5EZGnTf39aI/0.jpg)](https://www.youtube.com/watch?v=5EZGnTf39aI)
+
 Requirements
 ------------
 * Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)
