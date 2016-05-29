@@ -7,6 +7,7 @@ Change Logs
 -----------
 
 * **Bug** - Features providing multiple state field in a model was causing a problem. When there are multiple state field, injected attributes in model class are owerriten. This feature is also unpractical. So, it is dropped to fix the bug.
+* **Improvement** - Initial video tutorial which is Simple jira example is added into the documentations. 
 
 
 0.8.1 (Stable)
