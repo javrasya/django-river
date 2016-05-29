@@ -4,9 +4,11 @@
    :target: https://coveralls.io/github/javrasya/django-river?branch=master
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest
+.. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
+   :alt: Simple jira example
+   :target: https://www.youtube.com/watch?v=5EZGnTf39aI
+
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
-
-
 
 .. |Gitter| image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/javrasya/django-river
@@ -52,7 +54,7 @@ Video Tutorials
 Simple Jira Example
 ^^^^^^^^^^^^^^^^^^^
 
-[![Simple Jira Example](http://img.youtube.com/vi/5EZGnTf39aI/0.jpg)](https://www.youtube.com/watch?v=5EZGnTf39aI)
+|SimpleJiraExample|
 
 
 Requirements

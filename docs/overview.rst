@@ -1,3 +1,8 @@
+.. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
+   :alt: Simple jira example
+   :target: https://www.youtube.com/watch?v=5EZGnTf39aI
+
+
 .. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
 
 .. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
@@ -15,7 +20,7 @@ There is ordering aprovments for a transition functionality in ``django-river``.
 Simple Jira Example
 -------------------
 
-[![Simple Jira Example](http://img.youtube.com/vi/5EZGnTf39aI/0.jpg)](https://www.youtube.com/watch?v=5EZGnTf39aI)
+|SimpleJiraExample|
 
 Requirements
 ------------
