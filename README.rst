@@ -43,6 +43,8 @@ There are lining up approvements functionality for a transition in
 ``django-river``. It also provides skipping specific transition of a
 specific objects.
 
+**Playground**: There is a fake jira example repository as a playground of django-river. https://github.com/javrasya/fakejira
+
 Documentation
 -------------
 
@@ -427,7 +429,7 @@ Change Logs
 -----------
 
 * **Bug** - Features providing multiple state field in a model was causing a problem. When there are multiple state field, injected attributes in model class are owerriten. This feature is also unpractical. So, it is dropped to fix the bug.
-* **Improvement** - Initial video tutorial which is Simple jira example is added into the documentations.
+* **Improvement** - Initial video tutorial which is Simple jira example is added into the documentations. Also repository link of fakejira project which is created in the video tutorial is added into the docs.
 * **Improvement** - No proceeding meta parent input is required by user. It is set automatically by django-river now. The field is removed from ProceedingMeta admin interface too.
 
 

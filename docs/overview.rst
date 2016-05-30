@@ -16,6 +16,7 @@ Main goal of developing this framework is **to be able to edit any workflow item
 
 There is ordering aprovments for a transition functionality in ``django-river``. It also provides skipping specific transition of a specific objects.
 
+**Playground**: There is a fake jira example repository as a playground of django-river. https://github.com/javrasya/fakejira
 
 Simple Jira Example
 -------------------
