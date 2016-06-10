@@ -218,17 +218,17 @@ Before any transition occurred, if the condition is match; means object, source_
 
 **`register` method parameter**
 
-+------------------+---------------------------------------+----------+
-| **Args**         | **Description**                       |          |
-+==================+=======================================+==========+
-| workflow_object  | Your object  proceeded                | Required |
-+------------------+---------------------------------------+----------+
-| field            | Field which you registered object for | Required |
-+------------------+---------------------------------------+----------+
-| source_state     | Source state of the tranition         | Optional |
-+------------------+---------------------------------------+----------+
-| desination_satte | Destinatio state of the tranition     | Optional |
-+------------------+---------------------------------------+----------+
++-------------------+----------------------------------------+----------+
+| **Args**          | **Description**                        |          |
++===================+========================================+==========+
+| workflow_object   | Your object proceeded                  | Required |
++-------------------+----------------------------------------+----------+
+| field             | Field which you registered object for  | Required |
++-------------------+----------------------------------------+----------+
+| source_state      | Source state of the transition         | Optional |
++-------------------+----------------------------------------+----------+
+| destination_state | Destination state of the transition    | Optional |
++-------------------+----------------------------------------+----------+
 
 PostTransitionHandler
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -246,17 +246,17 @@ After any transition occurred, if the condition is match; means object, source_s
 
 **`register` method parameter**
 
-+------------------+---------------------------------------+----------+
-| **Args**         | **Description**                       |          |
-+==================+=======================================+==========+
-| workflow_object  | Your object proceeded                 | Required |
-+------------------+---------------------------------------+----------+
-| field            | Field which you registered object for | Required |
-+------------------+---------------------------------------+----------+
-| source_state     | Source state of the tranition         | Optional |
-+------------------+---------------------------------------+----------+
-| desination_satte | Destinatio state of the tranition     | Optional |
-+------------------+---------------------------------------+----------+
++-------------------+-----------------------------------------+----------+
+| **Args**          | **Description**                         |          |
++===================+=========================================+==========+
+| workflow_object   | Your object proceeded                   | Required |
++-------------------+-----------------------------------------+----------+
+| field             | Field which you registered object for   | Required |
++-------------------+-----------------------------------------+----------+
+| source_state      | Source state of the transition          | Optional |
++-------------------+-----------------------------------------+----------+
+| destination_state | Destination state of the transition     | Optional |
++-------------------+-----------------------------------------+----------+
 
 
 Handler Backends
