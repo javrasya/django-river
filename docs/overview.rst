@@ -34,6 +34,7 @@ Requirements
   
 Features
 --------
+* Multiple model
 * Unlimited states
 * Multiple destination
 * Multiple end-point
