@@ -2,6 +2,11 @@
    :target: https://travis-ci.org/javrasya/django-river
 .. |Coverage Status| image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/javrasya/django-river?branch=master
+
+.. |Health Status| image:: https://landscape.io/github/javrasya/django-river/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/javrasya/django-river/master
+   :alt: Code Health
+
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest
 .. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
@@ -26,7 +31,7 @@ Django River
 
 .. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
-|Build Status| |Coverage Status| |Documentation Status| |Gitter|
+|Build Status| |Coverage Status| |Health Status| |Documentation Status| |Gitter|
 
 River is a open source workflow system for ``Django`` which support on
 the fly changes on every item in workflow instead of hardcoding states
