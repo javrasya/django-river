@@ -231,7 +231,7 @@ class test__TransitionService(BaseTestCase):
         except RiverException as e:
             self.assertEqual(str(e),
                              "Invalid state is given(%s). Valid states is(are) %s" % (
-                                 State.objects.get(label='s3').__unicode__(), ','.join([ast.__unicode__() for ast in State.objects.filter(label__in=['s4', 's5'])])))
+                                 State.objects.get(label='s3').__str__(), ','.join([ast.__str__() for ast in State.objects.filter(label__in=['s4', 's5'])])))
             self.assertEqual(ErrorCode.INVALID_NEXT_STATE_FOR_USER, e.code)
 
 
