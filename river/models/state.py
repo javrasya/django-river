@@ -1,6 +1,9 @@
+from __future__ import unicode_literals
+
 from django.db import models
 from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
@@ -9,6 +12,7 @@ from river.models.managers.state import StateManager
 __author__ = 'ahmetdal'
 
 
+@python_2_unicode_compatible
 class State(BaseModel):
     class Meta:
         app_label = 'river'
@@ -21,7 +25,7 @@ class State(BaseModel):
     label = models.CharField(max_length=50)
     description = models.CharField(_("Description"), max_length=200, null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.label
 
     def natural_key(self):

@@ -61,8 +61,8 @@ class TransitionService(object):
                         available_states = StateService.get_available_states(workflow_object, field, user)
                         raise RiverException(ErrorCode.INVALID_NEXT_STATE_FOR_USER,
                                              "Invalid state is given(%s). Valid states is(are) %s" % (
-                                                 next_state.__unicode__(),
-                                                 ','.join([ast.__unicode__() for ast in available_states])))
+                                                 next_state.__str__(),
+                                                 ','.join([ast.__str__() for ast in available_states])))
                 else:
                     raise RiverException(ErrorCode.NEXT_STATE_IS_REQUIRED,
                                          "State must be given when there are multiple states for destination")
