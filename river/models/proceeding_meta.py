@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 from django.db import models
 from django.db.models.signals import m2m_changed, post_save
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from river.config import app_config
@@ -10,6 +13,7 @@ from river.models.transition import Transition
 __author__ = 'ahmetdal'
 
 
+@python_2_unicode_compatible
 class ProceedingMeta(BaseModel):
     class Meta:
         app_label = 'river'
@@ -34,7 +38,7 @@ class ProceedingMeta(BaseModel):
     def natural_key(self):
         return self.content_type, self.field, self.transition, self.order
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Transition:%s, Permissions:%s, Groups:%s, Order:%s' % (
             self.transition, ','.join(self.permissions.values_list('name', flat=True)),
             ','.join(self.groups.values_list('name', flat=True)), self.order)

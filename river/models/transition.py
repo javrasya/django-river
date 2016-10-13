@@ -1,4 +1,7 @@
+from __future__ import unicode_literals
+
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
@@ -16,6 +19,7 @@ DIRECTIONS = [
 ]
 
 
+@python_2_unicode_compatible
 class Transition(BaseModel):
     class Meta:
         app_label = 'river'
@@ -33,5 +37,5 @@ class Transition(BaseModel):
     def natural_key(self):
         return self.source_state.slug, self.destination_state.slug
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s -> %s' % (self.source_state, self.destination_state)
