@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 __author__ = 'ahmetdal'
 BASE_DIR = os.path.dirname(__file__)
@@ -18,8 +18,13 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.contenttypes',
     'river',
-    'river.tests'
 )
+
+TESTING = any("py.test" in s for s in sys.argv) or 'test' in sys.argv
+if TESTING:
+    INSTALLED_APPS += (
+        'river.tests',
+    )
 
 SITE_ID = 1
 
