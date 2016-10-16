@@ -3,16 +3,25 @@
 Change Logs
 ===========
 
-0.8.2 (Dev)
------------
+0.8.3(Dev)
+----------
+
+* # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
+* # 31_ - **Improvement** - unicode issue for Python3.
+  
+.. _30: https://github.com/javrasya/django-river/pull/30
+.. _31: https://github.com/javrasya/django-river/pull/31
+
+0.8.2(Stable)
+-------------
 
 * **Bug** - Features providing multiple state field in a model was causing a problem. When there are multiple state field, injected attributes in model class are owerriten. This feature is also unpractical. So, it is dropped to fix the bug.
 * **Improvement** - Initial video tutorial which is Simple jira example is added into the documentations. Also repository link of fakejira project which is created in the video tutorial is added into the docs.
 * **Improvement** - No proceeding meta parent input is required by user. It is set automatically by django-river now. The field is removed from ProceedingMeta admin interface too.
 
 
-0.8.1 (Stable)
---------------
+0.8.1
+-----
 
 * **Bug** - ProceedingMeta form was causing a problem on migrations. Accessing content type before migrations was the problem. This is fixed by defining choices in init function instead of in field
 
