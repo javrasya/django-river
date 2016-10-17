@@ -253,7 +253,7 @@ object is suitable, it is fired;
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PreCompletedHandler.register(handler,my_object,'my_state_field')
+    PreCompletedHandler.register(handler,my_object)
 
 ``register`` method parameter
 
@@ -276,7 +276,7 @@ object is suitable, it is fired;
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PostCompletedHandler.register(handler,my_object,'my_state_field')
+    PostCompletedHandler.register(handler,my_object)
 
 ``register`` method parameter
 
@@ -299,7 +299,7 @@ source_state,destination state are suitable, it is fired;
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PreTransitionHandler.register(handler,my_object,'my_state_field')
+    PreTransitionHandler.register(handler,my_object)
 
 ``register`` method parameter
 
@@ -326,7 +326,7 @@ source_state,destination state are suitable, it is fired;
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PostTransitionHandler.register(handler,my_object,'my_state_field')
+    PostTransitionHandler.register(handler,my_object)
 
 ``register`` method parameter
 

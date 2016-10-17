@@ -150,7 +150,7 @@ Before an object is on final state, if the condition is match; means object is s
     def handler(my_object,*args,**kwargs):
 	    do_something_with(object)
 
-    PreCompletedHandler.register(handler,my_object,'my_state_field')
+    PreCompletedHandler.register(handler,my_object)
 	
 	
 
@@ -175,7 +175,7 @@ After an object is on final state, if the condition is match; means object is su
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
     
-    PostCompletedHandler.register(handler,my_object,'my_state_field')
+    PostCompletedHandler.register(handler,my_object)
 
 
 **`register` method parameter**
@@ -197,7 +197,7 @@ Before any transition occurred, if the condition is match; means object, source_
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PreTransitionHandler.register(handler,my_object,'my_state_field')
+    PreTransitionHandler.register(handler,my_object)
 
 
 **`register` method parameter**
@@ -223,7 +223,7 @@ After any transition occurred, if the condition is match; means object, source_s
     def handler(my_object,*args,**kwargs):
         do_something_with(object)
 
-    PostTransitionHandler.register(handler,my_object,'my_state_field')
+    PostTransitionHandler.register(handler,my_object)
 
 
 **`register` method parameter**
