@@ -23,10 +23,9 @@ classes = []
 
 
 class StateField(models.ForeignKey):
-    def __init__(self, state_model=State, object_manager=WorkflowObjectManager, *args, **kwargs):
+    def __init__(self, state_model=State,*args, **kwargs):
         kwargs['null'] = True
         kwargs['blank'] = True
-        self.object_manager = object_manager
         kwargs['to'] = '%s.%s' % (state_model._meta.app_label, state_model._meta.object_name)
         super(StateField, self).__init__(*args, **kwargs)
 
