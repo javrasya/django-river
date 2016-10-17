@@ -37,7 +37,6 @@ class BaseTestCase(TestCase):
         self.user3 = UserObjectFactory(user_permissions=[self.permissions[2]])
         self.user4 = UserObjectFactory(user_permissions=[self.permissions[3]])
 
-        self.field = 'my_field'
         self.states = StateObjectFactory.create_batch(
             9,
             label=factory.Sequence(
@@ -55,7 +54,6 @@ class BaseTestCase(TestCase):
         self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
             9,
             content_type=self.content_type,
-            field=self.field,
             transition=factory.Sequence(lambda n: self.transitions[n] if n <= 1 else self.transitions[n - 1]),
             order=factory.Sequence(lambda n: 1 if n == 2 else 0)
         )
@@ -85,7 +83,6 @@ class BaseTestCase(TestCase):
         self.user3 = UserObjectFactory(user_permissions=[self.permissions[2]])
         self.user4 = UserObjectFactory(user_permissions=[self.permissions[3]])
 
-        self.field = 'my_field'
 
         self.open_state = StateObjectFactory(
             label='open'
@@ -117,7 +114,6 @@ class BaseTestCase(TestCase):
         self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
             5,
             content_type=self.content_type,
-            field=self.field,
             transition=factory.Sequence(lambda n: self.transitions[n]),
             order=0
         )

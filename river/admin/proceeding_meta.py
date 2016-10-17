@@ -31,7 +31,7 @@ class ProceedingMetaForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         content_type = self.cleaned_data['content_type']
-        field = ObjectService.get_only_field(content_type.model_class())
+        field = ObjectService.get_field(content_type.model_class())
         instance = super(ProceedingMetaForm, self).save(commit=False)
         instance.field = field.name
         return super(ProceedingMetaForm, self).save(*args, **kwargs)

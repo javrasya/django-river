@@ -19,12 +19,11 @@ class ProceedingMeta(BaseModel):
         app_label = 'river'
         verbose_name = _("Proceeding Meta")
         verbose_name_plural = _("Proceeding Metas")
-        unique_together = [('content_type', 'field', 'transition', 'order')]
+        unique_together = [('content_type', 'transition', 'order')]
 
     objects = ProceedingMetaManager()
 
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
-    field = models.CharField(verbose_name=_('Field'), max_length=200)
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
@@ -36,7 +35,7 @@ class ProceedingMeta(BaseModel):
                                      db_index=True, null=True, blank=True)
 
     def natural_key(self):
-        return self.content_type, self.field, self.transition, self.order
+        return self.content_type, self.transition, self.order
 
     def __str__(self):
         return 'Transition:%s, Permissions:%s, Groups:%s, Order:%s' % (

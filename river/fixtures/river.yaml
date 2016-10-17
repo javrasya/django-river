@@ -127,7 +127,6 @@
       content_type:
         - "tts"
         - "ticket"
-      field: "state"
       transition:
         - "open"
         - "in-progress"
@@ -144,7 +143,6 @@
       content_type:
         - "tts"
         - "ticket"
-      field: "state"
       transition:
         - "in-progress"
         - "resolved"
@@ -161,7 +159,6 @@
       content_type:
         - "tts"
         - "ticket"
-      field: "state"
       transition:
         - "resolved"
         - "closed"
@@ -178,7 +175,6 @@
       content_type:
         - "tts"
         - "ticket"
-      field: "state"
       transition:
         - "resolved"
         - "re-opened"
@@ -195,7 +191,6 @@
       content_type:
         - "tts"
         - "ticket"
-      field: "state"
       transition:
         - "re-opened"
         - "in-progress"

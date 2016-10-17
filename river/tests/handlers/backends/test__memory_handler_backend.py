@@ -19,21 +19,19 @@ class test_MemoryHandlerBackend(BaseTestCase):
         self.handler_backend = load_handler_backend()
         self.handler_backend.handlers = {}
 
-        ObjectService.register_object(self.objects[0], self.field)
+        ObjectService.register_object(self.objects[0])
 
     def test_register(self):
-        self.assertFalse('%s.%s_object%sfield%s' % (
-            PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk,
-            'my_field') in self.handler_backend.handlers)
-        self.handler_backend.register(PostTransitionHandler, test_handler, self.objects[1], 'my_field')
-        self.assertTrue('%s.%s_object%sfield%s' % (
-            PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk,
-            'my_field') in self.handler_backend.handlers)
+        self.assertFalse('%s.%s_object%s' % (
+            PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk) in self.handler_backend.handlers)
+        self.handler_backend.register(PostTransitionHandler, test_handler, self.objects[1])
+        self.assertTrue(
+            '%s.%s_object%s' % (PostTransitionHandler.__module__, PostTransitionHandler.__name__, self.objects[1].pk) in self.handler_backend.handlers)
         self.assertEqual(test_handler.__name__, list(self.handler_backend.handlers.values())[0].__name__)
 
     def test_get_handlers(self):
-        self.handler_backend.register(PostTransitionHandler, test_handler, self.objects[1], 'my_field')
-        handlers = self.handler_backend.get_handlers(PostTransitionHandler, self.objects[1], 'my_field')
+        self.handler_backend.register(PostTransitionHandler, test_handler, self.objects[1])
+        handlers = self.handler_backend.get_handlers(PostTransitionHandler, self.objects[1])
         self.assertEqual(1, len(handlers))
 
         self.assertEqual(test_handler.__name__, handlers[0].__name__)

@@ -32,53 +32,50 @@ class StateField(models.ForeignKey):
 
     def contribute_to_class(self, cls, name, virtual_only=False):
         def is_workflow_completed(workflow_object):
-            return ObjectService.is_workflow_completed(workflow_object, name)
+            return ObjectService.is_workflow_completed(workflow_object)
 
         def proceed(self, user, *args, **kwargs):
-            TransitionService.proceed(self, name, user, *args, **kwargs)
+            TransitionService.proceed(self, user, *args, **kwargs)
 
         @property
         def on_initial_state(self):
             from river.services.state import StateService
 
-            return StateService.get_initial_state(ContentType.objects.get_for_model(self), name) == getattr(self, name)
+            return StateService.get_initial_state(ContentType.objects.get_for_model(self)) == self.get_state()
 
         @property
         def on_final_state(self):
             from river.services.state import StateService
 
-            return getattr(self, name) in StateService.get_final_states(ContentType.objects.get_for_model(self), name)
+            return self.get_state() in StateService.get_final_states(ContentType.objects.get_for_model(self))
 
         def get_initial_state(self):
             from river.services.state import StateService
 
-            return StateService.get_initial_state(ContentType.objects.get_for_model(self), name)
+            return StateService.get_initial_state(ContentType.objects.get_for_model(self))
 
         def get_available_proceedings(self, *args, **kwargs):
             from river.services.proceeding import ProceedingService
 
-            return ProceedingService.get_available_proceedings(self, name, [getattr(self, name)], *args, **kwargs)
+            return ProceedingService.get_available_proceedings(self, [self.get_state()], *args, **kwargs)
 
         @property
         def initial_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_initial_proceedings(
-                ContentType.objects.get_for_model(self), name)
+            return self.get_state() in ProceedingService.get_initial_proceedings(ContentType.objects.get_for_model(self))
 
         @property
         def final_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_final_proceedings(
-                ContentType.objects.get_for_model(self), name)
+            return self.get_state() in ProceedingService.get_final_proceedings(ContentType.objects.get_for_model(self))
 
         @property
         def next_proceedings(self):
             from river.services.proceeding import ProceedingService
 
-            return getattr(self, name) in ProceedingService.get_next_proceedings(
-                ContentType.objects.get_for_model(self), name)
+            return self.get_state() in ProceedingService.get_next_proceedings(ContentType.objects.get_for_model(self))
 
         @property
         def proceeding(self):
@@ -87,6 +84,12 @@ class StateField(models.ForeignKey):
             except Proceeding.DoesNotExist:
                 return None
 
+        def _get_state(self):
+            return getattr(self, name)
+
+        def _set_state(self, state):
+            setattr(self, name, state)
+
         self.model = cls
 
         if id(cls) in classes:
@@ -94,11 +97,10 @@ class StateField(models.ForeignKey):
 
         classes.append(id(cls))
 
-        self.__add_to_class(cls, "proceedings",
-                            GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
+        self.__add_to_class(cls, "proceedings", GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
         self.__add_to_class(cls, "proceeding", proceeding)
 
-        self.__add_to_class(cls, "workflow", self.object_manager(name))
+        self.__add_to_class(cls, "workflow", self.object_manager())
         self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
         self.__add_to_class(cls, "proceed", proceed)
 
@@ -112,17 +114,12 @@ class StateField(models.ForeignKey):
         self.__add_to_class(cls, "final_proceedings", final_proceedings)
         self.__add_to_class(cls, "next_proceedings", next_proceedings)
 
+        self.__add_to_class(cls, "get_state", _get_state)
+        self.__add_to_class(cls, "set_state", _set_state)
+
         super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
 
-        post_save.connect(_post_save, self.model, False,
-                          dispatch_uid='%s_%s_riverstatefield_post' % (self.model, self.name))
-        # self.model.__metaclass__ = WorkflowObjectMetaclass
-
-    def get_state(self, instance):
-        return instance.__dict__[self.attname]
-
-    def set_state(self, instance, state):
-        instance.__dict__[self.attname] = state.pk
+        post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, self.name))
 
     def __add_to_class(self, cls, key, value):
         if not hasattr(cls, key):
@@ -137,11 +134,9 @@ def _post_save(sender, instance, created, *args, **kwargs):  # signal, sender, i
     """
     from river.services.state import StateService
 
-    for f in instance._meta.fields:
-        if isinstance(f, StateField):
-            if created:
-                ObjectService.register_object(instance, f.name)
-            if not getattr(instance, f.name):
-                init_state = StateService.get_initial_state(ContentType.objects.get_for_model(instance), f.name)
-                setattr(instance, f.name, init_state)
-                instance.save()
+    if created:
+        ObjectService.register_object(instance)
+    if not instance.get_state():
+        init_state = StateService.get_initial_state(ContentType.objects.get_for_model(instance))
+        instance.set_state(init_state)
+        instance.save()

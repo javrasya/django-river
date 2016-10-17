@@ -36,7 +36,6 @@ class Proceeding(BaseModel):
 
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
     object_id = models.PositiveIntegerField(verbose_name=_('Related Object'))
-    field = models.CharField(verbose_name=_('Field'), max_length=200)
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
     meta = models.ForeignKey(ProceedingMeta, verbose_name=_('Meta'), related_name="proceedings")

@@ -1,11 +1,11 @@
+import factory
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
-import factory
 
-from river.models.state import State
-from river.models.transition import Transition,FORWARD
 from river.models.proceeding_meta import ProceedingMeta
+from river.models.state import State
+from river.models.transition import Transition, FORWARD
 
 __author__ = 'ahmetdal'
 
@@ -95,7 +95,6 @@ class ProceedingMetaObjectFactory(DjangoModelFactory):
         model = ProceedingMeta
 
     content_type = factory.SubFactory(ContentTypeObjectFactory)
-    field = 'my_field'
     transition = factory.SubFactory(TransitionObjectFactory)
 
     @factory.post_generation

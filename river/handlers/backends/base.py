@@ -10,10 +10,10 @@ def powerset(iterable):
 
 
 class BaseHandlerBackend(object):
-    def register(self, handler_cls, handler, workflow_object, field, override=False, *args, **kwargs):
+    def register(self, handler_cls, handler, workflow_object, override=False, *args, **kwargs):
         raise NotImplementedError()
 
-    def get_handlers(self, handler_cls, handler, workflow_object, field, *args, **kwargs):
+    def get_handlers(self, handler_cls, handler, workflow_object, *args, **kwargs):
         raise NotImplementedError()
 
     def get_handler_class(self, handler_cls):

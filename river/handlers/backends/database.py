@@ -32,8 +32,8 @@ class DatabaseHandlerBackend(MemoryHandlerBackend):
                         LOGGER.warning("Handler '%s' from database can not be registered. Because module '%s'  does not exists. " % (handler.hash, module))
         return handlers
 
-    def register(self, handler_cls, handler, workflow_object, field, override=False, *args, **kwargs):
-        hash = super(DatabaseHandlerBackend, self).register(handler_cls, handler, workflow_object, field, override=override, *args, **kwargs)
+    def register(self, handler_cls, handler, workflow_object, override=False, *args, **kwargs):
+        hash = super(DatabaseHandlerBackend, self).register(handler_cls, handler, workflow_object, override=override, *args, **kwargs)
         handler_obj, created = Handler.objects.update_or_create(
             hash=hash,
             defaults={
@@ -48,15 +48,15 @@ class DatabaseHandlerBackend(MemoryHandlerBackend):
 
         return hash
 
-    def get_handlers(self, handler_cls, workflow_object, field, *args, **kwargs):
-        handlers = super(DatabaseHandlerBackend, self).get_handlers(handler_cls, workflow_object, field, *args, **kwargs)
+    def get_handlers(self, handler_cls, workflow_object, *args, **kwargs):
+        handlers = super(DatabaseHandlerBackend, self).get_handlers(handler_cls, workflow_object, *args, **kwargs)
         if not handlers:
             hashes = []
             for c in powerset(kwargs.keys()):
                 skwargs = {}
                 for f in c:
                     skwargs[f] = kwargs.get(f)
-                hash = self.get_handler_class(handler_cls).get_hash(workflow_object, field, **skwargs)
+                hash = self.get_handler_class(handler_cls).get_hash(workflow_object, **skwargs)
                 hashes.append(self.get_handler_class_prefix(self.get_handler_class(handler_cls)) + hash)
             handlers = self.__register(Handler.objects.filter(hash__in=hashes))
         return handlers
