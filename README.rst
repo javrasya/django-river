@@ -422,6 +422,30 @@ created object. Do not add or edit this model data unless you don't need
 specific objects editing like skipping, overriding permissions and
 groups.
 
+Workflow Manager :
+------------------
+``django-river`` contains a model manager provides some methods about workflow;
+
+.. code-block:: python
+    
+    from django.db import models
+    from river.models.fields.state import StateField
+    from river.models.managers.workflow_object import WorkflowObjectManager
+    
+    class MyModel(models.Model):
+        my_state_field = StateField()
+
+        objects = WorkflowObjectManager()
+
+
+    >>> MyModel.objects.get_objects_waiting_for_approval(current_user)
+    # Will give you your model instance objects which is waiting for approval by current user by considering his/her authorization rules.
+
+    >>> MyModel.objects.get_object_count_waiting_for_approval(current_user)
+    # Will give you count of your model instance objects which is waiting for approval by current user by considering his/her authorization rules. This can be used to show a badge contains a count on main screen for each user whether there are some objects waiting for approval.
+
+
+
 Timeline
 --------
 
