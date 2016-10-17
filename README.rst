@@ -456,8 +456,8 @@ Change Logs
 * **Improvement** - No proceeding meta parent input is required by user. It is set automatically by django-river now. The field is removed from ProceedingMeta admin interface too.
 
 
-0.8.1 (Stable)
---------------
+0.8.1
+-----
 
 * **Bug** - ProceedingMeta form was causing a problem on migrations. Accessing content type before migrations was the problem. This is fixed by defining choices in init function instead of in field
 
