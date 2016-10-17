@@ -3,14 +3,18 @@
 Change Logs
 ===========
 
-0.8.3(Dev)
+0.9.0(Dev)
 ----------
 
 * # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
 * # 31_ - **Improvement** - unicode issue for Python3.
-  
-.. _30: https://github.com/javrasya/django-river/pull/30
-.. _31: https://github.com/javrasya/django-river/pull/31
+* # 33_ - **Bug** - Automatically injecting workflow manager was causing the models not have default ``objects`` one. So, automatic injection support has been dropped. If anyone want to use it, it can be used explicitly.
+* # 35_ - **Bug** - This is huge changes in django-river. Multiple state field each model support is dropped completely and so many APIs have been changed. Check documentations and apply changes.
+
+.. _30: https://github.com/javrasya/django-river/pull/30  
+.. _31: https://github.com/javrasya/django-river/pull/30
+.. _33: https://github.com/javrasya/django-river/pull/33
+.. _35: https://github.com/javrasya/django-river/pull/35
 
 0.8.2(Stable)
 -------------

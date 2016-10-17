@@ -71,7 +71,7 @@ Requirements
 * Django (``1.7``, ``1.8``, ``1.9``, ``1.10``)
 * Django 1.7 is not for Python3.5
 * Django 1.9 is not for Python3.3 and PyPy3 (Because of Django deprecation)
-  
+
 Features
 --------
 * Multiple model
@@ -82,7 +82,7 @@ Features
 * Transition authorization
 * Skipping or disabling specific step
 * Custom transition hooks
-  
+
 
 Example Scenarios
 -----------------
@@ -172,8 +172,6 @@ Signals:
 +===================+=======================================+
 | workflow_object   | Your object on transition.            |
 +-------------------+---------------------------------------+
-| field             | Field which you registered object for.|
-+-------------------+---------------------------------------+
 | source_state      | Transition source state object.       |
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object.  |
@@ -187,8 +185,6 @@ Signals:
 | Args              | Description                           |
 +===================+=======================================+
 | workflow_object   | Your object on transition.            |
-+-------------------+---------------------------------------+
-| field             | Field which you registered object for.|
 +-------------------+---------------------------------------+
 | source_state      | Transition source state object.       |
 +-------------------+---------------------------------------+
@@ -205,8 +201,6 @@ does not have to occur.
 +=================+=======================================+
 | workflow_object | Your object proceeded.                |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for.|
-+-----------------+---------------------------------------+
 | proceeding      | Proceeding object.                    |
 +-----------------+---------------------------------------+
 
@@ -217,8 +211,6 @@ Transition does not have to occur.
 | Args            | Description                           |
 +=================+=======================================+
 | workflow_object | Your object proceeded.                |
-+-----------------+---------------------------------------+
-| field           | Field which you registered object for.|
 +-----------------+---------------------------------------+
 | proceeding      | Proceeding object.                    |
 +-----------------+---------------------------------------+
@@ -231,8 +223,6 @@ Transition does not have to occur.
 +=================+=======================================+
 | workflow_object | Your object on final.                 |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for.|
-+-----------------+---------------------------------------+
 
 ``post_final``: fired after any workflow is completed.
 
@@ -240,8 +230,6 @@ Transition does not have to occur.
 | Args            | Description                           |
 +=================+=======================================+
 | workflow_object | Your object on final.                 |
-+-----------------+---------------------------------------+
-| field           | Field which you registered object for.|
 +-----------------+---------------------------------------+
 
 Handlers:
@@ -262,8 +250,8 @@ object is suitable, it is fired;
 
     from river.handlers.completed import PreCompletedHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PreCompletedHandler.register(handler,my_object,'my_state_field')
 
@@ -273,8 +261,6 @@ object is suitable, it is fired;
 | Args            | Description                           |          |
 +=================+=======================================+==========+
 | workflow_object | Your object proceeded                 | Required |
-+-----------------+---------------------------------------+----------+
-| field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
 PostCompletedHandler:
@@ -287,8 +273,8 @@ object is suitable, it is fired;
 
     from river.handlers.completed import PostCompletedHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PostCompletedHandler.register(handler,my_object,'my_state_field')
 
@@ -298,8 +284,6 @@ object is suitable, it is fired;
 | Args            | Description                           |          |
 +=================+=======================================+==========+
 | workflow_object | Your object proceeded                 | Required |
-+-----------------+---------------------------------------+----------+
-| field           | Field which you registered object for | Required |
 +-----------------+---------------------------------------+----------+
 
 PreTransitionHandler:
@@ -312,8 +296,8 @@ source_state,destination state are suitable, it is fired;
 
     from river.handlers.transition import PreTransitionHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PreTransitionHandler.register(handler,my_object,'my_state_field')
 
@@ -323,8 +307,6 @@ source_state,destination state are suitable, it is fired;
 | Args              | Description                           |          |
 +===================+=======================================+==========+
 | workflow_object   | Your object proceeded                 | Required |
-+-------------------+---------------------------------------+----------+
-| field             | Field which you registered object for | Required |
 +-------------------+---------------------------------------+----------+
 | source_state      | Source state of the transition        | Optional |
 +-------------------+---------------------------------------+----------+
@@ -341,8 +323,8 @@ source_state,destination state are suitable, it is fired;
 
     from river.handlers.transition import PostTransitionHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PostTransitionHandler.register(handler,my_object,'my_state_field')
 
@@ -352,8 +334,6 @@ source_state,destination state are suitable, it is fired;
 | Args              | Description                           |          |
 +===================+=======================================+==========+
 | workflow_object   | Your object   proceeded               | Required |
-+-------------------+---------------------------------------+----------+
-| field             | Field which you registered object for | Required |
 +-------------------+---------------------------------------+----------+
 | source_state      | Source state of the transition        | Optional |
 +-------------------+---------------------------------------+----------+
@@ -455,14 +435,18 @@ Timeline
 Change Logs
 ===========
 
-0.8.3(Dev)
+0.9.0(Dev)
 ----------
 
 * # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
 * # 31_ - **Improvement** - unicode issue for Python3.
-  
-.. _30: https://github.com/javrasya/django-river/pull/30
-.. _31: https://github.com/javrasya/django-river/pull/31
+* # 33_ - **Bug** - Automatically injecting workflow manager was causing the models not have default ``objects`` one. So, automatic injection support has been dropped. If anyone want to use it, it can be used explicitly.
+* # 35_ - **Bug** - This is huge changes in django-river. Multiple state field each model support is dropped completely and so many APIs have been changed. Check documentations and apply changes.
+
+.. _30: https://github.com/javrasya/django-river/pull/30  
+.. _31: https://github.com/javrasya/django-river/pull/30
+.. _33: https://github.com/javrasya/django-river/pull/33
+.. _35: https://github.com/javrasya/django-river/pull/35
 
 0.8.2(Stable)
 -------------

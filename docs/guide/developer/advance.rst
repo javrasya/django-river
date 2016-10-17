@@ -73,8 +73,6 @@ Signals
 +===================+=======================================+
 | workflow_object   | Your object on transition             |
 +-------------------+---------------------------------------+
-| field             | Field which you registered object for |
-+-------------------+---------------------------------------+
 | source_state      | Transition source state object        |
 +-------------------+---------------------------------------+
 | destination_state | Transition destination state object   |
@@ -88,8 +86,6 @@ Signals
 | **Args**          | **Description**                       |
 +===================+=======================================+
 | workflow_object   | Your object on transition             |
-+-------------------+---------------------------------------+
-| field             | Field which you registered object for |
 +-------------------+---------------------------------------+
 | source_state      | Transition source state object        |
 +-------------------+---------------------------------------+
@@ -106,8 +102,6 @@ Signals
 +=================+=======================================+
 | workflow_object | Your object proceeded                 |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for |
-+-----------------+---------------------------------------+
 | proceeder       | Proceeding object                     |
 +-----------------+---------------------------------------+
 
@@ -117,8 +111,6 @@ Signals
 | **Args**        | **Description**                       |
 +=================+=======================================+
 | workflow_object | Your object proceeded                 |
-+-----------------+---------------------------------------+
-| field           | Field which you registered object for |
 +-----------------+---------------------------------------+
 | proceeder       | Proceeding object                     |
 +-----------------+---------------------------------------+
@@ -130,8 +122,6 @@ Signals
 +=================+=======================================+
 | workflow_object | Your object on final                  |
 +-----------------+---------------------------------------+
-| field           | Field which you registered object for |
-+-----------------+---------------------------------------+
 
 ``post_final``: it is fired before any workflow is completed.
 
@@ -139,8 +129,6 @@ Signals
 | **Args**        | **Description**                       |
 +=================+=======================================+
 | workflow_object | Your object on final                  |
-+-----------------+---------------------------------------+
-| field           | Field which you registered object for |
 +-----------------+---------------------------------------+
 
 
@@ -159,8 +147,8 @@ Before an object is on final state, if the condition is match; means object is s
 
     from river.handlers.completed import PreCompletedHandler
 
-    def handler(my_object,field,*args,**kwargs):
-	    do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+	    do_something_with(object)
 
     PreCompletedHandler.register(handler,my_object,'my_state_field')
 	
@@ -174,8 +162,6 @@ Before an object is on final state, if the condition is match; means object is s
 +=================+=======================================+==========+
 | workflow_object | Your object                           | Required |
 +-----------------+---------------------------------------+----------+
-| field           | Field which you registered object for | Required |
-+-----------------+---------------------------------------+----------+
 
 PostCompletedHandler
 ^^^^^^^^^^^^^^^^^^^^^
@@ -186,8 +172,8 @@ After an object is on final state, if the condition is match; means object is su
 
     from river.handlers.completed import PostCompletedHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
     
     PostCompletedHandler.register(handler,my_object,'my_state_field')
 
@@ -199,8 +185,6 @@ After an object is on final state, if the condition is match; means object is su
 +=================+=======================================+==========+
 | workflow_object | Your object                           | Required |
 +-----------------+---------------------------------------+----------+
-| field           | Field which you registered object for | Required |
-+-----------------+---------------------------------------+----------+
 
 PreTransitionHandler
 ^^^^^^^^^^^^^^^^^^^^^
@@ -210,8 +194,8 @@ Before any transition occurred, if the condition is match; means object, source_
 
     from river.handlers.transition import PreTransitionHandler
 
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PreTransitionHandler.register(handler,my_object,'my_state_field')
 
@@ -222,8 +206,6 @@ Before any transition occurred, if the condition is match; means object, source_
 | **Args**          | **Description**                        |          |
 +===================+========================================+==========+
 | workflow_object   | Your object proceeded                  | Required |
-+-------------------+----------------------------------------+----------+
-| field             | Field which you registered object for  | Required |
 +-------------------+----------------------------------------+----------+
 | source_state      | Source state of the transition         | Optional |
 +-------------------+----------------------------------------+----------+
@@ -238,8 +220,8 @@ After any transition occurred, if the condition is match; means object, source_s
 
     from river.handlers.transition import PostTransitionHandler
     
-    def handler(my_object,field,*args,**kwargs):
-        do_something_with(object,field)
+    def handler(my_object,*args,**kwargs):
+        do_something_with(object)
 
     PostTransitionHandler.register(handler,my_object,'my_state_field')
 
@@ -250,8 +232,6 @@ After any transition occurred, if the condition is match; means object, source_s
 | **Args**          | **Description**                         |          |
 +===================+=========================================+==========+
 | workflow_object   | Your object proceeded                   | Required |
-+-------------------+-----------------------------------------+----------+
-| field             | Field which you registered object for   | Required |
 +-------------------+-----------------------------------------+----------+
 | source_state      | Source state of the transition          | Optional |
 +-------------------+-----------------------------------------+----------+
