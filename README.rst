@@ -435,8 +435,8 @@ Timeline
 Change Logs
 ===========
 
-0.9.0(Dev)
-----------
+0.9.0(Stable)
+-------------
 
 * # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
 * # 31_ - **Improvement** - unicode issue for Python3.
@@ -448,8 +448,8 @@ Change Logs
 .. _33: https://github.com/javrasya/django-river/pull/33
 .. _35: https://github.com/javrasya/django-river/pull/35
 
-0.8.2(Stable)
--------------
+0.8.2
+-----
 
 * **Bug** - Features providing multiple state field in a model was causing a problem. When there are multiple state field, injected attributes in model class are owerriten. This feature is also unpractical. So, it is dropped to fix the bug.
 * **Improvement** - Initial video tutorial which is Simple jira example is added into the documentations. Also repository link of fakejira project which is created in the video tutorial is added into the docs.
