@@ -27,12 +27,12 @@ class ProceedingMeta(BaseModel):
 
     transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
-    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), null=True, blank=True)
+    groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), blank=True)
     order = models.IntegerField(default=0, verbose_name=_('Order'), null=True)
     action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 
     parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False,
-                                     db_index=True, null=True, blank=True)
+                                     db_index=True, blank=True)
 
     def natural_key(self):
         return self.content_type, self.transition, self.order
