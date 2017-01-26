@@ -22,8 +22,6 @@ env:
     - TOXENV=pypy-dj1.8
     - TOXENV=pypy-dj1.9
     - TOXENV=pypy-dj1.10
-    - TOXENV=pypy3-dj1.7
-    - TOXENV=pypy3-dj1.8
     - TOXENV=cov
 install:
   - pip install tox
