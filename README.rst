@@ -67,10 +67,10 @@ Simple Jira Example
 Requirements
 ------------
 * Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)
-* PyPy (``2``, ``3``)
+* PyPy (``2``)
 * Django (``1.7``, ``1.8``, ``1.9``, ``1.10``)
 * Django 1.7 is not for Python3.5
-* Django 1.9 is not for Python3.3 and PyPy3 (Because of Django deprecation)
+* Django 1.9 is not for Python3.3 Because of Django deprecation)
 
 Features
 --------
@@ -434,6 +434,13 @@ Timeline
 
 Change Logs
 ===========
+
+0.9.1(Development)
+------------------
+
+* # 39_ - **Improvement** -  Django has dropped support for pypy-3. So, It should be dropped from django itself too.
+
+.. _39: https://github.com/javrasya/django-river/issues/39
 
 0.9.0(Stable)
 -------------
