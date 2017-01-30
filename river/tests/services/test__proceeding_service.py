@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
+
 from river.models.proceeding import Proceeding
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 from river.services.object import ObjectService
 from river.services.proceeding import ProceedingService
 from river.tests.base_test import BaseTestCase
+from river.tests.models.factories import TestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -203,3 +206,14 @@ class test_ProceedingService(BaseTestCase):
         # No Cycle for closed state.
         self.objects[0].proceed(user=self.user4, next_state=self.closed_state, god_mod=True)
         self.assertEqual(11, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
+
+    def test_get_proceedings_object_waiting_for_approval_slow_test(self):
+        self.initialize_normal_scenario()
+        self.objects = TestModelObjectFactory.create_batch(100)
+        for o in self.objects:
+            ObjectService.register_object(o)
+        before = datetime.now()
+        for o in self.objects:
+            ProceedingService.get_available_proceedings(o, [o.my_field], user=self.user1)
+        after = datetime.now()
+        self.assertLess(after - before, timedelta(seconds=2))

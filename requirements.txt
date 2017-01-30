@@ -1,3 +1,4 @@
 django-mptt
 factory-boy
 mock
+psycopg2
