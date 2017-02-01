@@ -1,5 +1,12 @@
+from copy import deepcopy
+
+from django.db import models
+
+from river.models.fields.state import StateField, _get_cls_identifier, class_field_rl
 from river.tests.base_test import BaseTestCase
 from river.tests.models.testmodel import TestModel
+from river.utils.error_code import ErrorCode
+from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
 
@@ -20,3 +27,27 @@ class test_StateFIeld(BaseTestCase):
         self.assertTrue(hasattr(TestModel, 'get_state'))
         self.assertTrue(hasattr(TestModel, 'set_state'))
         self.assertTrue(hasattr(TestModel, 'objects'))
+
+    def test_triggering_multiple_time(self):
+        class TestModelForTriggeringMultipleTime(models.Model):
+            pass
+
+        field = StateField()
+        class_field_rl_cp = deepcopy(class_field_rl)
+
+        field.contribute_to_class(TestModelForTriggeringMultipleTime, 'status')
+
+        class_field_rl_cp.update({_get_cls_identifier(TestModelForTriggeringMultipleTime): 'status'})
+        self.assertDictEqual(class_field_rl_cp, class_field_rl)
+
+        field.contribute_to_class(TestModelForTriggeringMultipleTime, 'status')
+
+        self.assertDictEqual(class_field_rl_cp, class_field_rl)
+
+        try:
+            field.contribute_to_class(TestModelForTriggeringMultipleTime, 'status2')
+            self.assertFalse(True, "River exception with error code %d, must have been raised")
+        except RiverException as re:
+            self.assertEqual(ErrorCode.MULTIPLE_STATE_FIELDS, re.code)
+        else:
+            self.assertFalse(True, "River exception with error code %d, must have been raised")
