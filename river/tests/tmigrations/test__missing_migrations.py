@@ -1,6 +1,8 @@
 import os
 import sys
 
+from django.test.utils import override_settings
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -29,6 +31,7 @@ class TestMissingMigrations(TestCase):
         for d in diff:
             os.remove(os.path.join('river/migrations', d))
 
+    @override_settings(MIGRATION_MODULES={})
     def test_missing_migrations(self):
         self.migrations_before = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/migrations/')))
 

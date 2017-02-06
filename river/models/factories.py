@@ -35,7 +35,7 @@ class UserObjectFactory(factory.DjangoModelFactory):
                 self.user_permissions.add(permission)
 
     @factory.post_generation
-    def user_groups(self, create, extracted, **kwargs):
+    def groups(self, create, extracted, **kwargs):
         if not create:
             # Simple build, do nothing.
             return
@@ -43,7 +43,7 @@ class UserObjectFactory(factory.DjangoModelFactory):
         if extracted:
             # A list of groups were passed in, use them
             for group in extracted:
-                self.user_groups.add(group)
+                self.groups.add(group)
 
 
 class GroupObjectFactory(factory.DjangoModelFactory):

@@ -1,6 +1,8 @@
 import os
 import sys
 
+import django
+
 __author__ = 'ahmetdal'
 BASE_DIR = os.path.dirname(__file__)
 
@@ -26,6 +28,7 @@ DATABASES = {
 # }
 
 
+USE_TZ = True
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -34,11 +37,23 @@ INSTALLED_APPS = (
     'river',
 )
 
+
+class DisableMigrations(object):
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return None
+
+
 TESTING = any("py.test" in s for s in sys.argv) or 'test' in sys.argv
 if TESTING:
     INSTALLED_APPS += (
         'river.tests',
     )
+
+    if django.get_version() >= '1.9.0':
+        MIGRATION_MODULES = DisableMigrations()
 
 SITE_ID = 1
 

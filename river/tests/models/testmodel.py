@@ -12,3 +12,11 @@ class TestModel(models.Model):
 
 class TestModelWithoutStateField(models.Model):
     test_field = models.CharField(max_length=50, null=True, blank=True)
+
+
+class TestModelSlowCase1(models.Model):
+    status = StateField()
+
+
+class TestModelSlowCase2(models.Model):
+    status = StateField()
