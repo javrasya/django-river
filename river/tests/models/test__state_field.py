@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+import mock
 from django.db import models
 
 from river.models.fields.state import StateField, _get_cls_identifier, class_field_rl
@@ -28,6 +29,8 @@ class test_StateFIeld(BaseTestCase):
         self.assertTrue(hasattr(TestModel, 'set_state'))
         self.assertTrue(hasattr(TestModel, 'objects'))
 
+    @mock.patch('django.db.models.fields.related.ForeignObject.contribute_to_class', mock.MagicMock())
+    @mock.patch('river.models.fields.state.StateField._StateField__add_to_class', mock.MagicMock())
     def test_triggering_multiple_time(self):
         class TestModelForTriggeringMultipleTime(models.Model):
             pass
