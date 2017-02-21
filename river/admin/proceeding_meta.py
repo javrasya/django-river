@@ -11,9 +11,10 @@ def get_content_types():
     content_type_pks = []
     for ct in ContentType.objects.all():
         model = ct.model_class()
-        for f in model._meta.fields:
-            if type(f) is StateField:
-                content_type_pks.append(ct.pk)
+        if model is not None:
+            for f in model._meta.fields:
+                if type(f) is StateField:
+                    content_type_pks.append(ct.pk)
     return content_type_pks
 
 
