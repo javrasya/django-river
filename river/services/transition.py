@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from django.db.transaction import atomic
+from django.utils.timezone import now
 
 from river.models.proceeding import APPROVED
 from river.services.proceeding import ProceedingService
@@ -64,7 +65,7 @@ class TransitionService(object):
             proceeding = proceedings[0]
             proceeding.status = action
             proceeding.transactioner = user
-            proceeding.transaction_date = datetime.now()
+            proceeding.transaction_date = now()
             if workflow_object.proceeding:
                 proceeding.previous = workflow_object.proceeding
             proceeding.save()

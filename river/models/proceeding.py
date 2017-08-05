@@ -7,6 +7,8 @@ except ImportError:
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
+
 
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.base_model import BaseModel
@@ -40,7 +42,7 @@ class Proceeding(BaseModel):
 
     meta = models.ForeignKey(ProceedingMeta, verbose_name=_('Meta'), related_name="proceedings")
     transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True)
-    transaction_date = models.DateTimeField(null=True, blank=True)
+    transaction_date = models.DateTimeField(null=True, blank=True, default=now)
 
     status = models.IntegerField(_('Status'), choices=PROCEEDING_STATUSES, default=PENDING)
 
