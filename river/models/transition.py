@@ -29,8 +29,9 @@ class Transition(BaseModel):
 
     objects = TransitionManager()
 
-    source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transitions_as_source')
-    destination_state = models.ForeignKey(State, verbose_name=_("Next State"),
+    source_state = models.ForeignKey(State, on_delete=models.CASCADE, verbose_name=_("Source State"),
+                                     related_name='transitions_as_source')
+    destination_state = models.ForeignKey(State, on_delete=models.CASCADE, verbose_name=_("Next State"),
                                           related_name='transitions_as_destination')
     direction = models.SmallIntegerField(_("Transition Direction"), choices=DIRECTIONS, default=FORWARD)
 

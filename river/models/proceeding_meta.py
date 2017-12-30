@@ -23,9 +23,9 @@ class ProceedingMeta(BaseModel):
 
     objects = ProceedingMetaManager()
 
-    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, on_delete=models.CASCADE, verbose_name=_('Content Type'))
 
-    transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
+    transition = models.ForeignKey(Transition, on_delete=models.CASCADE, verbose_name=_('Transition'))
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
     groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), blank=True)
     order = models.IntegerField(default=0, verbose_name=_('Order'), null=True)
