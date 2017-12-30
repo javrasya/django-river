@@ -23,7 +23,7 @@ class ProceedingMetaForm(forms.ModelForm):
 
     class Meta:
         model = ProceedingMeta
-        fields = ('content_type', 'transition', 'permissions', 'groups', 'order', 'action_text')
+        fields = ('content_type', 'transition', 'permissions', 'groups', 'order', 'action_text', 'parents')
 
     def __init__(self, *args, **kwargs):
         self.declared_fields['content_type'].queryset = ContentType.objects.filter(pk__in=get_content_types())
