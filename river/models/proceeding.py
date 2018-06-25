@@ -1,3 +1,4 @@
+from django.db.models import CASCADE
 from mptt.fields import TreeOneToOneField
 
 try:
@@ -34,12 +35,12 @@ class Proceeding(BaseModel):
 
     objects = ProceedingManager()
 
-    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=CASCADE)
     object_id = models.PositiveIntegerField(verbose_name=_('Related Object'))
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
-    meta = models.ForeignKey(ProceedingMeta, verbose_name=_('Meta'), related_name="proceedings")
-    transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True)
+    meta = models.ForeignKey(ProceedingMeta, verbose_name=_('Meta'), related_name="proceedings", on_delete=CASCADE)
+    transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True, on_delete=CASCADE)
     transaction_date = models.DateTimeField(null=True, blank=True)
 
     status = models.IntegerField(_('Status'), choices=PROCEEDING_STATUSES, default=PENDING)
@@ -52,7 +53,6 @@ class Proceeding(BaseModel):
 
     enabled = models.BooleanField(_('Enabled?'), default=True)
 
-    previous = TreeOneToOneField("self", verbose_name=_('Previous Proceeding'), related_name="next_proceeding",
-                                 null=True, blank=True)
+    previous = TreeOneToOneField("self", verbose_name=_('Previous Proceeding'), related_name="next_proceeding",null=True, blank=True, on_delete=CASCADE)
 
     cloned = models.BooleanField(_('Cloned?'), default=False)

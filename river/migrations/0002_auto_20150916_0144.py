@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import uuid
 
 from django.db import models, migrations
+from django.db.models import CASCADE
 from django.utils.text import slugify
 
 
@@ -15,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proceedingmeta',
             name='content_type',
-            field=models.ForeignKey(default=1, verbose_name='Content Type', to='contenttypes.ContentType'),
+            field=models.ForeignKey(default=1, verbose_name='Content Type', to='contenttypes.ContentType', on_delete=CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(

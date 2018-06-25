@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import CASCADE
 from django.db.models.signals import post_save
 
 from river.utils.error_code import ErrorCode
@@ -34,9 +35,10 @@ class StateField(models.ForeignKey):
         kwargs['null'] = True
         kwargs['blank'] = True
         kwargs['to'] = '%s.%s' % (state_model._meta.app_label, state_model._meta.object_name)
+        kwargs['on_delete'] = kwargs.get('on_delete', CASCADE)
         super(StateField, self).__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name, virtual_only=False):
+    def contribute_to_class(self, cls, name):
         def is_workflow_completed(workflow_object):
             return ObjectService.is_workflow_completed(workflow_object)
 
@@ -127,7 +129,7 @@ class StateField(models.ForeignKey):
         self.__add_to_class(cls, "get_state", _get_state)
         self.__add_to_class(cls, "set_state", _set_state)
 
-        super(StateField, self).contribute_to_class(cls, name, virtual_only=virtual_only)
+        super(StateField, self).contribute_to_class(cls, name)
 
         post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
 
