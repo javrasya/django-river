@@ -18,6 +18,13 @@ env:
     - TOXENV=py3.5-dj1.8
     - TOXENV=py3.5-dj1.9    
     - TOXENV=py3.5-dj1.10
+    - TOXENV=py3.5-dj1.11
+    - TOXENV=py3.5-dj2.0
+    - TOXENV=py3.6-dj1.8
+    - TOXENV=py3.6-dj1.9
+    - TOXENV=py3.6-dj1.10
+    - TOXENV=py3.6-dj1.11
+    - TOXENV=py3.6-dj2.0
     - TOXENV=pypy-dj1.7
     - TOXENV=pypy-dj1.8
     - TOXENV=pypy-dj1.9
