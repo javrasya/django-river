@@ -1,11 +1,7 @@
 language: python
 sudo: false
 cache: pip
-python:
-  - '2.7'
-  - '3.4'
-  - '3.5'
-  - '3.6'
+python: 3.6
 env:
   global:
     PYTHONUNBUFFERED=yes
@@ -14,6 +10,7 @@ env:
     - TOXENV=py2.7-dj1.8
     - TOXENV=py2.7-dj1.9
     - TOXENV=py2.7-dj1.10
+    - TOXENV=py2.7-dj1.11
     - TOXENV=py3.4-dj1.7
     - TOXENV=py3.4-dj1.8
     - TOXENV=py3.4-dj1.9
