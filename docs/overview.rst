@@ -25,11 +25,10 @@ Simple Jira Example
 
 Requirements
 ------------
-* Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)
-* PyPy (``2``, ``3``)
-* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``)
-* Django 1.7 is not for Python3.5
-* Django 1.9 is not for Python3.3 and PyPy3 (Because of Django deprecation)
+* Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
+* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``)
+* Django 2.0 is supported with ``Python3.5`` and ``Python3.6``
+* Django 1.7 is not for ``Python3.5``
   
   
 Features
@@ -40,7 +39,7 @@ Features
 * Multiple end-point
 * Circular state machines
 * Transition authorization
-* Skiping or disabling spesific step
+* Skipping or disabling spesific step
 * Custom transition hooks
   
 Example Scenarios

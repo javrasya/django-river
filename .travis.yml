@@ -1,30 +1,52 @@
 language: python
 sudo: false
-python: 3.5
-env:
-  global:
-    PYTHONUNBUFFERED=yes
-  matrix:
-    - TOXENV=py2.7-dj1.7
-    - TOXENV=py2.7-dj1.8
-    - TOXENV=py2.7-dj1.9
-    - TOXENV=py2.7-dj1.10
-    - TOXENV=py3.3-dj1.7
-    - TOXENV=py3.3-dj1.8
-    - TOXENV=py3.4-dj1.7
-    - TOXENV=py3.4-dj1.8
-    - TOXENV=py3.4-dj1.9
-    - TOXENV=py3.4-dj1.10
-    - TOXENV=py3.5-dj1.8
-    - TOXENV=py3.5-dj1.9    
-    - TOXENV=py3.5-dj1.10
-    - TOXENV=pypy-dj1.7
-    - TOXENV=pypy-dj1.8
-    - TOXENV=pypy-dj1.9
-    - TOXENV=pypy-dj1.10
-    - TOXENV=cov
+cache: pip
+matrix:
+  include:
+    - python: "2.7"
+      env: TOXENV=py27-dj1.7
+    - python: "2.7"
+      env: TOXENV=py27-dj1.8
+    - python: "2.7"
+      env: TOXENV=py27-dj1.9
+    - python: "2.7"
+      env: TOXENV=py27-dj1.10
+    - python: "2.7"
+      env: TOXENV=py27-dj1.11
+    - python: "3.4"
+      env: TOXENV=py34-dj1.7
+    - python: "3.4"
+      env: TOXENV=py34-dj1.8
+    - python: "3.4"
+      env: TOXENV=py34-dj1.9
+    - python: "3.4"
+      env: TOXENV=py34-dj1.10
+    - python: "3.4"
+      env: TOXENV=py34-dj1.11
+    - python: "3.5"
+      env: TOXENV=py35-dj1.8
+    - python: "3.5"
+      env: TOXENV=py35-dj1.9
+    - python: "3.5"
+      env: TOXENV=py35-dj1.10
+    - python: "3.5"
+      env: TOXENV=py35-dj1.11
+    - python: "3.5"
+      env: TOXENV=py35-dj2.0
+    - python: "3.6"
+      env: TOXENV=py36-dj1.8
+    - python: "3.6"
+      env: TOXENV=py36-dj1.9
+    - python: "3.6"
+      env: TOXENV=py36-dj1.10
+    - python: "3.6"
+      env: TOXENV=py36-dj1.11
+    - python: "3.6"
+      env: TOXENV=py36-dj2.0
+    - python: "3.6"
+      env: TOXENV=cov
 install:
-  - pip install tox
+  - pip install tox-travis
   - pip install coveralls
 script:
   - tox

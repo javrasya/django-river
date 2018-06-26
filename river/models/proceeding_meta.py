@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import CASCADE
 from django.db.models.signals import m2m_changed, post_save
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -23,16 +24,15 @@ class ProceedingMeta(BaseModel):
 
     objects = ProceedingMetaManager()
 
-    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'))
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=CASCADE)
 
-    transition = models.ForeignKey(Transition, verbose_name=_('Transition'))
+    transition = models.ForeignKey(Transition, verbose_name=_('Transition'), on_delete=CASCADE)
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
     groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), blank=True)
     order = models.IntegerField(default=0, verbose_name=_('Order'), null=True)
     action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
 
-    parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False,
-                                     db_index=True, blank=True)
+    parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False, db_index=True, blank=True)
 
     def natural_key(self):
         return self.content_type, self.transition, self.order

@@ -12,3 +12,7 @@ junit-*.xml
 .coverage
 docs/_*
 dist
+.DS_Store
+.cache
+.pytest_cache
+.python-version

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import mptt.fields
 from django.conf import settings
+from django.db.models import CASCADE
 
 
 class Migration(migrations.Migration):
@@ -42,7 +43,7 @@ class Migration(migrations.Migration):
                 ('skip', models.BooleanField(default=False, verbose_name='Skip')),
                 ('order', models.IntegerField(default=0, verbose_name='Order')),
                 ('enabled', models.BooleanField(default=True, verbose_name='Enabled?')),
-                ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType')),
+                ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType', on_delete=CASCADE)),
                 ('groups', models.ManyToManyField(to='auth.Group', verbose_name='Groups')),
             ],
             options={
@@ -73,8 +74,8 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='Date Created')),
                 ('date_updated', models.DateTimeField(auto_now=True, verbose_name='Date Updated')),
                 ('process_date', models.DateTimeField(auto_now_add=True, null=True)),
-                ('previous_track', mptt.fields.TreeOneToOneField(related_name='next_track', null=True, blank=True, to='river.ProceedingTrack', verbose_name='Previous track')),
-                ('proceeding', models.ForeignKey(related_name='tracks', verbose_name='Proceeding', to='river.Proceeding')),
+                ('previous_track', mptt.fields.TreeOneToOneField(related_name='next_track', null=True, blank=True, to='river.ProceedingTrack', verbose_name='Previous track', on_delete=CASCADE)),
+                ('proceeding', models.ForeignKey(related_name='tracks', verbose_name='Proceeding', to='river.Proceeding', on_delete=CASCADE)),
             ],
             options={
                 'verbose_name': 'Proceeding Track',
@@ -103,9 +104,9 @@ class Migration(migrations.Migration):
                 ('date_updated', models.DateTimeField(auto_now=True, verbose_name='Date Updated')),
                 ('field', models.CharField(max_length=200, verbose_name='Field')),
                 ('direction', models.SmallIntegerField(default=1, verbose_name='Transition Direction')),
-                ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType')),
-                ('destination_state', models.ForeignKey(related_name='transitions_as_destination', verbose_name='Next State', to='river.State')),
-                ('source_state', models.ForeignKey(related_name='transitions_as_source', verbose_name='Source State', to='river.State')),
+                ('content_type', models.ForeignKey(verbose_name='Content Type', to='contenttypes.ContentType', on_delete=CASCADE)),
+                ('destination_state', models.ForeignKey(related_name='transitions_as_destination', verbose_name='Next State', to='river.State', on_delete=CASCADE)),
+                ('source_state', models.ForeignKey(related_name='transitions_as_source', verbose_name='Source State', to='river.State', on_delete=CASCADE)),
             ],
             options={
                 'verbose_name': 'Transition',
@@ -115,12 +116,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proceedingmeta',
             name='transition',
-            field=models.ForeignKey(verbose_name='Transition', to='river.Transition'),
+            field=models.ForeignKey(verbose_name='Transition', to='river.Transition', on_delete=CASCADE),
         ),
         migrations.AddField(
             model_name='proceeding',
             name='meta',
-            field=models.ForeignKey(related_name='proceedings', verbose_name='Meta', to='river.ProceedingMeta'),
+            field=models.ForeignKey(related_name='proceedings', verbose_name='Meta', to='river.ProceedingMeta', on_delete=CASCADE),
         ),
         migrations.AddField(
             model_name='proceeding',
@@ -130,7 +131,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proceeding',
             name='transactioner',
-            field=models.ForeignKey(verbose_name='Transactioner', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(verbose_name='Transactioner', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='proceedingmeta',

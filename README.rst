@@ -1,23 +1,23 @@
 .. |Build Status| image:: https://travis-ci.org/javrasya/django-river.svg
-   :target: https://travis-ci.org/javrasya/django-river
+    :target: https://travis-ci.org/javrasya/django-river
 .. |Coverage Status| image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/javrasya/django-river?branch=master
+    :target: https://coveralls.io/github/javrasya/django-river?branch=master
 
 .. |Health Status| image:: https://landscape.io/github/javrasya/django-river/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/javrasya/django-river/master
+    :target: https://landscape.io/github/javrasya/django-river/master
    :alt: Code Health
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
-   :target: https://readthedocs.org/projects/django-river/?badge=latest
+    :target: https://readthedocs.org/projects/django-river/?badge=latest
 .. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
-   :alt: Simple jira example
+    :alt: Simple jira example
    :target: https://www.youtube.com/watch?v=5EZGnTf39aI
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
 .. |Gitter| image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/javrasya/django-river
-   :target: https://gitter.im/javrasya/django-river?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge  
+    :alt: Join the chat at https://gitter.im/javrasya/django-river
+   :target: https://gitter.im/javrasya/django-river?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 .. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
 
@@ -66,11 +66,10 @@ Simple Jira Example
 
 Requirements
 ------------
-* Python (``2.7``, ``3.3`` , ``3.4``, ``3.5``)
-* PyPy (``2``)
-* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``)
-* Django 1.7 is not for Python3.5
-* Django 1.9 is not for Python3.3 Because of Django deprecation)
+* Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
+* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``)
+* Django 2.0 is supported with ``Python3.5`` and ``Python3.6``
+* Django 1.7 is not for ``Python3.5``
 
 Features
 --------
@@ -98,7 +97,7 @@ Closed without Re-Open case
 
 Closed with Re-Open case
 """"""""""""""""""""""""
-|Closed With Re Open Case|  
+|Closed With Re Open Case|
 
 
 Installation
@@ -131,7 +130,7 @@ Installation
         my_state_field = StateField()
 
 .. note::
-   Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it might require migrating.
+Once project is configured to work with ``django-river``, do not forget to make your migrations for your model have ``StateField``. Sometimes changes in ``django-river`` models happen. New versions of it might require migrating.
 
 .. code-block:: python
 
@@ -153,7 +152,7 @@ Usage for End User
    authorization for transitions. Proceeding order is also given here.
 
 .. note::
-   There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is going to try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
+There must be only one initial state candidate for your workflow scenarios. Because ``django-river`` is going to try to detect it and initialize your objects workflow path. If there are more than one initial state, ``django-river`` will raise ``RiverException(error_code=3)`` which is ``MULTIPLE_INITIAL_STATE`` error.
 
 
 Whenever an object of MyModel is inserted in your system, all its
@@ -435,10 +434,13 @@ Timeline
 Change Logs
 ===========
 
-0.9.1(Development)
+0.10.0(Development)
 ------------------
 
 * # 39_ - **Improvement** -  Django has dropped support for pypy-3. So, It should be dropped from django itself too.
+* **Remove** -  ``pypy`` support has been dropped
+* **Remove** -  ``Python3.3`` support has been dropped
+* **Improvement** - ``Django2.0`` support with ``Python3.5`` and ``Python3.6`` is provided
 
 .. _39: https://github.com/javrasya/django-river/issues/39
 
@@ -450,7 +452,7 @@ Change Logs
 * # 33_ - **Bug** - Automatically injecting workflow manager was causing the models not have default ``objects`` one. So, automatic injection support has been dropped. If anyone want to use it, it can be used explicitly.
 * # 35_ - **Bug** - This is huge change in django-river. Multiple state field each model support is dropped completely and so many APIs have been changed. Check documentations and apply changes.
 
-.. _30: https://github.com/javrasya/django-river/pull/30  
+.. _30: https://github.com/javrasya/django-river/pull/30
 .. _31: https://github.com/javrasya/django-river/pull/30
 .. _33: https://github.com/javrasya/django-river/pull/33
 .. _35: https://github.com/javrasya/django-river/pull/35
@@ -505,7 +507,7 @@ Change Logs
 * **Improvement** - ``State`` model now has ``natural_key`` as ``slug`` field.
 * **Improvement** - ``Transition`` model now has ``natural_key`` as (``source_state_slug`` , ``destination_state_slug``) fields
 * **Improvement** - ``ProceedingMeta`` model now has ``natural_key`` as (``content_type``, ``field``, ``transition``, ``order``) fields
-* **Improvement** - Changelog is added into documentation.  
+* **Improvement** - Changelog is added into documentation.
 
 0.5.3
 -----
@@ -532,6 +534,6 @@ Change Logs
 
 
 .. image:: https://d2weczhvl823v0.cloudfront.net/javrasya/django-river/trend.png
-   :alt: Bitdeli badge
+    :alt: Bitdeli badge
    :target: https://bitdeli.com/free
 

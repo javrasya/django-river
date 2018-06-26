@@ -3,10 +3,13 @@
 Change Logs
 ===========
 
-0.9.1(Development)
+0.10.0(Development)
 ------------------
 
 * # 39_ - **Improvement** -  Django has dropped support for pypy-3. So, It should be dropped from django itself too.
+* **Remove** -  ``pypy`` support has been dropped
+* **Remove** -  ``Python3.3`` support has been dropped
+* **Improvement** - ``Django2.0`` support with ``Python3.5`` and ``Python3.6`` is provided
 
 .. _39: https://github.com/javrasya/django-river/issues/39
 
