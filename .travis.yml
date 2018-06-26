@@ -1,15 +1,11 @@
 language: python
 sudo: false
+cache: pip
 python:
-    - "pypy2.7"
     - "2.7"
-    - "3.3"
     - "3.4"
     - "3.5"
     - "3.6"
-env:
-  global:
-    PYTHONUNBUFFERED=yes
 matrix:
   fast_finish: true
   include:
