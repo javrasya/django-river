@@ -23,8 +23,6 @@ matrix:
       env: TOXENV=py34-dj1.10
     - python: "3.4"
       env: TOXENV=py34-dj1.11
-    - python: "3.4"
-      env: TOXENV=py34-dj2.0
     - python: "3.5"
       env: TOXENV=py35-dj1.8
     - python: "3.5"
