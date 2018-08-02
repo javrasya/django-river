@@ -39,7 +39,9 @@ class ProceedingService(object):
     def get_user_permissions(workflow_object, source_states, **kwargs):
         """
         Override this method to customize how river determines a user's
-        permissions
+        permissions. This method must return an array of strings that match
+        the following format:
+        ['app_label.codename', 'app_label.codename', ...]
         """
         user = kwargs.get('user')
         permissions = []
