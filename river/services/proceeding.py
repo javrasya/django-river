@@ -1,4 +1,5 @@
 import logging
+from pydoc import locate
 
 from django.contrib import auth
 from django.db.models import Min, Q
@@ -35,8 +36,23 @@ class ProceedingService(object):
         LOGGER.debug("Proceedings are initialized for workflow object %s" % workflow_object)
 
     @staticmethod
+    def get_user_permissions(workflow_object, source_states, **kwargs):
+        """
+        Override this method to customize how river determines a user's
+        permissions
+        """
+        user = kwargs.get('user')
+        permissions = []
+        for backend in auth.get_backends():
+            permissions.extend(backend.get_all_permissions(user))
+
+        return permissions
+
+    @staticmethod
     def get_available_proceedings(workflow_object, source_states, user=None, destination_state=None,
                                   god_mod=False):
+        LocatedProceedingService = locate(app_config.PROCEEDING_SERVICE)
+        get_user_permissions = LocatedProceedingService.get_user_permissions
 
         def get_proceeding(proceedings):
             min_order = proceedings.aggregate(Min('order'))['order__min']
@@ -52,12 +68,13 @@ class ProceedingService(object):
             for g in user.groups.all():
                 group_q = group_q | Q(groups__in=[g])
 
-            permissions = []
-            for backend in auth.get_backends():
-                permissions.extend(backend.get_all_permissions(user))
-
+            user_permissions = get_user_permissions(workflow_object,
+                                                    source_states,
+                                                    user=user,
+                                                    destination_state=destination_state,
+                                                    god_mod=god_mod)
             permission_q = Q()
-            for p in permissions:
+            for p in user_permissions:
                 label, codename = p.split('.')
                 permission_q = permission_q | Q(permissions__content_type__app_label=label,
                                                 permissions__codename=codename)

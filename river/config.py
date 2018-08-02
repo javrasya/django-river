@@ -20,6 +20,7 @@ class RiverConfig(object):
         self.PERMISSION_CLASS = getattr(settings, self.get_with_prefix('PERMISSION_CLASS'), Permission)
         self.GROUP_CLASS = getattr(settings, self.get_with_prefix('GROUP_CLASS'), Group)
         self.HANDLER_BACKEND = getattr(settings, self.get_with_prefix('HANDLER_BACKEND'), {'backend': 'river.handlers.backends.memory.MemoryHandlerBackend'})
+        self.PROCEEDING_SERVICE = getattr(settings, self.get_with_prefix('PROCEEDING_SERVICE'), 'river.services.proceeding.ProceedingService')
 
         # Generated
         self.HANDLER_BACKEND_CLASS = self.HANDLER_BACKEND.get('backend')

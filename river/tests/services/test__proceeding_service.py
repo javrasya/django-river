@@ -1,19 +1,21 @@
+from pydoc import locate
 from datetime import datetime, timedelta
 
 from django.contrib.auth.models import Group
 from django.core.management import call_command
 
+from river.config import app_config
 from river.models.factories import UserObjectFactory
 from river.models.proceeding import Proceeding
 from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 from river.services.object import ObjectService
-from river.services.proceeding import ProceedingService
 from river.tests.base_test import BaseTestCase
 from river.tests.models import TestModelSlowCase1
 from river.tests.models import TestModelSlowCase2
 from river.tests.models.factories import TestModelObjectFactory
 
+ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 __author__ = 'ahmetdal'
 
 

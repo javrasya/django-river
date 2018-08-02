@@ -1,8 +1,11 @@
+from pydoc import locate
+from river.config import app_config
 from river.models.proceeding import Proceeding
 from river.models.state import State
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
-from .proceeding import ProceedingService
+
+ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
 __author__ = 'ahmetdal'
 

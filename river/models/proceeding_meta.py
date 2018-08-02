@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from pydoc import locate
 
 from django.db import models
 from django.db.models import CASCADE
@@ -44,7 +45,7 @@ class ProceedingMeta(BaseModel):
 
 
 def post_group_change(sender, instance, *args, **kwargs):
-    from river.services.proceeding import ProceedingService
+    ProceedingService = locate(app_config.PROCEEDING_SERVICE)
     from river.models.proceeding import PENDING
 
     for proceeding_pending in instance.proceedings.filter(status=PENDING):
@@ -53,7 +54,7 @@ def post_group_change(sender, instance, *args, **kwargs):
 
 def post_permissions_change(sender, instance, *args, **kwargs):
     from river.models.proceeding import PENDING
-    from river.services.proceeding import ProceedingService
+    ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
     for proceeding_pending in instance.proceedings.filter(status=PENDING):
         ProceedingService.override_permissions(proceeding_pending, instance.permissions.all())

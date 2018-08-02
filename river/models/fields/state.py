@@ -1,3 +1,4 @@
+from pydoc import locate
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import CASCADE
 from django.db.models.signals import post_save
@@ -14,6 +15,7 @@ from river.models.state import State
 from river.models.proceeding import Proceeding
 from river.services.object import ObjectService
 from river.services.transition import TransitionService
+from river.config import app_config
 
 __author__ = 'ahmetdal'
 
@@ -63,25 +65,25 @@ class StateField(models.ForeignKey):
             return StateService.get_initial_state(ContentType.objects.get_for_model(self))
 
         def get_available_proceedings(self, *args, **kwargs):
-            from river.services.proceeding import ProceedingService
+            ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
             return ProceedingService.get_available_proceedings(self, [self.get_state()], *args, **kwargs)
 
         @property
         def initial_proceedings(self):
-            from river.services.proceeding import ProceedingService
+            ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
             return self.get_state() in ProceedingService.get_initial_proceedings(ContentType.objects.get_for_model(self))
 
         @property
         def final_proceedings(self):
-            from river.services.proceeding import ProceedingService
+            ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
             return self.get_state() in ProceedingService.get_final_proceedings(ContentType.objects.get_for_model(self))
 
         @property
         def next_proceedings(self):
-            from river.services.proceeding import ProceedingService
+            ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
             return self.get_state() in ProceedingService.get_next_proceedings(ContentType.objects.get_for_model(self))
 

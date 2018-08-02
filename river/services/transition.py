@@ -1,16 +1,19 @@
 import logging
 from datetime import datetime
+from pydoc import locate
 
 from django.db.transaction import atomic
 
+from river.config import app_config
 from river.models.proceeding import APPROVED
-from river.services.proceeding import ProceedingService
 from river.services.state import StateService
 from river.signals import ProceedingSignal, TransitionSignal, FinalSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
 __author__ = 'ahmetdal'
+
+ProceedingService = locate(app_config.PROCEEDING_SERVICE)
 
 
 class TTSSignal(object):
