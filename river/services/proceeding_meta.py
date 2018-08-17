@@ -23,8 +23,10 @@ class ProceedingMetaService(object):
 
     @staticmethod
     def build_tree(instance):
-        parents = ProceedingMeta.objects.filter(transition__destination_state__pk=instance.transition.source_state.pk).exclude(pk__in=instance.parents.values_list('pk', flat=True))
-        children = ProceedingMeta.objects.filter(transition__source_state__pk=instance.transition.destination_state.pk).exclude(parents__in=[instance.pk])
+        parents = ProceedingMeta.objects.filter(transition__destination_state__pk=instance.transition.source_state.pk,
+                                               content_type=instance.content_type).exclude(pk__in=instance.parents.values_list('pk', flat=True))
+        children = ProceedingMeta.objects.filter(transition__source_state__pk=instance.transition.destination_state.pk,
+                                                content_type=instance.content_type).exclude(parents__in=[instance.pk])
         instance = ProceedingMeta.objects.get(pk=instance.pk)
         if parents:
             instance.parents.add(*parents)
