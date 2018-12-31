@@ -29,7 +29,7 @@ class State(BaseModel):
         return self.label
 
     def natural_key(self):
-        return (self.slug,)
+        return self.slug,
 
     def details(self):
         detail = super(State, self).details()

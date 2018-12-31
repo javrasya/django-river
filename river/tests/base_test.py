@@ -22,11 +22,11 @@ class BaseTestCase(TestCase):
             TransitionObjectFactory, \
             UserObjectFactory, \
             PermissionObjectFactory, \
-            ProceedingMetaObjectFactory, \
+            TransitionMetadataFactory, \
             StateObjectFactory
 
         TransitionObjectFactory.reset_sequence(0)
-        ProceedingMetaObjectFactory.reset_sequence(0)
+        TransitionMetadataFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
         TestModel.objects.all().delete()
 
@@ -51,7 +51,7 @@ class BaseTestCase(TestCase):
                                                                 destination_state=factory.Sequence(
                                                                     lambda n: self.states[n + 1]))
 
-        self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
+        self.proceeding_metas = TransitionMetadataFactory.create_batch(
             9,
             content_type=self.content_type,
             transition=factory.Sequence(lambda n: self.transitions[n] if n <= 1 else self.transitions[n - 1]),
@@ -68,11 +68,11 @@ class BaseTestCase(TestCase):
             TransitionObjectFactory, \
             UserObjectFactory, \
             PermissionObjectFactory, \
-            ProceedingMetaObjectFactory, \
+            TransitionApprovalMetaFactory, \
             StateObjectFactory
 
         TransitionObjectFactory.reset_sequence(0)
-        ProceedingMetaObjectFactory.reset_sequence(0)
+        TransitionMetadataFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
         TestModel.objects.all().delete()
 
@@ -111,7 +111,7 @@ class BaseTestCase(TestCase):
             TransitionObjectFactory(source_state=self.resolved_state, destination_state=self.closed_state),
             TransitionObjectFactory(source_state=self.re_opened_state, destination_state=self.in_progress_state)]
 
-        self.proceeding_metas = ProceedingMetaObjectFactory.create_batch(
+        self.proceeding_metas = TransitionApprovalMetaFactory.create_batch(
             5,
             content_type=self.content_type,
             transition=factory.Sequence(lambda n: self.transitions[n]),

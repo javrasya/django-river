@@ -27,12 +27,12 @@ class TransitionSignal(object):
             pre_transition.send(
                 sender=TransitionSignal.__class__,
                 workflow_object=self.workflow_object,
-                source_state=self.proceeding.meta.transition.source_state,
-                destination_state=self.proceeding.meta.transition.destination_state,
+                source_state=self.proceeding.source_state,
+                destination_state=self.proceeding.destination_state,
                 proceeding=self.proceeding,
             )
             LOGGER.debug("Pre transition signal IS sent for workflow object %s for transition %s -> %s" % (
-                self.workflow_object, self.proceeding.meta.transition.source_state.label, self.proceeding.meta.transition.destination_state.label))
+                self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
         else:
             LOGGER.debug(
                 "Pre transition signal IS NOT sent for workflow object %s. Although proceeding is occurred, not transition is occurred." % (
@@ -43,13 +43,13 @@ class TransitionSignal(object):
             post_transition.send(
                 sender=TransitionSignal.__class__,
                 workflow_object=self.workflow_object,
-                source_state=self.proceeding.meta.transition.source_state,
-                destination_state=self.proceeding.meta.transition.destination_state,
+                source_state=self.proceeding.source_state,
+                destination_state=self.proceeding.destination_state,
                 proceeding=self.proceeding,
             )
             LOGGER.debug(
                 "Post transition signal IS sent for workflow object %s for transition %s -> %s" % (
-                    self.workflow_object, self.proceeding.meta.transition.source_state.label, self.proceeding.meta.transition.destination_state.label))
+                    self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
         else:
             LOGGER.debug(
                 "Post transition signal IS NOT sent for workflow object %s. Although proceeding is occurred, not transition is occurred." % (
@@ -68,7 +68,7 @@ class ProceedingSignal(object):
             proceeding=self.proceeding,
         )
         LOGGER.debug("Pre proceeding signal IS sent for workflow object %s for transition %s -> %s" % (
-            self.workflow_object, self.proceeding.meta.transition.source_state.label, self.proceeding.meta.transition.destination_state.label))
+            self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
 
     def __exit__(self, type, value, traceback):
         post_proceed.send(
@@ -77,13 +77,14 @@ class ProceedingSignal(object):
             proceeding=self.proceeding,
         )
         LOGGER.debug("Post proceeding signal IS sent for workflow object %s for transition %s -> %s" % (
-            self.workflow_object, self.proceeding.meta.transition.source_state.label, self.proceeding.meta.transition.destination_state.label))
+            self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
 
 
 class FinalSignal(object):
-    def __init__(self, workflow_object):
+    def __init__(self, workflow_object, workflow_name):
         self.workflow_object = workflow_object
-        self.status = self.workflow_object.on_final_state
+        self.workflow_name = workflow_name
+        self.status = getattr(self.workflow_object.river, self.workflow_name).on_final_state
 
     def __enter__(self):
         if self.status:

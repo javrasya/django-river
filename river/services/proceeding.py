@@ -3,10 +3,10 @@ import logging
 from django.contrib import auth
 from django.db.models import Min, Q
 from django.db.transaction import atomic
+from river.models.proceeding import Proceeding, PENDING
+from river.models.transitionmetadata import TransitionMetadata
 
 from river.config import app_config
-from river.models.proceeding import Proceeding, PENDING
-from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 
 __author__ = 'ahmetdal'
@@ -19,17 +19,17 @@ class ProceedingService(object):
     def init_proceedings(workflow_object):
 
         content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
-        for proceeding_meta in ProceedingMeta.objects.filter(content_type=content_type):
+        for transition_metadata in TransitionMetadata.objects.filter(content_type=content_type):
             proceeding, created = Proceeding.objects.update_or_create(
-                meta=proceeding_meta,
+                meta=transition_metadata,
                 workflow_object=workflow_object,
                 defaults={
-                    'order': proceeding_meta.order,
+                    'order': transition_metadata.order,
                     'status': PENDING,
                 }
             )
-            proceeding.permissions.add(*proceeding_meta.permissions.all())
-            proceeding.groups.add(*proceeding_meta.groups.all())
+            proceeding.permissions.add(*transition_metadata.permissions.all())
+            proceeding.groups.add(*transition_metadata.groups.all())
 
         workflow_object.save()
         LOGGER.debug("Proceedings are initialized for workflow object %s" % workflow_object)

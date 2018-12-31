@@ -3,7 +3,6 @@ import logging
 from django.apps import AppConfig
 from django.db.utils import OperationalError, ProgrammingError
 
-
 __author__ = 'ahmetdal'
 
 LOGGER = logging.getLogger(__name__)
@@ -16,7 +15,12 @@ class RiverApp(AppConfig):
     def ready(self):
 
         from river.handlers.backends.database import DatabaseHandlerBackend
-        from river.handlers.backends.loader import handler_backend        
+        from river.handlers.backends.loader import handler_backend
+        from river.models.fields.state import workflow_registry
+
+        for workflow in workflow_registry.workflows:
+            if self.get_model('Workflow').objects.filter(name=workflow).count() == 0:
+                LOGGER.warning("%s workflow doesn't seem to exists in database" % workflow)
 
         if isinstance(handler_backend, DatabaseHandlerBackend):
             try:

@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.models import Group
 from django.core.management import call_command
+from river.models.proceeding import Proceeding
+from river.models.transitionmetadata import TransitionMetadata
 
 from river.models.factories import UserObjectFactory
-from river.models.proceeding import Proceeding
-from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
 from river.services.object import ObjectService
 from river.services.proceeding import ProceedingService
@@ -166,7 +166,7 @@ class test_ProceedingService(BaseTestCase):
         self.assertFalse(ProceedingService.cycle_proceedings(self.objects[0]))
         self.objects[0].proceed(user=self.user3, next_state=self.re_opened_state, god_mod=True)
         self.assertEqual(6, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.in_progress_state, transition__destination_state=self.resolved_state),
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.in_progress_state, transition__destination_state=self.resolved_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 
         # There will be no cycling even if the method is invoked. Because cycling is done in proceeding.
@@ -176,14 +176,14 @@ class test_ProceedingService(BaseTestCase):
         # State is in-progress and cycle is detected. Transition resolved to re-opened proceeding is cloned
         self.objects[0].proceed(user=self.user3, next_state=self.in_progress_state, god_mod=True)
         self.assertEqual(7, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.resolved_state,
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.resolved_state,
                                                     transition__destination_state=self.re_opened_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 
         # State is resolved and cycle is detected. Transition re-opened to in-progress proceeding is cloned
         self.objects[0].proceed(user=self.user3, next_state=self.resolved_state, god_mod=True)
         self.assertEqual(8, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.re_opened_state,
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.re_opened_state,
                                                     transition__destination_state=self.in_progress_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 
@@ -191,21 +191,21 @@ class test_ProceedingService(BaseTestCase):
         self.assertFalse(ProceedingService.cycle_proceedings(self.objects[0]))
         self.objects[0].proceed(user=self.user3, next_state=self.re_opened_state, god_mod=True)
         self.assertEqual(9, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.in_progress_state,
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.in_progress_state,
                                                     transition__destination_state=self.resolved_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 
         # State is in-progress and cycle is detected. Transition resolved to re-opened proceeding is cloned
         self.objects[0].proceed(user=self.user3, next_state=self.in_progress_state, god_mod=True)
         self.assertEqual(10, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.resolved_state,
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.resolved_state,
                                                     transition__destination_state=self.re_opened_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 
         # State is resolved and cycle is detected. Transition re-opened to in-progress proceeding is cloned
         self.objects[0].proceed(user=self.user3, next_state=self.resolved_state, god_mod=True)
         self.assertEqual(11, Proceeding.objects.filter(object_id=self.objects[0].pk).count())
-        self.assertEqual(ProceedingMeta.objects.get(transition__source_state=self.re_opened_state,
+        self.assertEqual(TransitionMetadata.objects.get(transition__source_state=self.re_opened_state,
                                                     transition__destination_state=self.in_progress_state),
                          Proceeding.objects.filter(object_id=self.objects[0].pk).latest('date_created').meta)
 

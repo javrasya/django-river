@@ -1,0 +1,46 @@
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+
+from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory
+from river.models.fields.state import RiverObject, InstanceWorkflowObject, ClassWorkflowObject
+from river.tests.models.testmodel import TestModel
+
+__author__ = 'ahmetdal'
+
+
+class StateFieldTest(TestCase):
+
+    def test_injections(self):
+        self.assertTrue(hasattr(TestModel, 'river'))
+        self.assertIsInstance(TestModel.river, RiverObject)
+        self.assertTrue(hasattr(TestModel.river, "test_workflow1"))
+        self.assertIsInstance(TestModel.river.test_workflow1, ClassWorkflowObject)
+
+        content_type = ContentType.objects.get_for_model(TestModel)
+
+        state1 = StateObjectFactory.create(label="state1")
+        state2 = StateObjectFactory.create(label="state2")
+
+        workflow = WorkflowFactory.create(name="test_workflow1")
+
+        TransitionApprovalMetaFactory.create(
+            content_type=content_type,
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0
+        )
+        test_model = TestModel.objects.create()
+        self.assertTrue(hasattr(test_model, "river"))
+        self.assertIsInstance(test_model.river, RiverObject)
+        self.assertTrue(hasattr(test_model.river, "test_workflow1"))
+        self.assertIsInstance(test_model.river.test_workflow1, InstanceWorkflowObject)
+
+        self.assertTrue(test_model.river.test_workflow1.on_initial_state)
+        self.assertFalse(test_model.river.test_workflow1.on_final_state)
+
+        self.assertFalse(test_model.river.test_workflow1.is_complete)
+
+        self.assertEquals(state1, TestModel.river.test_workflow1.initial_state)
+        self.assertEquals(1, TestModel.river.test_workflow1.final_states.count())
+        self.assertEquals(state2, TestModel.river.test_workflow1.final_states[0])
