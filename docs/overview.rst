@@ -30,18 +30,6 @@ Requirements
 * Django 2.0 is supported with ``Python3.5`` and ``Python3.6``
 * Django 1.7 is not for ``Python3.5``
   
-  
-Features
---------
-* Multiple model
-* Unlimited states
-* Multiple destination
-* Multiple end-point
-* Circular state machines
-* Transition authorization
-* Skipping or disabling spesific step
-* Custom transition hooks
-  
 Example Scenarios
 -----------------
 Something Like JIRA

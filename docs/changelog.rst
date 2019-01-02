@@ -3,8 +3,14 @@
 Change Logs
 ===========
 
-0.10.0(Development)
+1.0.0(Development)
 ------------------
+``django-river`` is finally having it's first major version bump. In this version, all code and the APIs are revisited
+and are much easier to understand how it works and much easier to use it now. In some places even more performant. 
+There are also more documentation with this version. Stay tuned :-)
+
+0.10.0(Stable)
+--------------
 
 * # 39_ - **Improvement** -  Django has dropped support for pypy-3. So, It should be dropped from django itself too.
 * **Remove** -  ``pypy`` support has been dropped
@@ -13,7 +19,7 @@ Change Logs
 
 .. _39: https://github.com/javrasya/django-river/issues/39
 
-0.9.0(Stable)
+0.9.0
 -------------
 
 * # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
