@@ -66,7 +66,7 @@ class ClassWorkflowObject(object):
         initial_states = State.objects.filter(
             pk__in=TransitionApprovalMeta.objects.filter(
                 content_type=self._content_type,
-                workflow__name=self.name,
+                field_name=self.name,
                 parents__isnull=True
             ).values_list("source_state", flat=True)
         )
@@ -82,7 +82,7 @@ class ClassWorkflowObject(object):
     def final_states(self):
         return State.objects.filter(
             pk__in=TransitionApprovalMeta.objects.filter(
-                workflow__name=self.name,
+                field_name=self.name,
                 children__isnull=True,
                 content_type=self._content_type
             ).values_list("destination_state", flat=True)
@@ -99,12 +99,12 @@ class InstanceWorkflowObject(object):
         self.initialized = False
 
     def initialize_transitions(self):
-        if not self.initialized and not TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow__name=self.name).count():
+        if not self.initialized and not TransitionApproval.objects.filter(workflow_object=self.workflow_object, field_name=self.name).count():
             content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
-            for transition_approval_meta in TransitionApprovalMeta.objects.filter(workflow__name=self.name, content_type=content_type):
+            for transition_approval_meta in TransitionApprovalMeta.objects.filter(field_name=self.name, content_type=content_type):
                 transition_approval, created = TransitionApproval.objects.update_or_create(
                     workflow_object=self.workflow_object,
-                    workflow=transition_approval_meta.workflow,
+                    field_name=transition_approval_meta.field_name,
                     source_state=transition_approval_meta.source_state,
                     destination_state=transition_approval_meta.destination_state,
                     priority=transition_approval_meta.priority,
@@ -123,7 +123,7 @@ class InstanceWorkflowObject(object):
     def is_complete(self):
         return TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
-            workflow__name=self.name,
+            field_name=self.name,
             source_state=self.get_state()
         ).count() == 0
 
@@ -146,7 +146,7 @@ class InstanceWorkflowObject(object):
     def current_transition_approval(self):
         try:
 
-            return getattr(self.workflow_object, "transitions_in_" + self.name).filter(transaction_date__isnull=False).latest('transaction_date')
+            return getattr(self.workflow_object,  self.name+"_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
         except TransitionApproval.DoesNotExist:
             return None
 
@@ -173,7 +173,6 @@ class InstanceWorkflowObject(object):
     def get_available_transition_approvals(self, as_user=None, source_states=None, destination_state=None, god_mod=False):
         def get_transition_approvals(transition_approvals):
             min_priority = transition_approvals.aggregate(Min('priority'))['priority__min']
-            min_priority = min_priority if min_priority is not None else -1
             transition_approvals = transition_approvals.filter(priority=min_priority)
 
             if destination_state:
@@ -208,7 +207,7 @@ class InstanceWorkflowObject(object):
 
         transition_approvals = TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
-            workflow__name=self.name,
+            field_name=self.name,
             source_state__in=source_states,
             status=PENDING,
             enabled=True
@@ -222,7 +221,7 @@ class InstanceWorkflowObject(object):
         skipped_transition_approvals = get_transition_approvals(transition_approvals.filter(skip=True))
         if skipped_transition_approvals:
             source_state_pks = list(skipped_transition_approvals.values_list('destination_state', flat=True))
-            suitable_transition_approvals = skipped_transition_approvals | self.get_available_transition_approvals(
+            suitable_transition_approvals = suitable_transition_approvals | self.get_available_transition_approvals(
                 as_user=as_user,
                 source_states=State.objects.filter(pk__in=source_state_pks),
                 destination_state=destination_state,
@@ -231,7 +230,7 @@ class InstanceWorkflowObject(object):
         return suitable_transition_approvals
 
     @atomic
-    def proceed(self, as_user, next_state=None, god_mod=False):
+    def approve(self, as_user, next_state=None, god_mod=False):
         def process(action, next_state=None, god_mod=False):
             available_transition_approvals = self.get_available_transition_approvals(as_user=as_user, god_mod=god_mod)
             c = available_transition_approvals.count()
@@ -285,7 +284,7 @@ class InstanceWorkflowObject(object):
         current_states = list(current_states.values_list('pk', flat=True)) if current_states else [self.get_state()]
         next_transition_approvals = TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
-            workflow__name=self.name,
+            field_name=self.name,
             source_state__in=current_states
         )
         if self.current_transition_approval:
@@ -316,7 +315,7 @@ class InstanceWorkflowObject(object):
                 destination_state=ta.destination_state,
                 content_type=ta.content_type,
                 object_id=ta.object_id,
-                workflow=ta.workflow,
+                field_name=ta.field_name,
                 skip=ta.skip,
                 priority=ta.priority,
                 enabled=ta.enabled,
@@ -351,44 +350,40 @@ class RiverObject(object):
         self.field_name = field_name
         self.is_class = inspect.isclass(owner)
 
-    def __getattr__(self, workflow_name):
+    def __getattr__(self, field_name):
         cls = self.owner if self.is_class else self.owner.__class__
-        if workflow_name not in workflow_registry.workflows[id(cls)]:
-            raise Exception("Workflow with name:%s doesn't exist for class:%s" % (workflow_name, cls.__name__))
+        if field_name not in workflow_registry.workflows[id(cls)]:
+            raise Exception("Workflow with name:%s doesn't exist for class:%s" % (field_name, cls.__name__))
         if self.is_class:
-            return ClassWorkflowObject(self.owner, workflow_name, self.field_name)
+            return ClassWorkflowObject(self.owner, field_name, self.field_name)
         else:
-            return InstanceWorkflowObject(self.owner, workflow_name, self.field_name)
+            return InstanceWorkflowObject(self.owner, field_name, self.field_name)
 
     def all(self, cls):
-        return list([getattr(self, workflow_name) for workflow_name in workflow_registry.workflows[id(cls)]])
+        return list([getattr(self, field_name) for field_name in workflow_registry.workflows[id(cls)]])
 
 
 registered_classes = set()
 
 
 class StateField(models.ForeignKey):
-    def __init__(self, workflow_name, *args, **kwargs):
-        self.workflow_name = workflow_name
+    def __init__(self, *args, **kwargs):
+        self.field_name = None
         kwargs['null'] = True
         kwargs['blank'] = True
         kwargs['to'] = '%s.%s' % (State._meta.app_label, State._meta.object_name)
         kwargs['on_delete'] = kwargs.get('on_delete', CASCADE)
         super(StateField, self).__init__(*args, **kwargs)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        args = [self.workflow_name] + args
-        return name, path, args, kwargs
-
     def contribute_to_class(self, cls, name):
         @classproperty
         def river(_self):
             return RiverObject(_self, name)
 
-        workflow_registry.add(self.workflow_name, cls)
+        self.field_name = name
+        workflow_registry.add(self.field_name, cls)
 
-        self._add_to_class(cls, "transitions_in_" + self.workflow_name, GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
+        self._add_to_class(cls, self.field_name + "_transitions", GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
 
         if cls not in registered_classes:
             self._add_to_class(cls, "river", river)
