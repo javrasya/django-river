@@ -1,8 +1,7 @@
-from django.db.models import CASCADE, DO_NOTHING
+from django.db.models import CASCADE
 from mptt.fields import TreeOneToOneField
 
 from river.models import State, TransitionApprovalMeta
-from river.models.workflow import Workflow
 
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -36,8 +35,10 @@ class TransitionApproval(BaseModel):
         verbose_name_plural = _("Transition Approvals")
 
     objects = TransitionApprovalManager()
-    workflow = models.ForeignKey(Workflow, verbose_name=_('Workflow'), on_delete=DO_NOTHING)
+
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=CASCADE)
+    field_name = models.CharField(_("Field Name"), max_length=200)
+
     object_id = models.CharField(max_length=50, verbose_name=_('Related Object'))
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
