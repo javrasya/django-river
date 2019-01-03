@@ -1,9 +1,8 @@
-import factory
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, UserObjectFactory
 from river.tests.models import TestModel
-from river.tests.models.factories import TestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -17,108 +16,163 @@ class BaseTestCase(TestCase):
         super(BaseTestCase, self).tearDown()
         print('%s is finished' % self.__class__)
 
-    def initialize_normal_scenario(self):
-        from river.models.factories import \
-            TransitionObjectFactory, \
-            UserObjectFactory, \
-            PermissionObjectFactory, \
-            TransitionMetadataFactory, \
-            StateObjectFactory
-
-        TransitionObjectFactory.reset_sequence(0)
-        TransitionMetadataFactory.reset_sequence(0)
+    def initialize_standard_scenario(self):
+        TransitionApprovalMetaFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
-        TestModel.objects.all().delete()
 
-        self.content_type = ContentType.objects.get_for_model(TestModel)
-        self.permissions = PermissionObjectFactory.create_batch(4)
-        self.user1 = UserObjectFactory(user_permissions=[self.permissions[0]])
-        self.user2 = UserObjectFactory(user_permissions=[self.permissions[1]])
-        self.user3 = UserObjectFactory(user_permissions=[self.permissions[2]])
-        self.user4 = UserObjectFactory(user_permissions=[self.permissions[3]])
+        content_type = ContentType.objects.get_for_model(TestModel)
+        permissions = PermissionObjectFactory.create_batch(4)
+        self.user1 = UserObjectFactory(user_permissions=[permissions[0]])
+        self.user2 = UserObjectFactory(user_permissions=[permissions[1]])
+        self.user3 = UserObjectFactory(user_permissions=[permissions[2]])
+        self.user4 = UserObjectFactory(user_permissions=[permissions[3]])
 
-        self.states = StateObjectFactory.create_batch(
-            9,
-            label=factory.Sequence(
-                lambda n: "s%s" % str(n + 1) if n <= 4 else ("s4.%s" % str(n - 4) if n <= 6 else "s5.%s" % str(n - 6)))
+        self.state1 = StateObjectFactory(label="state1")
+        self.state2 = StateObjectFactory(label="state2")
+        self.state3 = StateObjectFactory(label="state3")
+        self.state4 = StateObjectFactory(label="state4")
+        self.state5 = StateObjectFactory(label="state5")
+
+        self.state41 = StateObjectFactory(label="state4.1")
+        self.state42 = StateObjectFactory(label="state4.2")
+
+        self.state51 = StateObjectFactory(label="state5.1")
+        self.state52 = StateObjectFactory(label="state5.2")
+
+        t1 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state1,
+            destination_state=self.state2,
+            priority=0
         )
-        self.transitions = TransitionObjectFactory.create_batch(8,
-                                                                source_state=factory.Sequence(
-                                                                    lambda n: self.states[n] if n <= 2 else (
-                                                                        self.states[n - 1]) if n <= 4 else (
-                                                                        self.states[n - 2] if n <= 6 else self.states[
-                                                                            4])),
-                                                                destination_state=factory.Sequence(
-                                                                    lambda n: self.states[n + 1]))
+        t1.permissions.add(permissions[0])
 
-        self.proceeding_metas = TransitionMetadataFactory.create_batch(
-            9,
-            content_type=self.content_type,
-            transition=factory.Sequence(lambda n: self.transitions[n] if n <= 1 else self.transitions[n - 1]),
-            order=factory.Sequence(lambda n: 1 if n == 2 else 0)
+        t2 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state2,
+            destination_state=self.state3,
+            priority=0
         )
+        t2.permissions.add(permissions[1])
 
-        for n, proceeding_meta in enumerate(self.proceeding_metas):
-            proceeding_meta.permissions.add(self.permissions[n] if n <= 3 else self.permissions[3])
+        t3 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state2,
+            destination_state=self.state3,
+            priority=1
+        )
+        t3.permissions.add(permissions[2])
 
-        self.objects = TestModelObjectFactory.create_batch(2)
+        t4 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state3,
+            destination_state=self.state4,
+            priority=0
+        )
+        t4.permissions.add(permissions[3])
+
+        t5 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state3,
+            destination_state=self.state5,
+            priority=0
+        )
+        t5.permissions.add(permissions[3])
+
+        t6 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state4,
+            destination_state=self.state41,
+            priority=0
+        )
+        t6.permissions.add(permissions[3])
+
+        t7 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state4,
+            destination_state=self.state42,
+            priority=0
+        )
+        t7.permissions.add(permissions[3])
+
+        t8 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state5,
+            destination_state=self.state51,
+            priority=0
+        )
+        t8.permissions.add(permissions[3])
+
+        t9 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.state5,
+            destination_state=self.state52,
+            priority=0
+        )
+        t9.permissions.add(permissions[3])
 
     def initialize_circular_scenario(self):
-        from river.models.factories import \
-            TransitionObjectFactory, \
-            UserObjectFactory, \
-            PermissionObjectFactory, \
-            TransitionApprovalMetaFactory, \
-            StateObjectFactory
-
-        TransitionObjectFactory.reset_sequence(0)
-        TransitionMetadataFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
-        TestModel.objects.all().delete()
+        TransitionApprovalMetaFactory.reset_sequence(0)
 
-        self.content_type = ContentType.objects.get_for_model(TestModel)
-        self.permissions = PermissionObjectFactory.create_batch(4)
-        self.user1 = UserObjectFactory(user_permissions=[self.permissions[0]])
-        self.user2 = UserObjectFactory(user_permissions=[self.permissions[1]])
-        self.user3 = UserObjectFactory(user_permissions=[self.permissions[2]])
-        self.user4 = UserObjectFactory(user_permissions=[self.permissions[3]])
+        content_type = ContentType.objects.get_for_model(TestModel)
+        permissions = PermissionObjectFactory.create_batch(4)
+        self.user1 = UserObjectFactory(user_permissions=[permissions[0]])
+        self.user2 = UserObjectFactory(user_permissions=[permissions[1]])
+        self.user3 = UserObjectFactory(user_permissions=[permissions[2]])
+        self.user4 = UserObjectFactory(user_permissions=[permissions[3]])
 
+        self.open_state = StateObjectFactory(label='open')
+        self.in_progress_state = StateObjectFactory(label='in-progress')
+        self.resolved_state = StateObjectFactory(label='resolved')
+        self.re_opened_state = StateObjectFactory(label='re-opened')
+        self.closed_state = StateObjectFactory(label='closed')
 
-        self.open_state = StateObjectFactory(
-            label='open'
+        t1 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.open_state,
+            destination_state=self.in_progress_state,
         )
-        self.in_progress_state = StateObjectFactory(
-            label='in-progress'
+        t1.permissions.add(permissions[0])
+
+        t2 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.in_progress_state,
+            destination_state=self.resolved_state,
         )
+        t2.permissions.add(permissions[1])
 
-        self.resolved_state = StateObjectFactory(
-            label='resolved'
+        t3 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.resolved_state,
+            destination_state=self.re_opened_state,
         )
-        self.re_opened_state = StateObjectFactory(
-            label='re-opened'
+        t3.permissions.add(permissions[2])
+
+        t4 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.resolved_state,
+            destination_state=self.closed_state,
         )
+        t4.permissions.add(permissions[3])
 
-        self.closed_state = StateObjectFactory(
-            label='closed'
+        t5 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.re_opened_state,
+            destination_state=self.in_progress_state,
         )
-
-        self.transitions = [
-            TransitionObjectFactory(source_state=self.open_state, destination_state=self.in_progress_state),
-            TransitionObjectFactory(source_state=self.in_progress_state,
-                                    destination_state=self.resolved_state),
-            TransitionObjectFactory(source_state=self.resolved_state,
-                                    destination_state=self.re_opened_state),
-            TransitionObjectFactory(source_state=self.resolved_state, destination_state=self.closed_state),
-            TransitionObjectFactory(source_state=self.re_opened_state, destination_state=self.in_progress_state)]
-
-        self.proceeding_metas = TransitionApprovalMetaFactory.create_batch(
-            5,
-            content_type=self.content_type,
-            transition=factory.Sequence(lambda n: self.transitions[n]),
-            order=0
-        )
-
-        for n, proceeding_meta in enumerate(self.proceeding_metas):
-            proceeding_meta.permissions.add(self.permissions[n] if n < len(self.permissions) else self.permissions[0])
-
-        self.objects = TestModelObjectFactory.create_batch(2)
+        t5.permissions.add(permissions[0])

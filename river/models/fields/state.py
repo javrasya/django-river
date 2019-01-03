@@ -9,6 +9,8 @@ from django.db.models.signals import post_save
 from django.db.transaction import atomic
 
 from river.config import app_config
+from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
+from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 from river.models.transitionapprovalmeta import TransitionApprovalMeta
 from river.signals import ProceedingSignal, TransitionSignal, FinalSignal
 from river.utils.error_code import ErrorCode
@@ -146,7 +148,7 @@ class InstanceWorkflowObject(object):
     def current_transition_approval(self):
         try:
 
-            return getattr(self.workflow_object,  self.name+"_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
+            return getattr(self.workflow_object, self.name + "_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
         except TransitionApproval.DoesNotExist:
             return None
 
@@ -263,6 +265,7 @@ class InstanceWorkflowObject(object):
         rest_of_transition_approvals = self.get_available_transition_approvals(destination_state=next_state, god_mod=True)
 
         transition_status = False
+        previous_state = self.get_state()
         if rest_of_transition_approvals.count() == 0:
             self.set_state(transition_approval.destination_state)
             transition_status = True
@@ -271,11 +274,13 @@ class InstanceWorkflowObject(object):
             self._cycle_proceedings()
             # ProceedingService.get_next_proceedings(workflow_object).update(status=PENDING)
 
-        with ProceedingSignal(self.workflow_object, transition_approval), TransitionSignal(transition_status, self.workflow_object, transition_approval), FinalSignal(self.workflow_object, self.name):
+        with ProceedingSignal(self.workflow_object, self.field_name, transition_approval), \
+             TransitionSignal(transition_status, self.workflow_object, self.field_name, transition_approval), \
+             FinalSignal(self.workflow_object, self.field_name):
             self.workflow_object.save()
 
         LOGGER.debug("Workflow object %s is proceeded for next transition. Transition: %s -> %s" % (
-            self.workflow_object, self.get_state().label, self.get_state()))
+            self.workflow_object, previous_state, self.get_state()))
 
     def _get_next_transition_approvals(self, transition_approval_pks=None, current_states=None, index=0, limit=None):
         if not transition_approval_pks:
@@ -335,6 +340,18 @@ class InstanceWorkflowObject(object):
 
     def set_state(self, state):
         return setattr(self.workflow_object, self.field_name, state)
+
+    def hook_post_transition(self, callback, *args, **kwargs):
+        PostTransitionHooking.register(callback, self.workflow_object, self.field_name, *args, **kwargs)
+
+    def hook_pre_transition(self, callback, *args, **kwargs):
+        PreTransitionHooking.register(callback, self.workflow_object, self.field_name, *args, **kwargs)
+
+    def hook_post_complete(self, callback):
+        PostCompletedHooking.register(callback, self.workflow_object, self.field_name)
+
+    def hook_pre_complete(self, callback):
+        PreCompletedHooking.register(callback, self.workflow_object, self.field_name)
 
 
 class classproperty(object):

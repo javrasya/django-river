@@ -1,14 +1,14 @@
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
 
 from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory
 from river.models.fields.state import RiverObject, InstanceWorkflowObject, ClassWorkflowObject
+from river.tests.base_test import BaseTestCase
 from river.tests.models.testmodel import TestModel
 
 __author__ = 'ahmetdal'
 
 
-class StateFieldTest(TestCase):
+class StateFieldTest(BaseTestCase):
 
     def test_injections(self):
         self.assertTrue(hasattr(TestModel, 'river'))

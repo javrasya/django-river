@@ -14,8 +14,8 @@ class RiverApp(AppConfig):
 
     def ready(self):
 
-        from river.handlers.backends.database import DatabaseHandlerBackend
-        from river.handlers.backends.loader import handler_backend
+        from river.hooking.backends.database import DatabaseHookingBackend
+        from river.hooking.backends.loader import callback_backend
         from river.models.fields.state import workflow_registry
 
         for field_name in workflow_registry.workflows:
@@ -23,10 +23,10 @@ class RiverApp(AppConfig):
             if transition_approval_meta.count() == 0:
                 LOGGER.warning("%s field doesn't seem have any transition approval meta in database" % field_name)
 
-        if isinstance(handler_backend, DatabaseHandlerBackend):
+        if isinstance(callback_backend, DatabaseHookingBackend):
             try:
-                self.get_model('Handler').objects.exists()
-                handler_backend.initialize_handlers()
+                self.get_model('Callback').objects.exists()
+                callback_backend.initialize_callbacks()
             except (OperationalError, ProgrammingError):
-                LOGGER.debug('Database handlers are not registered. Because database is not created yet.')
+                LOGGER.debug('Database hookings are not registered. Because database is not created yet.')
         LOGGER.debug('RiverApp is loaded.')

@@ -3,7 +3,7 @@ from river.tests.models import TestModel
 __author__ = 'ahmetdal'
 
 
-class TestModelObjectFactory():
+class TestModelObjectFactory(object):
     def __init__(self):
         self.model = TestModel.objects.create(test_field="")
 
