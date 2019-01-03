@@ -58,9 +58,9 @@ Simple Jira Example
 Requirements
 ------------
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
-* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``)
-* Django 2.0 is supported with ``Python3.5`` and ``Python3.6``
-* Django 1.7 is not for ``Python3.5``
+* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``,``2.1``)
+* ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
+* ``Django`` == 1.7 is only supported for ``Python`` == 2.7 and ``Python``== 3.4
 
 Example Scenarios
 -----------------
