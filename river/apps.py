@@ -16,12 +16,6 @@ class RiverApp(AppConfig):
 
         from river.hooking.backends.database import DatabaseHookingBackend
         from river.hooking.backends.loader import callback_backend
-        from river.models.fields.state import workflow_registry
-
-        for field_name in workflow_registry.workflows:
-            transition_approval_meta = self.get_model('TransitionApprovalMeta').objects.filter(field_name=field_name)
-            if transition_approval_meta.count() == 0:
-                LOGGER.warning("%s field doesn't seem have any transition approval meta in database" % field_name)
 
         if isinstance(callback_backend, DatabaseHookingBackend):
             try:
