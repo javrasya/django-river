@@ -12,21 +12,21 @@ __author__ = 'ahmetdal'
 
 class RiverTest(BaseTestCase):
 
-    def test_get_objects_waiting_for_approval_for_user(self):
+    def test_get_on_approval_objects(self):
         self.initialize_standard_scenario()
         objects = TestModelObjectFactory.create_batch(2)
 
-        on_approval_objects = TestModel.river.my_field.get_objects_waiting_for_approval(as_user=self.user1)
+        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user1)
         self.assertEqual(2, on_approval_objects.count())
         self.assertEqual(objects[0], on_approval_objects[0])
 
-        on_approval_objects = TestModel.river.my_field.get_objects_waiting_for_approval(as_user=self.user2)
+        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user2)
         self.assertEqual(0, on_approval_objects.count())
 
-        on_approval_objects = TestModel.river.my_field.get_objects_waiting_for_approval(as_user=self.user3)
+        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user3)
         self.assertEqual(0, on_approval_objects.count())
 
-        on_approval_objects = TestModel.river.my_field.get_objects_waiting_for_approval(as_user=self.user4)
+        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user4)
         self.assertEqual(0, on_approval_objects.count())
 
     def test_get_available_states(self):
@@ -61,23 +61,23 @@ class RiverTest(BaseTestCase):
         self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user1)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user1)
         self.assertEqual(1, transition_approvals.count())
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user2)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user2)
         self.assertEqual(0, transition_approvals.count())
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user3)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user3)
         self.assertEqual(0, transition_approvals.count())
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(0, transition_approvals.count())
 
     def test_get_waiting_transition_approvals_with_skip(self):
         self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user1)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user1)
         self.assertEqual(1, transition_approvals.count())
         self.assertEqual(self.state2, transition_approvals[0].destination_state)
 
@@ -87,7 +87,7 @@ class RiverTest(BaseTestCase):
             destination_state=self.state2
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user2)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user2)
         self.assertEqual(1, transition_approvals.count())
         self.assertEqual(self.state3, transition_approvals[0].destination_state)
 
@@ -97,7 +97,7 @@ class RiverTest(BaseTestCase):
             destination_state=self.state3
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(2, transition_approvals.count())
         self.assertEqual(self.state4, transition_approvals[0].destination_state)
         self.assertEqual(self.state5, transition_approvals[1].destination_state)
@@ -108,7 +108,7 @@ class RiverTest(BaseTestCase):
             destination_state=self.state4
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(3, transition_approvals.count())
         self.assertEqual(self.state5, transition_approvals[0].destination_state)
         self.assertEqual(self.state41, transition_approvals[1].destination_state)
@@ -126,7 +126,7 @@ class RiverTest(BaseTestCase):
             destination_state=self.state5
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(3, transition_approvals.count())
         self.assertEqual(self.state4, transition_approvals[0].destination_state)
         self.assertEqual(self.state51, transition_approvals[1].destination_state)
@@ -138,7 +138,7 @@ class RiverTest(BaseTestCase):
             destination_state__in=[self.state4, self.state5]
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(4, transition_approvals.count())
         self.assertEqual(self.state41, transition_approvals[0].destination_state)
         self.assertEqual(self.state42, transition_approvals[1].destination_state)
@@ -151,7 +151,7 @@ class RiverTest(BaseTestCase):
             destination_state__in=[self.state41, self.state51]
         ).update(skip=True)
 
-        transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user4)
+        transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user4)
         self.assertEqual(2, transition_approvals.count())
         self.assertEqual(self.state42, transition_approvals[0].destination_state)
         self.assertEqual(self.state52, transition_approvals[1].destination_state)
