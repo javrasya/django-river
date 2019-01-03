@@ -319,7 +319,9 @@ class InstanceWorkflowObject(object):
                 skip=ta.skip,
                 priority=ta.priority,
                 enabled=ta.enabled,
-                status=PENDING)
+                status=PENDING,
+                meta=ta.meta
+            )
 
             if c:
                 clone_transition_approval.permissions.add(*ta.permissions.all())

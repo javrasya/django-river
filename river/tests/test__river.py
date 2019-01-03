@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
-from river.models import TransitionApproval, APPROVED
+from river.models import TransitionApproval, APPROVED, TransitionApprovalMeta
 from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, UserObjectFactory, PermissionObjectFactory
 from river.tests.models.factories import TestModelObjectFactory
 from river.tests.models.testmodel import TestModel
@@ -13,10 +13,8 @@ __author__ = 'ahmetdal'
 
 class RiverTest(TestCase):
 
-    def setUp(self):
-        self.initialize_advance_scenario()
-
     def test_get_objects_waiting_for_approval_for_user(self):
+        self.initialize_standard_scenario()
         objects = TestModelObjectFactory.create_batch(2)
 
         on_approval_objects = TestModel.river.my_field.get_objects_waiting_for_approval(as_user=self.user1)
@@ -33,6 +31,7 @@ class RiverTest(TestCase):
         self.assertEqual(0, on_approval_objects.count())
 
     def test_get_available_states(self):
+        self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
         available_states = object.river.my_field.get_available_states()
         self.assertEqual(1, available_states.count())
@@ -52,12 +51,15 @@ class RiverTest(TestCase):
         self.assertEqual(0, available_states.count())
 
     def test_get_initial_state(self):
+        self.initialize_standard_scenario()
         self.assertEqual(self.state1, TestModel.river.my_field.initial_state)
 
     def test_get_final_states(self):
+        self.initialize_standard_scenario()
         self.assertListEqual([self.state41, self.state42, self.state51, self.state52], list(TestModel.river.my_field.final_states))
 
     def test_get_waiting_transition_approvals_without_skip(self):
+        self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
 
         transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user1)
@@ -73,6 +75,7 @@ class RiverTest(TestCase):
         self.assertEqual(0, transition_approvals.count())
 
     def test_get_waiting_transition_approvals_with_skip(self):
+        self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
 
         transition_approvals = object.river.my_field.get_available_transition_approvals(as_user=self.user1)
@@ -155,6 +158,7 @@ class RiverTest(TestCase):
         self.assertEqual(self.state52, transition_approvals[1].destination_state)
 
     def test_proceed(self):
+        self.initialize_standard_scenario()
         object = TestModelObjectFactory.create_batch(1)[0]
 
         # ####################
@@ -331,7 +335,68 @@ class RiverTest(TestCase):
         self.assertEqual(self.user4, transition_approvals[0].transactioner)
         self.assertIsNotNone(transition_approvals[0].transaction_date)
 
-    def initialize_advance_scenario(self):
+    def test_cycle_proceedings(self):
+        self.initialize_circular_scenario()
+        object = TestModelObjectFactory.create_batch(1)[0]
+
+        # No Cycle
+        self.assertFalse(object.river.my_field._cycle_proceedings())
+        object.river.my_field.approve(as_user=self.user1, next_state=self.in_progress_state, god_mod=True)
+        self.assertEqual(5, TransitionApproval.objects.filter(object_id=object.pk).count())
+
+        # No Cycle
+        self.assertFalse(object.river.my_field._cycle_proceedings())
+        object.river.my_field.approve(as_user=self.user2, next_state=self.resolved_state, god_mod=True)
+        self.assertEqual(5, TransitionApproval.objects.filter(object_id=object.pk).count())
+
+        # State is re-opened and cycle is detected. Transition in-progress to resolved proceeding is cloned
+        self.assertFalse(object.river.my_field._cycle_proceedings())
+        object.river.my_field.approve(as_user=self.user3, next_state=self.re_opened_state, god_mod=True)
+        self.assertEqual(6, TransitionApproval.objects.filter(object_id=object.pk).count())
+
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.in_progress_state, destination_state=self.resolved_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # There will be no cycling even if the method is invoked. Because cycling is done in proceeding.
+        self.assertFalse(object.river.my_field._cycle_proceedings())
+        self.assertEqual(6, TransitionApproval.objects.filter(object_id=object.pk).count())
+
+        # State is in-progress and cycle is detected. Transition resolved to re-opened proceeding is cloned
+        object.river.my_field.approve(as_user=self.user3, next_state=self.in_progress_state, god_mod=True)
+        self.assertEqual(7, TransitionApproval.objects.filter(object_id=object.pk).count())
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.resolved_state, destination_state=self.re_opened_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # State is resolved and cycle is detected. Transition re-opened to in-progress proceeding is cloned
+        object.river.my_field.approve(as_user=self.user3, next_state=self.resolved_state, god_mod=True)
+        self.assertEqual(8, TransitionApproval.objects.filter(object_id=object.pk).count())
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.re_opened_state, destination_state=self.in_progress_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # State is re-opened and cycle is detected. Transition  in-progress to resolved proceeding is cloned
+        self.assertFalse(object.river.my_field._cycle_proceedings())
+        object.river.my_field.approve(as_user=self.user3, next_state=self.re_opened_state, god_mod=True)
+        self.assertEqual(9, TransitionApproval.objects.filter(object_id=object.pk).count())
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.in_progress_state, destination_state=self.resolved_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # State is in-progress and cycle is detected. Transition resolved to re-opened proceeding is cloned
+        object.river.my_field.approve(as_user=self.user3, next_state=self.in_progress_state, god_mod=True)
+        self.assertEqual(10, TransitionApproval.objects.filter(object_id=object.pk).count())
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.resolved_state, destination_state=self.re_opened_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # State is resolved and cycle is detected. Transition re-opened to in-progress proceeding is cloned
+        object.river.my_field.approve(as_user=self.user3, next_state=self.resolved_state, god_mod=True)
+        self.assertEqual(11, TransitionApproval.objects.filter(object_id=object.pk).count())
+        self.assertEqual(TransitionApprovalMeta.objects.get(source_state=self.re_opened_state, destination_state=self.in_progress_state),
+                         TransitionApproval.objects.filter(object_id=object.pk).latest('date_created').meta)
+
+        # No Cycle for closed state.
+        object.river.my_field.approve(as_user=self.user4, next_state=self.closed_state, god_mod=True)
+        self.assertEqual(11, TransitionApproval.objects.filter(object_id=object.pk).count())
+
+    def initialize_standard_scenario(self):
         TransitionApprovalMetaFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)
 
@@ -434,3 +499,60 @@ class RiverTest(TestCase):
             priority=0
         )
         t9.permissions.add(permissions[3])
+
+    def initialize_circular_scenario(self):
+        StateObjectFactory.reset_sequence(0)
+        TransitionApprovalMetaFactory.reset_sequence(0)
+
+        content_type = ContentType.objects.get_for_model(TestModel)
+        permissions = PermissionObjectFactory.create_batch(4)
+        self.user1 = UserObjectFactory(user_permissions=[permissions[0]])
+        self.user2 = UserObjectFactory(user_permissions=[permissions[1]])
+        self.user3 = UserObjectFactory(user_permissions=[permissions[2]])
+        self.user4 = UserObjectFactory(user_permissions=[permissions[3]])
+
+        self.open_state = StateObjectFactory(label='open')
+        self.in_progress_state = StateObjectFactory(label='in-progress')
+        self.resolved_state = StateObjectFactory(label='resolved')
+        self.re_opened_state = StateObjectFactory(label='re-opened')
+        self.closed_state = StateObjectFactory(label='closed')
+
+        t1 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.open_state,
+            destination_state=self.in_progress_state,
+        )
+        t1.permissions.add(permissions[0])
+
+        t2 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.in_progress_state,
+            destination_state=self.resolved_state,
+        )
+        t2.permissions.add(permissions[1])
+
+        t3 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.resolved_state,
+            destination_state=self.re_opened_state,
+        )
+        t3.permissions.add(permissions[2])
+
+        t4 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.resolved_state,
+            destination_state=self.closed_state,
+        )
+        t4.permissions.add(permissions[3])
+
+        t5 = TransitionApprovalMetaFactory.create(
+            field_name="my_field",
+            content_type=content_type,
+            source_state=self.re_opened_state,
+            destination_state=self.in_progress_state,
+        )
+        t5.permissions.add(permissions[0])

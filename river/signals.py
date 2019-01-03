@@ -67,7 +67,7 @@ class ProceedingSignal(object):
             workflow_object=self.workflow_object,
             proceeding=self.proceeding,
         )
-        LOGGER.debug("Pre proceeding signal IS sent for workflow object %s for transition %s -> %s" % (
+        LOGGER.debug("Pre proceeding signal is sent for workflow object %s for transition %s -> %s" % (
             self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
 
     def __exit__(self, type, value, traceback):
@@ -76,7 +76,7 @@ class ProceedingSignal(object):
             workflow_object=self.workflow_object,
             proceeding=self.proceeding,
         )
-        LOGGER.debug("Post proceeding signal IS sent for workflow object %s for transition %s -> %s" % (
+        LOGGER.debug("Post proceeding signal is sent for workflow object %s for transition %s -> %s" % (
             self.workflow_object, self.proceeding.source_state.label, self.proceeding.destination_state.label))
 
 
@@ -84,7 +84,8 @@ class FinalSignal(object):
     def __init__(self, workflow_object, workflow_name):
         self.workflow_object = workflow_object
         self.workflow_name = workflow_name
-        self.status = getattr(self.workflow_object.river, self.workflow_name).on_final_state
+        self.workflow = getattr(self.workflow_object.river, self.workflow_name)
+        self.status = self.workflow.on_final_state
 
     def __enter__(self):
         if self.status:
@@ -92,7 +93,7 @@ class FinalSignal(object):
                 sender=FinalSignal.__class__,
                 workflow_object=self.workflow_object,
             )
-            LOGGER.debug("Pre final signal IS sent for workflow object %s for final state %s" % (self.workflow_object, self.workflow_object.get_state().label))
+            LOGGER.debug("Pre final signal is sent for workflow object %s for final state %s" % (self.workflow_object, self.workflow.get_state().label))
 
     def __exit__(self, type, value, traceback):
         if self.status:
@@ -100,4 +101,4 @@ class FinalSignal(object):
                 sender=TransitionSignal.__class__,
                 workflow_object=self.workflow_object,
             )
-            LOGGER.debug("Post final signal IS sent for workflow object %s for final state %s" % (self.workflow_object, self.workflow_object.get_state().label))
+            LOGGER.debug("Post final signal is sent for workflow object %s for final state %s" % (self.workflow_object, self.workflow.get_state().label))
