@@ -12,9 +12,9 @@ def test_callback(*args, **kwargs):
     pass
 
 
-class DatabaseHookingBackend(BaseTestCase):
+class DatabaseHookingBackendTest(BaseTestCase):
     def setUp(self):
-        super(DatabaseHookingBackend, self).setUp()
+        super(DatabaseHookingBackendTest, self).setUp()
         self.field_name = "my_field"
         self.initialize_standard_scenario()
         app_config.HOOKING_BACKEND_CLASS = 'river.hooking.backends.database.DatabaseHookingBackend'

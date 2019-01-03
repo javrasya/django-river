@@ -86,6 +86,7 @@ Usage
    .. code:: bash
 
        pip install django-river
+       
 
    .. code:: python
 

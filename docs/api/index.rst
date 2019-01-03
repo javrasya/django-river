@@ -6,6 +6,6 @@ API Guide
 .. toctree::
     :maxdepth: 2
 
-    class/index
-    instance/index
+    class
+    instance
     

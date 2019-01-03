@@ -8,14 +8,6 @@ __author__ = 'ahmetdal'
 
 
 class BaseTestCase(TestCase):
-    def setUp(self):
-        super(BaseTestCase, self).setUp()
-        print('%s is initialized' % self.__class__)
-
-    def tearDown(self):
-        super(BaseTestCase, self).tearDown()
-        print('%s is finished' % self.__class__)
-
     def initialize_standard_scenario(self):
         TransitionApprovalMetaFactory.reset_sequence(0)
         StateObjectFactory.reset_sequence(0)

@@ -5,6 +5,11 @@ __author__ = 'ahmetdal'
 
 
 class TransitionHooking(Hooking):
+
+    @staticmethod
+    def get_result_exclusions():
+        return ["source_state", "destination_state"]
+
     @classmethod
     def get_hash(cls, workflow_object, field_name, source_state=None, destination_state=None, transition_approval=None, *args, **kwargs):
         return super(TransitionHooking, cls).get_hash(workflow_object, field_name) + ('source_state' + str(source_state.pk) if source_state else '') + (

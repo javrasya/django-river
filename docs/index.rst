@@ -40,8 +40,9 @@ Contents
 
    getting_started
    overview
-   api/index
    admin/index
+   api/index
+   hooking/index
    changelog
 
 

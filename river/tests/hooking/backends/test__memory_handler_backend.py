@@ -11,9 +11,9 @@ def test_handler(*args, **kwargs):
     pass
 
 
-class MemoryHookingBackend(BaseTestCase):
+class MemoryHookingBackendTest(BaseTestCase):
     def setUp(self):
-        super(MemoryHookingBackend, self).setUp()
+        super(MemoryHookingBackendTest, self).setUp()
         self.field_name = "my_field"
         self.initialize_standard_scenario()
         app_config.HOOKING_BACKEND_CLASS = 'river.hooking.backends.memory.MemoryHookingBackend'

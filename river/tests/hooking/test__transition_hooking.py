@@ -41,9 +41,7 @@ class TransitionHooking(BaseTestCase):
         self.assertDictEqual(
             {
                 'transition_approval': TransitionApproval.objects.get(object_id=objects[0].pk, source_state=self.state2, destination_state=self.state3,
-                                                                      permissions__in=Permission.objects.filter(user=self.user3)),
-                'source_state': self.state2,
-                'destination_state': self.state3
+                                                                      permissions__in=Permission.objects.filter(user=self.user3))
             }, self.test_kwargs)
 
     def test_register_for_a_transition(self):
@@ -78,7 +76,5 @@ class TransitionHooking(BaseTestCase):
         self.assertDictEqual(
             {
                 'transition_approval': TransitionApproval.objects.get(object_id=objects[0].pk, source_state=self.state2, destination_state=self.state3,
-                                                                      permissions__in=Permission.objects.filter(user=self.user3)),
-                'source_state': self.state2,
-                'destination_state': self.state3
+                                                                      permissions__in=Permission.objects.filter(user=self.user3))
             }, self.test_kwargs)

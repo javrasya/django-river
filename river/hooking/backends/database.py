@@ -44,7 +44,7 @@ class DatabaseHookingBackend(MemoryHookingBackend):
         if created:
             LOGGER.debug("Callback '%s' is registered in database as method %s and module %s. " % (callback_obj.hash, callback.__name__, callback.__module__))
         else:
-            LOGGER.warning("Callback '%s' is already registered in database as method %s and module %s. " % (callback_obj.hash, callback.__name__, callback.__module__))
+            LOGGER.debug("Callback '%s' is already registered in database as method %s and module %s. " % (callback_obj.hash, callback.__name__, callback.__module__))
 
         return hash
 

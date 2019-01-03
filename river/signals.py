@@ -7,8 +7,8 @@ __author__ = 'ahmetdal'
 pre_final = Signal(providing_args=["workflow_object", "field_name", ])
 post_final = Signal(providing_args=["workflow_object", "field_name", ])
 
-pre_transition = Signal(providing_args=["workflow_object", "field_name", "source_state", "destination_state", "transition_approval"])
-post_transition = Signal(providing_args=["workflow_object", "field_name", "source_state", "destination_state", "transition_approval"])
+pre_transition = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
+post_transition = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
 
 pre_proceed = Signal(providing_args=["workflow_object", "field_name", "proceeding"])
 post_proceed = Signal(providing_args=["workflow_object", "field_name", "proceeding"])
