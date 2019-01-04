@@ -2,7 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 
-from river.models.fields.state import StateField, workflow_registry
+from river.models.fields.state import StateField
+from river.core.workflowregistry import workflow_registry
 from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
 

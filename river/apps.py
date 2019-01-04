@@ -16,7 +16,7 @@ class RiverApp(AppConfig):
 
         from river.hooking.backends.database import DatabaseHookingBackend
         from river.hooking.backends.loader import callback_backend
-        from river.models.fields.state import workflow_registry
+        from river.core.workflowregistry import workflow_registry
 
         for field_name in workflow_registry.workflows:
             try:
