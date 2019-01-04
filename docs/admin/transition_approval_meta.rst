@@ -5,14 +5,11 @@ Transition Approval Meta Administration
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
 |           Field           |  Default   | Optional |       Format       |                Description                |
 +===========================+============+==========+====================+===========================================+
-| content_type              |            | False    | Django ContentType | | The content type of your class that     |
-|                           |            |          |                    | | contains a state field                  |
-+---------------------------+------------+----------+--------------------+-------------------------------------------+
-| field                     |            | False    | String             | | The name of the field that is in        |
-|                           |            |          |                    | | the model whose content type picked     |
-|                           |            |          |                    | | above. ``django-river`` will list       |
-|                           |            |          |                    | | all the possible field you can pick     |
-|                           |            |          |                    | | on the admin page                       |
+| workflow                  |            | False    | | Choice           | | Your model class along with the field   |
+|                           |            |          | | of               | | that you want to use this transition    |
+|                           |            | False    | | Strings          | | approval meta for. ``django-river``     |
+|                           |            |          |                    | | will list all the possible model and    |
+|                           |            |          |                    | | fields you can pick on the admin page   |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
 | source_state              |            | False    | State              | | Source state of the transition          |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
