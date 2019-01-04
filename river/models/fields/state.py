@@ -1,6 +1,7 @@
 import inspect
 import logging
 from datetime import datetime
+from uuid import uuid4
 
 from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
@@ -35,10 +36,12 @@ LOGGER = logging.getLogger(__name__)
 class WorkflowRegistry(object):
     def __init__(self):
         self.workflows = {}
+        self.class_index = {}
 
     def add(self, name, cls):
         self.workflows[id(cls)] = self.workflows.get(id(cls), set())
         self.workflows[id(cls)].add(name)
+        self.class_index[id(cls)] = cls
 
 
 workflow_registry = WorkflowRegistry()
@@ -385,6 +388,7 @@ class StateField(models.ForeignKey):
         kwargs['blank'] = True
         kwargs['to'] = '%s.%s' % (State._meta.app_label, State._meta.object_name)
         kwargs['on_delete'] = kwargs.get('on_delete', CASCADE)
+        kwargs['related_name'] = "rn" + str(uuid4()).replace("-", "")
         super(StateField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):

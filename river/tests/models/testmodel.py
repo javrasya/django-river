@@ -9,7 +9,6 @@ class TestModel(models.Model):
     test_field = models.CharField(max_length=50, null=True, blank=True)
     my_field = StateField()
 
-
 class TestModelWithoutStateField(models.Model):
     test_field = models.CharField(max_length=50, null=True, blank=True)
 
