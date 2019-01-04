@@ -3,7 +3,6 @@ import logging
 from django.apps import AppConfig
 from django.db.utils import OperationalError, ProgrammingError
 
-
 __author__ = 'ahmetdal'
 
 LOGGER = logging.getLogger(__name__)
@@ -15,13 +14,22 @@ class RiverApp(AppConfig):
 
     def ready(self):
 
-        from river.handlers.backends.database import DatabaseHandlerBackend
-        from river.handlers.backends.loader import handler_backend        
+        from river.hooking.backends.database import DatabaseHookingBackend
+        from river.hooking.backends.loader import callback_backend
+        from river.core.workflowregistry import workflow_registry
 
-        if isinstance(handler_backend, DatabaseHandlerBackend):
+        for field_name in workflow_registry.workflows:
             try:
-                self.get_model('Handler').objects.exists()
-                handler_backend.initialize_handlers()
+                transition_approval_meta = self.get_model('TransitionApprovalMeta').objects.filter(field_name=field_name)
+                if transition_approval_meta.count() == 0:
+                    LOGGER.warning("%s field doesn't seem have any transition approval meta in database. You should create it's TransitionApprovalMeta" % field_name)
             except (OperationalError, ProgrammingError):
-                LOGGER.debug('Database handlers are not registered. Because database is not created yet.')
+                pass
+
+        if isinstance(callback_backend, DatabaseHookingBackend):
+            try:
+                self.get_model('Callback').objects.exists()
+                callback_backend.initialize_callbacks()
+            except (OperationalError, ProgrammingError):
+                pass
         LOGGER.debug('RiverApp is loaded.')

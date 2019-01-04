@@ -1,6 +1,0 @@
-__author__ = 'ahmetdal'
-
-
-
-
-

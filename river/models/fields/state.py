@@ -1,9 +1,11 @@
-from django.contrib.contenttypes.models import ContentType
+import logging
+from uuid import uuid4
+
 from django.db.models import CASCADE
 from django.db.models.signals import post_save
 
-from river.utils.error_code import ErrorCode
-from river.utils.exceptions import RiverException
+from river.core.riverobject import RiverObject
+from river.core.workflowregistry import workflow_registry
 
 try:
     from django.contrib.contenttypes.fields import GenericRelation
@@ -11,144 +13,64 @@ except ImportError:
     from django.contrib.contenttypes.generic import GenericRelation
 
 from river.models.state import State
-from river.models.proceeding import Proceeding
-from river.services.object import ObjectService
-from river.services.transition import TransitionService
+from river.models.transitionapproval import TransitionApproval
 
 __author__ = 'ahmetdal'
 
 from django.db import models
 
-class_field_rl = {}
+LOGGER = logging.getLogger(__name__)
 
 
-def _get_cls_identifier(cls):
-    return cls.__module__ + "." + cls.__name__
+class classproperty(object):
+    def __init__(self, getter):
+        self.getter = getter
 
-
-def _get_identifier(cls_identifier, field):
-    return "%s_%s" % (cls_identifier, field)
+    def __get__(self, instance, owner):
+        return self.getter(instance) if instance else self.getter(owner)
 
 
 class StateField(models.ForeignKey):
-    def __init__(self, state_model=State, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.field_name = None
         kwargs['null'] = True
         kwargs['blank'] = True
-        kwargs['to'] = '%s.%s' % (state_model._meta.app_label, state_model._meta.object_name)
+        kwargs['to'] = '%s.%s' % (State._meta.app_label, State._meta.object_name)
         kwargs['on_delete'] = kwargs.get('on_delete', CASCADE)
+        kwargs['related_name'] = "rn" + str(uuid4()).replace("-", "")
         super(StateField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
-        def is_workflow_completed(workflow_object):
-            return ObjectService.is_workflow_completed(workflow_object)
+        @classproperty
+        def river(_self):
+            return RiverObject(_self, name)
 
-        def proceed(self, user, *args, **kwargs):
-            TransitionService.proceed(self, user, *args, **kwargs)
+        self.field_name = name
 
-        @property
-        def on_initial_state(self):
-            from river.services.state import StateService
+        self._add_to_class(cls, self.field_name + "_transitions", GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
 
-            return StateService.get_initial_state(ContentType.objects.get_for_model(self)) == self.get_state()
-
-        @property
-        def on_final_state(self):
-            from river.services.state import StateService
-
-            return self.get_state() in StateService.get_final_states(ContentType.objects.get_for_model(self))
-
-        def get_initial_state(self):
-            from river.services.state import StateService
-
-            return StateService.get_initial_state(ContentType.objects.get_for_model(self))
-
-        def get_available_proceedings(self, *args, **kwargs):
-            from river.services.proceeding import ProceedingService
-
-            return ProceedingService.get_available_proceedings(self, [self.get_state()], *args, **kwargs)
-
-        @property
-        def initial_proceedings(self):
-            from river.services.proceeding import ProceedingService
-
-            return self.get_state() in ProceedingService.get_initial_proceedings(ContentType.objects.get_for_model(self))
-
-        @property
-        def final_proceedings(self):
-            from river.services.proceeding import ProceedingService
-
-            return self.get_state() in ProceedingService.get_final_proceedings(ContentType.objects.get_for_model(self))
-
-        @property
-        def next_proceedings(self):
-            from river.services.proceeding import ProceedingService
-
-            return self.get_state() in ProceedingService.get_next_proceedings(ContentType.objects.get_for_model(self))
-
-        @property
-        def proceeding(self):
-            try:
-                return self.proceedings.filter(transaction_date__isnull=False).latest('transaction_date')
-            except Proceeding.DoesNotExist:
-                return None
-
-        def _get_state(self):
-            return getattr(self, name)
-
-        def _set_state(self, state):
-            setattr(self, name, state)
-
-        field_identifiers = [_get_identifier(c, f) for c, f in class_field_rl.items()]
-        cls_identifier = _get_cls_identifier(cls)
-        field_identifier = _get_identifier(cls_identifier, name)
-        if field_identifier not in field_identifiers:
-
-            if cls_identifier in class_field_rl.keys():
-                raise RiverException(ErrorCode.MULTIPLE_STATE_FIELDS,
-                                     "There can be only one state field in a model class. Class:%s - Field:%s." % (cls.__name__, name))
-
-            class_field_rl[cls_identifier] = name
-
-        self.model = cls
-        self.__add_to_class(cls, "proceedings", GenericRelation('%s.%s' % (Proceeding._meta.app_label, Proceeding._meta.object_name)))
-        self.__add_to_class(cls, "proceeding", proceeding)
-
-        self.__add_to_class(cls, "is_workflow_completed", is_workflow_completed)
-        self.__add_to_class(cls, "proceed", proceed)
-
-        self.__add_to_class(cls, "on_initial_state", on_initial_state)
-        self.__add_to_class(cls, "on_final_state", on_final_state)
-
-        self.__add_to_class(cls, "get_initial_state", get_initial_state)
-        self.__add_to_class(cls, "get_available_proceedings", get_available_proceedings)
-
-        self.__add_to_class(cls, "initial_proceedings", initial_proceedings)
-        self.__add_to_class(cls, "final_proceedings", final_proceedings)
-        self.__add_to_class(cls, "next_proceedings", next_proceedings)
-
-        self.__add_to_class(cls, "get_state", _get_state)
-        self.__add_to_class(cls, "set_state", _set_state)
+        if id(cls) not in workflow_registry.workflows:
+            self._add_to_class(cls, "river", river)
 
         super(StateField, self).contribute_to_class(cls, name)
 
-        post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
+        if id(cls) not in workflow_registry.workflows:
+            post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
 
-    def __add_to_class(self, cls, key, value):
-        if not hasattr(cls, key):
+        workflow_registry.add(self.field_name, cls)
+
+
+    @staticmethod
+    def _add_to_class(cls, key, value, ignore_exists=False):
+        if ignore_exists or not hasattr(cls, key):
             cls.add_to_class(key, value)
 
 
 def _post_save(sender, instance, created, *args, **kwargs):  # signal, sender, instance):
-    """
-    Desc:  Generate TransitionProceedings according to ProceedingMeta of the content type at the beginning.
-    :param kwargs:
-    :return:
-    """
-    from river.services.state import StateService
-
-    if created:
-        ObjectService.register_object(instance)
-    if not instance.get_state():
-        init_state = StateService.get_initial_state(ContentType.objects.get_for_model(instance))
-        instance.set_state(init_state)
-        instance.save()
+    for workflow in instance.river.all(instance.__class__):
+        if created:
+            workflow.initialize_approvals()
+        if not workflow.get_state():
+            init_state = getattr(instance.__class__.river, workflow.name).initial_state
+            workflow.set_state(init_state)
+            instance.save()

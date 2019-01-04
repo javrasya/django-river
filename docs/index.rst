@@ -12,24 +12,38 @@
    :alt: Code Health
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest   
+.. |Logo| image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
-django-river - Workflow Library for Django!
-===========================================
+Django River
+============
 
-.. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
-
+|Logo|
+   
 |Build Status| |Coverage Status| |Health Status| |Documentation Status|
 
-Contents:
+River is an open source and always free workflow framework for ``Django`` which support on
+the fly changes instead of hardcoding states, transitions and authorization rules.
+
+The main goal of developing this framework is **to be able to edit any
+workflow item on the fly.** This means that all the elements in a workflow like
+states, transitions or authorizations rules are editable at any time so that no changes requires a re-deploying of your application anymore.
+
+Getting Started
+===============
+
+You can easily get started with ``django-river`` by following :ref:`getting-started`.
+    
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
 
+   getting_started
    overview
-   installation
-   configuration
-   guide/developer/index
-   guide/end-user/index
+   admin/index
+   api/index
+   hooking/index
    changelog
 
 

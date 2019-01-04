@@ -3,9 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 
-from river.models.proceeding_meta import ProceedingMeta
 from river.models.state import State
-from river.models.transition import Transition, FORWARD
+from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
 __author__ = 'ahmetdal'
 
@@ -80,22 +79,13 @@ class StateObjectFactory(DjangoModelFactory):
     label = factory.Sequence(lambda n: 's%s' % n)
     description = factory.Sequence(lambda n: 'desc_%s' % n)
 
-
-class TransitionObjectFactory(DjangoModelFactory):
+class TransitionApprovalMetaFactory(DjangoModelFactory):
     class Meta:
-        model = Transition
+        model = TransitionApprovalMeta
 
     source_state = factory.SubFactory(StateObjectFactory)
     destination_state = factory.SubFactory(StateObjectFactory)
-    direction = FORWARD
-
-
-class ProceedingMetaObjectFactory(DjangoModelFactory):
-    class Meta:
-        model = ProceedingMeta
-
     content_type = factory.SubFactory(ContentTypeObjectFactory)
-    transition = factory.SubFactory(TransitionObjectFactory)
 
     @factory.post_generation
     def permissions(self, create, extracted, **kwargs):
