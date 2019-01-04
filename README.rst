@@ -10,10 +10,6 @@
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
     :target: https://readthedocs.org/projects/django-river/?badge=latest
 
-.. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
-   :alt: Simple jira example
-   :target: https://www.youtube.com/watch?v=5EZGnTf39aI
-
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
 .. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
@@ -22,13 +18,15 @@
 
 .. |Closed With Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624968/88b5f278-515a-11e5-996b-b62d6e224357.png
 
+.. |Logo| image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
 Django River
 ============
 
-.. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
-
+|Logo|
+   
 |Build Status| |Coverage Status| |Health Status| |Documentation Status|
+
 
 Contributors are welcome. Come and give a hand :-)
 ---------------------------------------------------
@@ -46,15 +44,6 @@ Documentation
 -------------
 
 Online documentation is available at http://django-river.rtfd.org/.
-
-Video Tutorials
----------------
-
-Simple Jira Example
-^^^^^^^^^^^^^^^^^^^
-
-|SimpleJiraExample|
-
 
 Requirements
 ------------
@@ -81,9 +70,7 @@ Usage
        ...
        ]
 
-2. Create your states as one of them will be your initial state
-3. Create your transition approval metadata with authorized permissions and user groups along with their priority
-4. Create your first state machine in your model
+2. Create your first state machine in your model and migrate your db
 
     .. code:: python
 
@@ -93,6 +80,8 @@ Usage
         class MyModel(models.Model):
             my_state_field = StateField()
 
+3. Create your states as one of them will be your initial state on the admin page
+4. Create your transition approval metadata with your model (``MyModel`` - ``my_state_field``) information and authorization rules along with their priority on the admin page
 5. Enjoy your ``django-river`` journey.
 
     .. code-block:: python
@@ -104,12 +93,13 @@ Usage
 
         # and much more. Check the documentation
 
-This is it. Whenever a model object is saved, it's state field will be initialized with the
-state is given at step-2 above by ``django-river``.
+.. note::
+    Whenever a model object is saved, it's state field will be initialized with the
+    state is given at step-3 above by ``django-river``.
 
 .. note::
-    Make sure there is only one initial state picked in your workflow, so ``django-river`` can pick that one automatically
-    when a model object is created. All other workflow items will be created by ``django-river`` by object creations.
+    Make sure that there is only one initial state defined in your workflow, so that ``django-river`` can pick that one automatically
+    when a model object is created. All other workflow items will be managed by ``django-river`` after object creations.
 
 
 

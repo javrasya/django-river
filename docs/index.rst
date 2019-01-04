@@ -12,12 +12,13 @@
    :alt: Code Health
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
    :target: https://readthedocs.org/projects/django-river/?badge=latest   
+.. |Logo| image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
 
-django-river - Workflow Library for Django!
-===========================================
+Django River
+============
 
-.. image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
-
+|Logo|
+   
 |Build Status| |Coverage Status| |Health Status| |Documentation Status|
 
 River is an open source and always free workflow framework for ``Django`` which support on

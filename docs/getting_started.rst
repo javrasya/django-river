@@ -16,9 +16,7 @@ Getting Started
        ...
        ]
 
-2. Create your states as one of them will be your initial state (Look at :ref:`state-administration`.)
-3. Create your transition approval metadata with authorized permissions and user groups along with their priority (Look at :ref:`transition-approval-meta-administration`.)
-4. Create your first state machine in your model
+3. Create your first state machine in your model
 
     .. code:: python
 
@@ -28,6 +26,8 @@ Getting Started
         class MyModel(models.Model):
             my_state_field = StateField()
 
+3. Create your states as one of them will be your initial state on the admin page (Look at :ref:`state-administration`.)
+4. Create your transition approval metadata with your model (``MyModel`` - ``my_state_field``) information and authorization rules along with their priority on the admin page (Look at :ref:`transition-approval-meta-administration`.)
 5. Enjoy your ``django-river`` journey.
 
     .. code-block:: python
@@ -39,9 +39,11 @@ Getting Started
 
         # and much more. Check the documentation
 
-This is it. Whenever a model object is saved, it's state field will be initialized with the 
-state is given at step-2 above by ``django-river``.
+
+.. note::
+    Whenever a model object is saved, it's state field will be initialized with the
+    state is given at step-3 above by ``django-river``.
 
 .. note:: 
-    Make sure there is only one initial state picked in your workflow, so ``django-river`` can pick that one automatically 
-    when a model object is created. All other workflow items will be created by ``django-river`` by object creations.
+    Make sure that there is only one initial state defined in your workflow, so that ``django-river`` can pick that one automatically
+    when a model object is created. All other workflow items will be managed by ``django-river`` after object creations.

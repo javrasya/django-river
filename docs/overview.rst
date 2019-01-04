@@ -1,8 +1,3 @@
-.. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
-   :alt: Simple jira example
-   :target: https://www.youtube.com/watch?v=5EZGnTf39aI
-
-
 .. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
 
 .. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
@@ -18,11 +13,6 @@ There is ordering aprovments for a transition functionality in ``django-river``.
 
 **Playground**: There is a fake jira example repository as a playground of django-river. https://github.com/javrasya/fakejira
 
-Simple Jira Example
--------------------
-
-|SimpleJiraExample|
-
 Requirements
 ------------
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
@@ -32,8 +22,8 @@ Requirements
   
 Example Scenarios
 -----------------
-Something Like JIRA
-^^^^^^^^^^^^^^^^^^^
+Simple Issue Tracking System
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Re-Open case
 """"""""""""
 |Re Open Case|
