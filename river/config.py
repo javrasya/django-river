@@ -2,8 +2,6 @@ from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 
-from django.conf import settings
-
 __author__ = 'ahmetdal'
 
 

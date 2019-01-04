@@ -10,9 +10,16 @@ and are much easier to understand how it works and much easier to use it now. In
 There are also more documentation with this version. Stay tuned :-)
 
     * **Improvement** - Support ``Django2.1``
-    * **Improvement** - Support multiple state fields in one model
-    * **Improvement** - Make the API very easy and useful
+    * **Improvement** - Support multiple state fields in a model
+    * **Improvement** - Make the API very easy and useful by accessing everyhing via model objects and model classes
     * **Improvement** - Simplify the concepts
+    * **Improvement** - Migrate ProceedingMeta and Transition into TransitionApprovalMeta for simplification
+    * **Improvement** - Rename Proceeding as TransitionApproval
+    * **Improvement** - Document transition and on-complete hooks
+    * **Improvement** - Document transition and on-complete hooks
+    * **Improvement** - Imrove documents in general
+    * **Improvement** - Minor improvements on admin pages
+    * **Improvement** - Some performance improvements
 
 0.10.0 (Stable)
 --------------
