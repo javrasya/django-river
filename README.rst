@@ -9,8 +9,9 @@
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
     :target: https://readthedocs.org/projects/django-river/?badge=latest
+
 .. |SimpleJiraExample| image:: http://img.youtube.com/vi/5EZGnTf39aI/0.jpg
-    :alt: Simple jira example
+   :alt: Simple jira example
    :target: https://www.youtube.com/watch?v=5EZGnTf39aI
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
@@ -32,7 +33,7 @@ Django River
 Contributors are welcome. Come and give a hand :-)
 ---------------------------------------------------
 
-River is an open source and always free workflow framework for ``Django`` which support on
+River is an open source workflow framework for ``Django`` which support on
 the fly changes instead of hardcoding states, transitions and authorization rules.
 
 The main goal of developing this framework is **to be able to edit any
@@ -58,9 +59,59 @@ Simple Jira Example
 Requirements
 ------------
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
-* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``,``2.1``)
+* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``, ``2.1``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
-* ``Django`` == 1.7 is only supported for ``Python`` == 2.7 and ``Python``== 3.4
+* ``Django`` == 1.7 is only supported for ``Python`` == 2.7 and ``Python`` == 3.4
+
+
+Usage
+-----
+1. Install and enable it
+
+   .. code:: bash
+
+       pip install django-river
+
+
+   .. code:: python
+
+       INSTALLED_APPS=[
+       ...
+       river
+       ...
+       ]
+
+2. Create your states as one of them will be your initial state
+3. Create your transition approval metadata with authorized permissions and user groups along with their priority
+4. Create your first state machine in your model
+
+    .. code:: python
+
+        from django.db import models
+        from river.models.fields.state import StateField
+
+        class MyModel(models.Model):
+            my_state_field = StateField()
+
+5. Enjoy your ``django-river`` journey.
+
+    .. code-block:: python
+
+        my_model=MyModel.objects.get(....)
+
+        my_model.river.my_state_field.approve(as_user=transactioner_user)
+        my_model.river.my_state_field.approve(as_user=transactioner_user,next_state=State.objects.get(label='re-opened'))
+
+        # and much more. Check the documentation
+
+This is it. Whenever a model object is saved, it's state field will be initialized with the
+state is given at step-2 above by ``django-river``.
+
+.. note::
+    Make sure there is only one initial state picked in your workflow, so ``django-river`` can pick that one automatically
+    when a model object is created. All other workflow items will be created by ``django-river`` by object creations.
+
+
 
 Example Scenarios
 -----------------
@@ -77,54 +128,6 @@ Closed without Re-Open case
 Closed with Re-Open case
 """"""""""""""""""""""""
 |Closed With Re Open Case|
-
-
-Usage
------
-1. Install and enable it
-
-   .. code:: bash
-
-       pip install django-river
-       
-
-   .. code:: python
-
-       INSTALLED_APPS=[
-       ...
-       river
-       ...
-       ]
-
-2. Create your states as one of them will be your initial state (Look at :ref:`state-administration`.)
-3. Create your transition approval metadata with authorized permissions and user groups along with their priority (Look at :ref:`transition-approval-meta-administration`.)
-4. Create your first state machine in your model
-
-    .. code:: python
-
-        from django.db import models
-        from river.models.fields.state import StateField
-
-        class MyModel(models.Model):
-            my_state_field = StateField()
-
-5. Enjoy your ``django-river`` journey.
-
-    .. code-block:: python
-
-        my_model=MyModel.objects.get(....)
-        
-        my_model.river.my_state_field.approve(as_user=transactioner_user)
-        my_model.river.my_state_field.approve(as_user=transactioner_user,next_state=State.objects.get(label='re-opened'))
-
-        # and much more. Check the documentation
-
-This is it. Whenever a model object is saved, it's state field will be initialized with the 
-state is given at step-2 above by ``django-river``.
-
-.. note:: 
-    Make sure there is only one initial state picked in your workflow, so ``django-river`` can pick that one automatically 
-    when a model object is created. All other workflow items will be created by ``django-river`` by object creations.
 
 Contribute
 ----------
