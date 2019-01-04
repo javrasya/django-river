@@ -18,7 +18,7 @@ def get_workflow_choices():
 
 
 class TransitionApprovalMetaForm(forms.ModelForm):
-    workflow = forms.ChoiceField(choices=get_workflow_choices())
+    workflow = forms.ChoiceField(choices=[])
 
     class Meta:
         model = TransitionApprovalMeta
@@ -26,6 +26,7 @@ class TransitionApprovalMetaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get("instance", None)
+        self.declared_fields['workflow'].choices = get_workflow_choices()
         if instance and instance.pk:
             self.declared_fields['workflow'].initial = "%s %s" % (instance.content_type.pk, instance.field_name)
 
@@ -51,7 +52,10 @@ class TransitionApprovalMetaAdmin(admin.ModelAdmin):
 
     def model_class(self, obj):
         cls = obj.content_type.model_class()
-        return "%s.%s" % (cls.__module__, cls.__name__)
+        if cls:
+            return "%s.%s" % (cls.__module__, cls.__name__)
+        else:
+            return "Class not found in the workspace"
 
 
 admin.site.register(TransitionApprovalMeta, TransitionApprovalMetaAdmin)
