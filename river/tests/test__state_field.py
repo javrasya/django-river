@@ -40,6 +40,6 @@ class StateFieldTest(BaseTestCase):
         self.assertTrue(test_model.river.my_field.on_initial_state)
         self.assertFalse(test_model.river.my_field.on_final_state)
 
-        self.assertEquals(state1, TestModel.river.my_field.initial_state)
-        self.assertEquals(1, TestModel.river.my_field.final_states.count())
-        self.assertEquals(state2, TestModel.river.my_field.final_states[0])
+        self.assertEqual(state1, TestModel.river.my_field.initial_state)
+        self.assertEqual(1, TestModel.river.my_field.final_states.count())
+        self.assertEqual(state2, TestModel.river.my_field.final_states[0])

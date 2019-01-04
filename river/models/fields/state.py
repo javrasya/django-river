@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import CASCADE, Min, Q
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
+from django.utils import timezone
 
 from river.config import app_config
 from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
@@ -244,7 +245,7 @@ class InstanceWorkflowObject(object):
             available_transition_approval = available_transition_approvals[0]
             available_transition_approval.status = action
             available_transition_approval.transactioner = as_user
-            available_transition_approval.transaction_date = datetime.now()
+            available_transition_approval.transaction_date = timezone.now()
             if self.recent_approval:
                 available_transition_approval.previous = self.recent_approval
             available_transition_approval.save()
