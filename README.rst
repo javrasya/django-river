@@ -1,5 +1,6 @@
 .. |Build Status| image:: https://travis-ci.org/javrasya/django-river.svg
     :target: https://travis-ci.org/javrasya/django-river
+    
 .. |Coverage Status| image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/javrasya/django-river?branch=master
 
