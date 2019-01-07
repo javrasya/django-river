@@ -124,3 +124,8 @@ Contribute
 ----------
 
 Contributions are welcome! Please join making always totally free ``django-river`` better.
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/c3c73d157fe045e6b966d8d4416b6b17
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
