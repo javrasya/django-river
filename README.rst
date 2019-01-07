@@ -10,6 +10,11 @@
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
     :target: https://readthedocs.org/projects/django-river/?badge=latest
+    
+.. |Quality Status| image:: https://api.codacy.com/project/badge/Grade/c3c73d157fe045e6b966d8d4416b6b17
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
+   
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
@@ -26,7 +31,7 @@ Django River
 
 |Logo|
    
-|Build Status| |Coverage Status| |Health Status| |Documentation Status|
+|Build Status| |Coverage Status| |Health Status| |Documentation Status| |Quality Status|
 
 
 Contributors are welcome. Come and give a hand :-)
