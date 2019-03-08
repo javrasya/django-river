@@ -23,7 +23,7 @@ Transition Approval Meta Administration
 |                           |            |          |                    | | authorized to approve this              |
 |                           |            |          |                    | | transition                              |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
-| priority                  | 0          | False    | Nummber            | | The priority of the transition          |
+| priority                  | 0          | False    | Number             | | The priority of the transition          |
 |                           |            |          |                    | | approval. Since there can be more       |
 |                           |            |          |                    | | than one transition approval to         |
 |                           |            |          |                    | | make that transition which means        |
