@@ -3,8 +3,15 @@
 Change Logs
 ===========
 
-1.0.0 (Development)
-------------------
+1.0.1 (Stable)
+--------------
+    * **Bug** - # 74_ : Fields that have no transition approval meta are now logged correctly.
+    * **Bug** - ``django`` version is now fixed to 2.1 for coverage in the build to make the build pass
+
+.. _74: https://github.com/javrasya/django-river/issues/74
+
+1.0.0
+-----
 ``django-river`` is finally having it's first major version bump. In this version, all code and the APIs are revisited
 and are much easier to understand how it works and much easier to use it now. In some places even more performant. 
 There are also more documentation with this version. Stay tuned :-)
@@ -21,8 +28,8 @@ There are also more documentation with this version. Stay tuned :-)
     * **Improvement** - Minor improvements on admin pages
     * **Improvement** - Some performance improvements
 
-0.10.0 (Stable)
---------------
+0.10.0
+------
 
     * # 39_ - **Improvement** -  Django has dropped support for pypy-3. So, It should be dropped from django itself too.
     * **Remove** -  ``pypy`` support has been dropped
@@ -32,7 +39,7 @@ There are also more documentation with this version. Stay tuned :-)
 .. _39: https://github.com/javrasya/django-river/issues/39
 
 0.9.0
--------------
+-----
 
     * # 30_ - **Bug** -  Missing migration file which is ``0007`` because of ``Python2.7`` can not detect it.
     * # 31_ - **Improvement** - unicode issue for Python3.
