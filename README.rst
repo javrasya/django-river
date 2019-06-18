@@ -107,24 +107,6 @@ Usage
     Make sure that there is only one initial state defined in your workflow, so that ``django-river`` can pick that one automatically
     when a model object is created. All other workflow items will be managed by ``django-river`` after object creations.
 
-
-
-Example Scenarios
------------------
-Simple Issue Tracking System
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Re-Open case
-""""""""""""
-|Re Open Case|
-
-Closed without Re-Open case
-"""""""""""""""""""""""""""
-|Closed Without Re Open Case|
-
-Closed with Re-Open case
-""""""""""""""""""""""""
-|Closed With Re Open Case|
-
 Contribute
 ----------
 
