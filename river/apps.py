@@ -38,4 +38,4 @@ class RiverApp(AppConfig):
     @classmethod
     def _get_all_workflow_fields(cls):
         from river.core.workflowregistry import workflow_registry
-        return reduce(operator.concat, map(list, workflow_registry.workflows.values()))
+        return reduce(operator.concat, map(list, workflow_registry.workflows.values()), [])
