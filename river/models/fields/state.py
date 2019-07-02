@@ -37,7 +37,7 @@ class StateField(models.ForeignKey):
         kwargs['blank'] = True
         kwargs['to'] = '%s.%s' % (State._meta.app_label, State._meta.object_name)
         kwargs['on_delete'] = kwargs.get('on_delete', CASCADE)
-        kwargs['related_name'] = "rn" + str(uuid4()).replace("-", "")
+        kwargs['related_name'] = "+"
         super(StateField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
