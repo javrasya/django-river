@@ -3,8 +3,16 @@
 Change Logs
 ===========
 
-1.0.1 (Stable)
+1.0.2 (Stable)
 --------------
+    * **Bug** - # 77_ : Migrations for the models that have state field is no longer kept getting recreated.
+    * **Bug** - It is crashing when there is no workflow in the workspace.
+
+.. _77: https://github.com/javrasya/django-river/issues/77
+
+
+1.0.1
+-----
     * **Bug** - # 74_ : Fields that have no transition approval meta are now logged correctly.
     * **Bug** - ``django`` version is now fixed to 2.1 for coverage in the build to make the build pass
 
