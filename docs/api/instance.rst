@@ -147,7 +147,8 @@ This is a property that indicates if object is on final state.
 hook_pre_transition
 --------------------
 
-This is a function that helps you to hook pre-transtion. For more detail please look at :ref:`transition_callback_function`.
+This is a function that helps you to hook pre-transtion. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`transition_callback_function`.
 
     .. code-block:: python
 
@@ -173,7 +174,8 @@ This is a function that helps you to hook pre-transtion. For more detail please 
 hook_post_transition
 --------------------
 
-This is a function that helps you to hook post-transtion. For more detail please look at :ref:`transition_callback_function`.
+This is a function that helps you to hook post-transtion. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`transition_callback_function`.
 
     .. code-block:: python
 
@@ -199,7 +201,8 @@ This is a function that helps you to hook post-transtion. For more detail please
 hook_pre_complete
 --------------------
 
-This is a function that helps you to hook pre-complete. For more detail please look at :ref:`on_complete_callback_function`.
+This is a function that helps you to hook pre-complete. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`on_complete_callback_function`.
 
     .. code-block:: python
 
@@ -220,7 +223,8 @@ This is a function that helps you to hook pre-complete. For more detail please l
 hook_post_complete
 --------------------
 
-This is a function that helps you to hook post-complete. For more detail please look at :ref:`on_complete_callback_function`.
+This is a function that helps you to hook post-complete. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`on_complete_callback_function`.
 
     .. code-block:: python
 

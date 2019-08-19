@@ -3,8 +3,14 @@
 Change Logs
 ===========
 
-1.0.2 (Stable)
+1.1.0 (Stable)
 --------------
+    * **Improvement** - # 82_ : Support class level hooking.
+
+.. _82: https://github.com/javrasya/django-river/issues/82
+
+1.0.2
+-----
     * **Bug** - # 77_ : Migrations for the models that have state field is no longer kept getting recreated.
     * **Bug** - It is crashing when there is no workflow in the workspace.
 
