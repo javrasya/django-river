@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from django.db.models import CASCADE
 from django.db.models.signals import post_save

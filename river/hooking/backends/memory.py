@@ -1,4 +1,5 @@
 import logging
+
 from river.hooking.backends.base import BaseHookingBackend, powerset
 
 __author__ = 'ahmetdal'

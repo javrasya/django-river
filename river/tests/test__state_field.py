@@ -1,9 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
 
-from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory
-from river.core.riverobject import RiverObject
-from river.core.instanceworkflowobject import InstanceWorkflowObject
 from river.core.classworkflowobject import ClassWorkflowObject
+from river.core.instanceworkflowobject import InstanceWorkflowObject
+from river.core.riverobject import RiverObject
+from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory
 from river.tests.base_test import BaseTestCase
 from river.tests.models.testmodel import TestModel
 

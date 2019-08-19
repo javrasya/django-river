@@ -1,5 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 
+from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
+from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 from river.models import State, TransitionApprovalMeta
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
@@ -51,3 +53,15 @@ class ClassWorkflowObject(object):
                 content_type=self._content_type
             ).values_list("destination_state", flat=True)
         )
+
+    def hook_post_transition(self, callback, *args, **kwargs):
+        PostTransitionHooking.register(callback, None, self.field_name, *args, **kwargs)
+
+    def hook_pre_transition(self, callback, *args, **kwargs):
+        PreTransitionHooking.register(callback, None, self.field_name, *args, **kwargs)
+
+    def hook_post_complete(self, callback):
+        PostCompletedHooking.register(callback, None, self.field_name)
+
+    def hook_pre_complete(self, callback):
+        PreCompletedHooking.register(callback, None, self.field_name)

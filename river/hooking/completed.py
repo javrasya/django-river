@@ -13,4 +13,5 @@ class PostCompletedHooking(Hooking):
 
 
 pre_final.connect(PreCompletedHooking.dispatch)
-post_final.connect(PostCompletedHooking.dispatch)
+post_final.connect(
+    PostCompletedHooking.dispatch)

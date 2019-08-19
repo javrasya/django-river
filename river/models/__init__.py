@@ -5,3 +5,4 @@ from .callback import *
 from .state import *
 from .transitionapprovalmeta import *
 from .transitionapproval import *
+from .transitionapprovalmeta import *
