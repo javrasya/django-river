@@ -21,9 +21,9 @@ class RiverApp(AppConfig):
 
         for field_name in self._get_all_workflow_fields():
             try:
-                transition_approval_meta = self.get_model('TransitionApprovalMeta').objects.filter(field_name=field_name)
-                if transition_approval_meta.count() == 0:
-                    LOGGER.warning("%s field doesn't seem have any transition approval meta in database. You should create it's TransitionApprovalMeta" % field_name)
+                workflows = self.get_model('Workflow').objects.filter(field_name=field_name)
+                if workflows.count() == 0:
+                    LOGGER.warning("%s field doesn't seem have any workflow defined in database. You should create its workflow" % field_name)
             except (OperationalError, ProgrammingError):
                 pass
 

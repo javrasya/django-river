@@ -3,7 +3,7 @@ from river.hooking.backends.loader import load_callback_backend
 from river.hooking.transition import PostTransitionHooking
 from river.models.callback import Callback
 from river.tests.base_test import BaseTestCase
-from river.tests.models.factories import TestModelObjectFactory
+from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -22,7 +22,7 @@ class DatabaseHookingBackendTest(BaseTestCase):
         self.handler_backend.callbacks = {}
 
     def test_register(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         self.assertEqual(0, Callback.objects.count())
         self.assertFalse('%s.%s_object%sfield%s' % (
@@ -38,7 +38,7 @@ class DatabaseHookingBackendTest(BaseTestCase):
         self.assertEqual(test_callback.__name__, list(self.handler_backend.callbacks.values())[0].__name__)
 
     def test_register_in_multiprocessing(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         from multiprocessing import Process, Queue
 
@@ -60,7 +60,7 @@ class DatabaseHookingBackendTest(BaseTestCase):
         self.assertEqual(test_callback.__name__, handlers[0])
 
     def test_get_callbacks(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         self.handler_backend.register(PostTransitionHooking, test_callback, objects[1], self.field_name)
         handlers = self.handler_backend.get_callbacks(PostTransitionHooking, objects[1], self.field_name)
@@ -69,7 +69,7 @@ class DatabaseHookingBackendTest(BaseTestCase):
         self.assertEqual(test_callback.__name__, handlers[0].__name__)
 
     def test_get_handlers_in_multiprocessing(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         from multiprocessing import Process, Queue
 

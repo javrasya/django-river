@@ -2,7 +2,7 @@ from river.config import app_config
 from river.hooking.backends.loader import load_callback_backend
 from river.hooking.transition import PostTransitionHooking
 from river.tests.base_test import BaseTestCase
-from river.tests.models.factories import TestModelObjectFactory
+from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -21,7 +21,7 @@ class MemoryHookingBackendTest(BaseTestCase):
         self.handler_backend.callbacks = {}
 
     def test_register(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         self.assertFalse('%s.%s_object%s_field_name%s' % (
             PostTransitionHooking.__module__, PostTransitionHooking.__name__, objects[1].pk, self.field_name) in self.handler_backend.callbacks)
@@ -31,7 +31,7 @@ class MemoryHookingBackendTest(BaseTestCase):
         self.assertEqual(test_handler.__name__, list(self.handler_backend.callbacks.values())[0].__name__)
 
     def test_get_handlers(self):
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
 
         self.handler_backend.register(PostTransitionHooking, test_handler, object, self.field_name)
         callbacks = self.handler_backend.get_callbacks(PostTransitionHooking, object, self.field_name)

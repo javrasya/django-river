@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission
 
 from river.models import TransitionApproval
 from river.tests.base_test import BaseTestCase
-from river.tests.models.factories import TestModelObjectFactory
+from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -18,7 +18,7 @@ class TransitionHooking(BaseTestCase):
             self.test_args = args
             self.test_kwargs = kwargs
 
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         objects[1].river.my_field.hook_post_transition(test_callback)
 
@@ -54,7 +54,7 @@ class TransitionHooking(BaseTestCase):
             self.test_args = args
             self.test_kwargs = kwargs
 
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
         objects[0].river.my_field.hook_post_transition(test_callback, source_state=self.state2, destination_state=self.state3)
 
         self.assertIsNone(self.test_args)

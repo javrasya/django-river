@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 
-from river.models import State, TransitionApprovalMeta
+from river.models import State, TransitionApprovalMeta, Workflow
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -11,6 +11,13 @@ class ClassWorkflowObject(object):
         self.workflow_class = workflow_class
         self.name = name
         self.field_name = field_name
+        self._cached_workflow = None
+
+    @property
+    def workflow(self):
+        if not self._cached_workflow:
+            self._cached_workflow = Workflow.objects.filter(field_name=self.field_name, content_type=self._content_type).first()
+        return self._cached_workflow
 
     @property
     def _content_type(self):
@@ -29,8 +36,7 @@ class ClassWorkflowObject(object):
     def initial_state(self):
         initial_states = State.objects.filter(
             pk__in=TransitionApprovalMeta.objects.filter(
-                content_type=self._content_type,
-                field_name=self.name,
+                workflow=self.workflow,
                 parents__isnull=True
             ).values_list("source_state", flat=True)
         )
@@ -46,8 +52,7 @@ class ClassWorkflowObject(object):
     def final_states(self):
         return State.objects.filter(
             pk__in=TransitionApprovalMeta.objects.filter(
-                field_name=self.name,
-                children__isnull=True,
-                content_type=self._content_type
+                workflow=self.workflow,
+                children__isnull=True
             ).values_list("destination_state", flat=True)
         )
