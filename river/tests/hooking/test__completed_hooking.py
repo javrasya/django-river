@@ -1,6 +1,6 @@
 from river.hooking.completed import PostCompletedHooking
 from river.tests.base_test import BaseTestCase
-from river.tests.models.factories import TestModelObjectFactory
+from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
@@ -11,7 +11,7 @@ class CompletedHookingTest(BaseTestCase):
         self.initialize_standard_scenario()
 
     def test_register_for_an_object(self):
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
         self.test_args = None
         self.test_kwargs = None

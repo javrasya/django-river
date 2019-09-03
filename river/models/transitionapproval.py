@@ -1,7 +1,7 @@
 from django.db.models import CASCADE
 from mptt.fields import TreeOneToOneField
 
-from river.models import State, TransitionApprovalMeta
+from river.models import State, TransitionApprovalMeta, Workflow
 
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -37,12 +37,13 @@ class TransitionApproval(BaseModel):
     objects = TransitionApprovalManager()
 
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=CASCADE)
-    field_name = models.CharField(_("Field Name"), max_length=200)
 
     object_id = models.CharField(max_length=50, verbose_name=_('Related Object'))
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
-    meta = models.ForeignKey(TransitionApprovalMeta, verbose_name=_('Meta'), related_name="proceedings", on_delete=CASCADE)
+    meta = models.ForeignKey(TransitionApprovalMeta, verbose_name=_('Meta'), related_name="transition_approvals", on_delete=CASCADE)
+    workflow = models.ForeignKey(Workflow, verbose_name=_("Workflow"), related_name='transition_approvals', on_delete=CASCADE)
+
     source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transition_approvals_as_source', on_delete=CASCADE)
     destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='transition_approvals_as_destination', on_delete=CASCADE)
 
