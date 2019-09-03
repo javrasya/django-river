@@ -58,7 +58,7 @@ class WorkflowAdmin(admin.ModelAdmin):
         else:
             return "Class not found in the workspace"
 
-    def field_name(self, obj):
+    def field_name(self, obj):  # pylint: disable=no-self-use
         return obj.workflow.field_name
 
 

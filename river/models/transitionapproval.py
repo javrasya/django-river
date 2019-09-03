@@ -1,18 +1,14 @@
-import logging
-
 from django.db.models import CASCADE
 from mptt.fields import TreeOneToOneField
 
 from river.models import State, TransitionApprovalMeta, Workflow
-from river.utils.error_code import ErrorCode
-from river.utils.exceptions import RiverException
 
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 
-from django.db import models, transaction
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
