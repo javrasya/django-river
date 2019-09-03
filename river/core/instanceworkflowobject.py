@@ -27,12 +27,12 @@ class InstanceWorkflowObject(object):
         self.initialized = False
 
     def initialize_approvals(self):
-        if not self.initialized and not TransitionApproval.objects.filter(workflow_object=self.workflow_object, field_name=self.name).count():
+        if not self.initialized and not TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow=self.class_workflow.workflow).count():
             content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
-            for transition_approval_meta in TransitionApprovalMeta.objects.filter(field_name=self.name, content_type=content_type):
+            for transition_approval_meta in TransitionApprovalMeta.objects.filter(workflow=self.class_workflow.workflow):
                 transition_approval, created = TransitionApproval.objects.update_or_create(
                     workflow_object=self.workflow_object,
-                    field_name=transition_approval_meta.field_name,
+                    workflow=self.class_workflow.workflow,
                     source_state=transition_approval_meta.source_state,
                     destination_state=transition_approval_meta.destination_state,
                     priority=transition_approval_meta.priority,
@@ -65,7 +65,6 @@ class InstanceWorkflowObject(object):
     @property
     def recent_approval(self):
         try:
-
             return getattr(self.workflow_object, self.name + "_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
         except TransitionApproval.DoesNotExist:
             return None
@@ -127,7 +126,7 @@ class InstanceWorkflowObject(object):
 
         transition_approvals = TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
-            field_name=self.name,
+            workflow=self.class_workflow.workflow,
             source_state__in=source_states,
             status=PENDING,
             enabled=True
@@ -207,7 +206,7 @@ class InstanceWorkflowObject(object):
         current_states = list(current_states.values_list('pk', flat=True)) if current_states else [self.get_state()]
         next_approvals = TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
-            field_name=self.name,
+            workflow=self.class_workflow.workflow,
             source_state__in=current_states
         )
         if self.recent_approval:
@@ -238,7 +237,7 @@ class InstanceWorkflowObject(object):
                 destination_state=ta.destination_state,
                 content_type=ta.content_type,
                 object_id=ta.object_id,
-                field_name=ta.field_name,
+                workflow=self.class_workflow.workflow,
                 skip=ta.skip,
                 priority=ta.priority,
                 enabled=ta.enabled,

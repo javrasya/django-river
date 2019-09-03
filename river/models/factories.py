@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 
+from river.models import Workflow
 from river.models.state import State
 from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
@@ -79,13 +80,22 @@ class StateObjectFactory(DjangoModelFactory):
     label = factory.Sequence(lambda n: 's%s' % n)
     description = factory.Sequence(lambda n: 'desc_%s' % n)
 
+
+class WorkflowFactory(DjangoModelFactory):
+    class Meta:
+        model = Workflow
+
+    content_type = factory.SubFactory(ContentTypeObjectFactory)
+    initial_state = factory.SubFactory(StateObjectFactory)
+
+
 class TransitionApprovalMetaFactory(DjangoModelFactory):
     class Meta:
         model = TransitionApprovalMeta
 
     source_state = factory.SubFactory(StateObjectFactory)
     destination_state = factory.SubFactory(StateObjectFactory)
-    content_type = factory.SubFactory(ContentTypeObjectFactory)
+    workflow = factory.SubFactory(WorkflowFactory)
 
     @factory.post_generation
     def permissions(self, create, extracted, **kwargs):

@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 from river.models import TransitionApproval, APPROVED, TransitionApprovalMeta
 from river.tests.base_test import BaseTestCase
-from river.tests.models.factories import TestModelObjectFactory
-from river.tests.models.testmodel import TestModel
+from river.tests.models.factories import BasicTestModelObjectFactory
+from river.tests.models import BasicTestModel
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -14,24 +14,24 @@ class RiverTest(BaseTestCase):
 
     def test_get_on_approval_objects(self):
         self.initialize_standard_scenario()
-        objects = TestModelObjectFactory.create_batch(2)
+        objects = BasicTestModelObjectFactory.create_batch(2)
 
-        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user1)
+        on_approval_objects = BasicTestModel.river.my_field.get_on_approval_objects(as_user=self.user1)
         self.assertEqual(2, on_approval_objects.count())
         self.assertEqual(objects[0], on_approval_objects[0])
 
-        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user2)
+        on_approval_objects = BasicTestModel.river.my_field.get_on_approval_objects(as_user=self.user2)
         self.assertEqual(0, on_approval_objects.count())
 
-        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user3)
+        on_approval_objects = BasicTestModel.river.my_field.get_on_approval_objects(as_user=self.user3)
         self.assertEqual(0, on_approval_objects.count())
 
-        on_approval_objects = TestModel.river.my_field.get_on_approval_objects(as_user=self.user4)
+        on_approval_objects = BasicTestModel.river.my_field.get_on_approval_objects(as_user=self.user4)
         self.assertEqual(0, on_approval_objects.count())
 
     def test_get_available_states(self):
         self.initialize_standard_scenario()
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
         available_states = object.river.my_field.get_available_states()
         self.assertEqual(1, available_states.count())
         self.assertEqual(self.state2, available_states[0])
@@ -51,15 +51,15 @@ class RiverTest(BaseTestCase):
 
     def test_get_initial_state(self):
         self.initialize_standard_scenario()
-        self.assertEqual(self.state1, TestModel.river.my_field.initial_state)
+        self.assertEqual(self.state1, BasicTestModel.river.my_field.initial_state)
 
     def test_get_final_states(self):
         self.initialize_standard_scenario()
-        self.assertListEqual([self.state41, self.state42, self.state51, self.state52], list(TestModel.river.my_field.final_states))
+        self.assertListEqual([self.state41, self.state42, self.state51, self.state52], list(BasicTestModel.river.my_field.final_states))
 
     def test_get_waiting_transition_approvals_without_skip(self):
         self.initialize_standard_scenario()
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
 
         transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user1)
         self.assertEqual(1, transition_approvals.count())
@@ -75,7 +75,7 @@ class RiverTest(BaseTestCase):
 
     def test_get_waiting_transition_approvals_with_skip(self):
         self.initialize_standard_scenario()
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
 
         transition_approvals = object.river.my_field.get_available_approvals(as_user=self.user1)
         self.assertEqual(1, transition_approvals.count())
@@ -83,7 +83,7 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state=self.state2
         ).update(skip=True)
 
@@ -93,7 +93,7 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state=self.state3
         ).update(skip=True)
 
@@ -104,7 +104,7 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state=self.state4
         ).update(skip=True)
 
@@ -116,13 +116,13 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state=self.state4
         ).update(skip=False)
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state=self.state5
         ).update(skip=True)
 
@@ -134,7 +134,7 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state__in=[self.state4, self.state5]
         ).update(skip=True)
 
@@ -147,7 +147,7 @@ class RiverTest(BaseTestCase):
 
         TransitionApproval.objects.filter(
             workflow_object=object,
-            field_name="my_field",
+            workflow=self.workflow,
             destination_state__in=[self.state41, self.state51]
         ).update(skip=True)
 
@@ -158,7 +158,7 @@ class RiverTest(BaseTestCase):
 
     def test_proceed(self):
         self.initialize_standard_scenario()
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
 
         # ####################
         # STATE 1 - STATE 2
@@ -336,7 +336,7 @@ class RiverTest(BaseTestCase):
 
     def test_cycle_proceedings(self):
         self.initialize_circular_scenario()
-        object = TestModelObjectFactory.create_batch(1)[0]
+        object = BasicTestModelObjectFactory.create_batch(1)[0]
 
         # No Cycle
         self.assertFalse(object.river.my_field._cycle_proceedings())
@@ -397,7 +397,7 @@ class RiverTest(BaseTestCase):
 
     def test_get_waiting_approvals_slowness_test(self):
         self.initialize_standard_scenario()
-        self.objects = TestModelObjectFactory.create_batch(100)
+        self.objects = BasicTestModelObjectFactory.create_batch(100)
         before = datetime.now()
         for o in self.objects:
             o.river.my_field.get_available_states(as_user=self.user1)
