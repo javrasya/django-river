@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 
-from river.models import State, TransitionApprovalMeta, Workflow
+from river.models import State, TransitionApprovalMeta, Workflow, TransitionApproval
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -23,30 +23,23 @@ class ClassWorkflowObject(object):
     def _content_type(self):
         return ContentType.objects.get_for_model(self.workflow_class)
 
-    def get_on_approval_objects(self, as_user):
-        object_pks = []
+    def get_available_approvals(self, as_user):
+        transition_approvals = None
         for workflow_object in self.workflow_class.objects.all():
             instance_workflow = getattr(workflow_object.river, self.name)
-            transition_approvals = instance_workflow.get_available_approvals(as_user=as_user)
-            if transition_approvals.count():
-                object_pks.append(workflow_object.pk)
-        return self.workflow_class.objects.filter(pk__in=object_pks)
+            available_approvals = instance_workflow.get_available_approvals(as_user=as_user)
+            transition_approvals = available_approvals.union(available_approvals) if transition_approvals else available_approvals
+
+        return transition_approvals
+
+    def get_on_approval_objects(self, as_user):
+        available_approvals = self.get_available_approvals(as_user)
+        return self.workflow_class.objects.filter(pk__in=available_approvals.values_list("object_id", flat=True))
 
     @property
     def initial_state(self):
-        initial_states = State.objects.filter(
-            pk__in=TransitionApprovalMeta.objects.filter(
-                workflow=self.workflow,
-                parents__isnull=True
-            ).values_list("source_state", flat=True)
-        )
-        if initial_states.count() == 0:
-            raise RiverException(ErrorCode.NO_AVAILABLE_INITIAL_STATE, 'There is no available initial state for the content type %s. ' % self._content_type)
-        elif initial_states.count() > 1:
-            raise RiverException(ErrorCode.MULTIPLE_INITIAL_STATE,
-                                 'There are multiple initial state for the content type %s. Have only one initial state' % self._content_type)
-
-        return initial_states[0]
+        workflow = Workflow.objects.filter(content_type=self._content_type, field_name=self.name).first()
+        return workflow.initial_state if workflow else None
 
     @property
     def final_states(self):

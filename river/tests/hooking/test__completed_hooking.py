@@ -1,17 +1,46 @@
-from river.hooking.completed import PostCompletedHooking
-from river.tests.base_test import BaseTestCase
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+from hamcrest import assert_that, equal_to, none
+
+from river.models.factories import PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, UserObjectFactory
+from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
 
-class CompletedHookingTest(BaseTestCase):
+# noinspection DuplicatedCode
+class CompletedHookingTest(TestCase):
     def setUp(self):
         super(CompletedHookingTest, self).setUp()
-        self.initialize_standard_scenario()
 
-    def test_register_for_an_object(self):
-        objects = BasicTestModelObjectFactory.create_batch(2)
+    def test_shouldInvokeTheRegisteredCallBackWhenFlowIsCompleteForTheObject(self):
+        authorized_permission = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+
+        content_type = ContentType.objects.get_for_model(BasicTestModel)
+        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
 
         self.test_args = None
         self.test_kwargs = None
@@ -20,32 +49,17 @@ class CompletedHookingTest(BaseTestCase):
             self.test_args = args
             self.test_kwargs = kwargs
 
-        objects[0].river.my_field.hook_post_complete(test_callback)
+        workflow_object.model.river.my_field.hook_post_complete(test_callback)
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        assert_that(self.test_args, none())
 
-        objects[0].river.my_field.approve(as_user=self.user1)
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state2))
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        assert_that(self.test_args, none())
 
-        # Proceeded but no transition
-        objects[0].river.my_field.approve(as_user=self.user2)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state3))
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
-
-        objects[0].river.my_field.approve(as_user=self.user3)
-
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
-
-        objects[0].river.my_field.approve(as_user=self.user4, next_state=self.state4)
-
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
-
-        objects[0].river.my_field.approve(as_user=self.user4, next_state=self.state41)
-
-        self.assertEqual((objects[0], "my_field"), self.test_args)
+        assert_that(self.test_args, equal_to((workflow_object.model, "my_field")))

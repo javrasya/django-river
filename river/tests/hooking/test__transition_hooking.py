@@ -1,16 +1,20 @@
-from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+from hamcrest import equal_to, assert_that, none, has_entry
 
 from river.models import TransitionApproval
-from river.tests.base_test import BaseTestCase
+from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory
+from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
 __author__ = 'ahmetdal'
 
 
-class TransitionHooking(BaseTestCase):
+# noinspection DuplicatedCode
+class TransitionHooking(TestCase):
 
-    def test_register_for_an_object(self):
-        self.initialize_standard_scenario()
+    def test_shouldInvokeTheRegisteredCallBackWhenATransitionHappens(self):
         self.test_args = None
         self.test_kwargs = None
 
@@ -18,35 +22,50 @@ class TransitionHooking(BaseTestCase):
             self.test_args = args
             self.test_kwargs = kwargs
 
-        objects = BasicTestModelObjectFactory.create_batch(2)
+        authorized_permission = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        objects[1].river.my_field.hook_post_transition(test_callback)
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
 
-        objects[0].river.my_field.approve(as_user=self.user1)
+        content_type = ContentType.objects.get_for_model(BasicTestModel)
+        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=1,
+            permissions=[authorized_permission]
+        )
 
-        objects[0].river.my_field.approve(as_user=self.user2)
+        workflow_object = BasicTestModelObjectFactory()
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        workflow_object.model.river.my_field.hook_post_transition(test_callback)
 
-        objects[0].river.my_field.hook_post_transition(test_callback)
+        assert_that(self.test_args, none())
 
-        objects[0].river.my_field.approve(as_user=self.user3)
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state1))
 
-        self.assertEqual((objects[0], "my_field"), self.test_args)
+        assert_that(self.test_args, none())
 
-        self.assertDictEqual(
-            {
-                'transition_approval': TransitionApproval.objects.get(object_id=objects[0].pk, source_state=self.state2, destination_state=self.state3,
-                                                                      permissions__in=Permission.objects.filter(user=self.user3))
-            }, self.test_kwargs)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state2))
+        assert_that(self.test_args, equal_to((workflow_object.model, "my_field")))
 
-    def test_register_for_a_transition(self):
-        self.initialize_standard_scenario()
+        last_approval = TransitionApproval.objects.get(object_id=workflow_object.model.pk, source_state=state1, destination_state=state2, priority=1)
+        assert_that(self.test_kwargs, has_entry(equal_to("transition_approval"), equal_to(last_approval)))
 
+    def test_shouldInvokeTheRegisteredCallBackWhenASpecificTransitionHappens(self):
         self.test_args = None
         self.test_kwargs = None
 
@@ -54,27 +73,46 @@ class TransitionHooking(BaseTestCase):
             self.test_args = args
             self.test_kwargs = kwargs
 
-        objects = BasicTestModelObjectFactory.create_batch(2)
-        objects[0].river.my_field.hook_post_transition(test_callback, source_state=self.state2, destination_state=self.state3)
+        authorized_permission = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
 
-        objects[0].river.my_field.approve(as_user=self.user1)
+        content_type = ContentType.objects.get_for_model(BasicTestModel)
+        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
 
-        objects[0].river.my_field.approve(as_user=self.user2)
+        workflow_object = BasicTestModelObjectFactory()
 
-        self.assertIsNone(self.test_args)
-        self.assertIsNone(self.test_kwargs)
+        workflow_object.model.river.my_field.hook_post_transition(test_callback, source_state=state2, destination_state=state3)
 
-        objects[0].river.my_field.approve(as_user=self.user3)
+        assert_that(self.test_args, none())
 
-        self.assertEqual((objects[0], "my_field"), self.test_args)
-        self.assertDictEqual(
-            {
-                'transition_approval': TransitionApproval.objects.get(object_id=objects[0].pk, source_state=self.state2, destination_state=self.state3,
-                                                                      permissions__in=Permission.objects.filter(user=self.user3))
-            }, self.test_kwargs)
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state2))
+
+        assert_that(self.test_args, none())
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(self.test_args, equal_to((workflow_object.model, "my_field")))
+
+        last_approval = TransitionApproval.objects.get(object_id=workflow_object.model.pk, source_state=state2, destination_state=state3)
+        assert_that(self.test_kwargs, has_entry(equal_to("transition_approval"), equal_to(last_approval)))
