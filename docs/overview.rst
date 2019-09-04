@@ -16,10 +16,9 @@ There is ordering aprovments for a transition functionality in ``django-river``.
 Requirements
 ------------
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
-* Django (``1.7``, ``1.8``, ``1.9``, ``1.10``, ``1.11``, ``2.0``)
-* Django 2.0 is supported with ``Python3.5`` and ``Python3.6``
-* Django 1.7 is not for ``Python3.5``
-  
+* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``)
+* ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
+
 Example Scenarios
 -----------------
 Simple Issue Tracking System
