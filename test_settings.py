@@ -1,5 +1,6 @@
 import os
 import sys
+from uuid import UUID, uuid4
 
 import django
 
@@ -8,11 +9,27 @@ BASE_DIR = os.path.dirname(__file__)
 
 DEBUG = True
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     },
+# }
+
+
+TEST_DB_PORT = os.environ['POSTGRES_5432_TCP_PORT']
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'river',
+        'USER': 'river',
+        'PASSWORD': 'river',
+        'HOST': 'localhost',
+        'PORT': TEST_DB_PORT,
+        'TEST': {
+            'NAME': 'test-db' + str(uuid4()),
+        },
+    }
 }
 
 # DATABASES = {

@@ -2,3 +2,5 @@ django-mptt
 factory-boy
 mock
 pyhamcrest
+django-cte
+psycopg2

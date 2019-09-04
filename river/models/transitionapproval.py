@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import CASCADE
 from mptt.fields import TreeOneToOneField
 
@@ -8,7 +10,7 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
@@ -26,6 +28,8 @@ PROCEEDING_STATUSES = [
     (APPROVED, _('Approved')),
     (REJECTED, _('Rejected')),
 ]
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TransitionApproval(BaseModel):
@@ -52,7 +56,7 @@ class TransitionApproval(BaseModel):
 
     status = models.IntegerField(_('Status'), choices=PROCEEDING_STATUSES, default=PENDING)
 
-    skip = models.BooleanField(_('Skip'), default=False)
+    skipped = models.BooleanField(_('Skip'), default=False)
 
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'))
     groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'))
@@ -63,3 +67,57 @@ class TransitionApproval(BaseModel):
     previous = TreeOneToOneField("self", verbose_name=_('Previous Transition'), related_name="next_transition", null=True, blank=True, on_delete=CASCADE)
 
     cloned = models.BooleanField(_('Cloned?'), default=False)
+
+    skipped_from = models.ManyToManyField("self", verbose_name=_("Skipped from"), related_name='created_after_skipped', null=True, blank=True)
+
+    @transaction.atomic
+    def skip(self):
+        if self.skipped:
+            LOGGER.info("TransitionApproval with id %s is already skipped.")
+            return
+        self.skipped = True
+        self.save()
+
+        if self._can_skip_whole_step:
+            self._bind_with_downstream(self.source_state)
+            for skipped_peer in self.peers.filter(skipped=True):
+                self._bind_with_downstream(skipped_peer.source_state)
+
+        self.downstream.filter(skipped=False).update(skipped=True)
+
+    @property
+    def peers(self):
+        return TransitionApproval.objects.filter(
+            workflow_object=self.workflow_object,
+            workflow=self.workflow,
+            source_state=self.source_state,
+            destination_state=self.destination_state
+        ).exclude(pk=self.pk)
+
+    @property
+    def downstream(self):
+        return TransitionApproval.objects.filter(
+            workflow_object=self.workflow_object,
+            workflow=self.workflow,
+            source_state=self.destination_state,
+        )
+
+    @property
+    def _can_skip_whole_step(self):
+        return self.peers.filter(skipped=False).count() == 0
+
+    def _bind_with_downstream(self, source_state):
+        for downstream_approval in self.downstream.filter(skipped=False):
+            transition_approval, created = TransitionApproval.objects.update_or_create(
+                workflow_object=self.workflow_object,
+                workflow=self.workflow,
+                source_state=source_state,
+                destination_state=downstream_approval.destination_state,
+                priority=self.priority,
+                meta=self.meta,
+                transactioner=downstream_approval.transactioner,
+                status=PENDING
+            )
+            transition_approval.skipped_from.add(self)
+            transition_approval.permissions.add(*downstream_approval.permissions.all())
+            transition_approval.groups.add(*downstream_approval.groups.all())

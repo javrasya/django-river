@@ -1,4 +1,6 @@
 language: python
+services:
+  - docker
 sudo: false
 cache: pip
 matrix:
@@ -51,6 +53,7 @@ matrix:
       env: TOXENV=cov
 install:
   - pip install tox-travis
+  - pip install tox-docker
   - pip install coveralls
 script:
   - tox
