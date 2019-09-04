@@ -10,7 +10,7 @@ from river.config import app_config
 from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
 from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow
-from river.signals import ProceedingSignal, TransitionSignal, FinalSignal
+from river.signals import ApproveSignal, TransitionSignal, OnCompleteSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
 
@@ -90,7 +90,7 @@ class InstanceWorkflowObject(object):
         all_destination_state_ids = self.get_available_approvals(as_user=as_user).values_list('destination_state', flat=True)
         return State.objects.filter(pk__in=all_destination_state_ids)
 
-    def get_available_approvals(self, as_user=None, destination_state=None, god_mod=False):
+    def get_available_approvals(self, as_user=None, destination_state=None):
         qs = self.class_workflow.get_available_approvals(as_user).filter(object_id=self.workflow_object.pk)
         if destination_state:
             qs = qs.filter(destination_state=destination_state)
@@ -98,7 +98,7 @@ class InstanceWorkflowObject(object):
         return qs
 
     @atomic
-    def approve(self, as_user, next_state=None, god_mod=False):
+    def approve(self, as_user, next_state=None):
         available_approvals = self.get_available_approvals(as_user=as_user)
         number_of_available_approvals = available_approvals.count()
         if number_of_available_approvals == 0:
@@ -129,10 +129,17 @@ class InstanceWorkflowObject(object):
             LOGGER.debug("Workflow object %s is proceeded for next transition. Transition: %s -> %s" % (
                 self.workflow_object, previous_state, self.get_state()))
 
-        with ProceedingSignal(self.workflow_object, self.field_name, approval), \
-             TransitionSignal(has_transit, self.workflow_object, self.field_name, approval), \
-             FinalSignal(self.workflow_object, self.field_name):
+        with self._approve_signal(approval), self._transition_signal(has_transit, approval), self._on_complete_signal():
             self.workflow_object.save()
+
+    def _approve_signal(self, approval):
+        return ApproveSignal(self.workflow_object, self.field_name, approval)
+
+    def _transition_signal(self, has_transit, approval):
+        return TransitionSignal(has_transit, self.workflow_object, self.field_name, approval)
+
+    def _on_complete_signal(self):
+        return OnCompleteSignal(self.workflow_object, self.field_name)
 
     def hook_post_transition(self, callback, *args, **kwargs):
         PostTransitionHooking.register(callback, self.workflow_object, self.field_name, *args, **kwargs)
@@ -185,33 +192,6 @@ class InstanceWorkflowObject(object):
                 source_state__in=approvals.values_list("destination_state", flat=TransitionApproval)
             )
             cycle_ended = approvals.filter(source_state=from_state).count() > 0
-
-    @atomic
-    def _cycle_proceedings(self):
-        """
-         Finds next proceedings and clone them for cycling if it exists.
-        """
-        next_approvals = self.next_approvals.exclude(status=PENDING).exclude(cloned=True)
-        for ta in next_approvals:
-            clone_transition_approval, c = TransitionApproval.objects.get_or_create(
-                source_state=ta.source_state,
-                destination_state=ta.destination_state,
-                content_type=ta.content_type,
-                object_id=ta.object_id,
-                field_name=ta.field_name,
-                skip=ta.skip,
-                priority=ta.priority,
-                enabled=ta.enabled,
-                status=PENDING,
-                meta=ta.meta
-            )
-
-            if c:
-                clone_transition_approval.permissions.add(*ta.permissions.all())
-                clone_transition_approval.groups.add(*ta.groups.all())
-            next_approvals.update(cloned=True)
-
-        return True if next_approvals.count() else False
 
     def get_state(self):
         return getattr(self.workflow_object, self.field_name)

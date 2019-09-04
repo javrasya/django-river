@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import CASCADE
 from django.db.models.signals import post_save
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from river.config import app_config
@@ -13,16 +12,7 @@ from river.models.managers.transitionmetada import TransitionApprovalMetadataMan
 
 __author__ = 'ahmetdal'
 
-BACKWARD = 0
-FORWARD = 1
 
-DIRECTIONS = [
-    (BACKWARD, _("Backward")),
-    (FORWARD, _("Forward"))
-]
-
-
-@python_2_unicode_compatible
 class TransitionApprovalMeta(BaseModel):
     class Meta:
         app_label = 'river'
@@ -34,15 +24,12 @@ class TransitionApprovalMeta(BaseModel):
 
     workflow = models.ForeignKey(Workflow, verbose_name=_("Workflow"), related_name='transition_approval_metas', on_delete=CASCADE)
 
-    # transition = models.ForeignKey(Transition, verbose_name=_('Transition'), on_delete=CASCADE)
     source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transition_approval_meta_as_source', on_delete=CASCADE)
     destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='transition_approval_meta_as_destination', on_delete=CASCADE)
-    # direction = models.SmallIntegerField(_("Transition Direction"), choices=DIRECTIONS, default=FORWARD)
 
     permissions = models.ManyToManyField(app_config.PERMISSION_CLASS, verbose_name=_('Permissions'), blank=True)
     groups = models.ManyToManyField(app_config.GROUP_CLASS, verbose_name=_('Groups'), blank=True)
     priority = models.IntegerField(default=0, verbose_name=_('Priority'), null=True)
-    action_text = models.TextField(_("Action Text"), max_length=200, null=True, blank=True)
     parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False, db_index=True, blank=True)
 
     def natural_key(self):
@@ -55,24 +42,6 @@ class TransitionApprovalMeta(BaseModel):
             self.destination_state,
             ','.join(self.permissions.values_list('name', flat=True)),
             ','.join(self.groups.values_list('name', flat=True)), self.priority)
-
-
-#
-#
-# def post_group_change(sender, instance, *args, **kwargs):
-#     from river.services.proceeding import ProceedingService
-#     from river.models.proceeding import PENDING
-#
-#     for proceeding_pending in instance.proceedings.filter(status=PENDING):
-#         ProceedingService.override_groups(proceeding_pending, instance.groups.all())
-#
-#
-# def post_permissions_change(sender, instance, *args, **kwargs):
-#     from river.models.proceeding import PENDING
-#     from river.services.proceeding import ProceedingService
-#
-#     for proceeding_pending in instance.proceedings.filter(status=PENDING):
-#         ProceedingService.override_permissions(proceeding_pending, instance.permissions.all())
 
 
 def post_save_model(sender, instance, *args, **kwargs):
@@ -93,8 +62,5 @@ def post_save_model(sender, instance, *args, **kwargs):
     for child in children:
         child.parents.add(instance)
 
-
-# m2m_changed.connect(post_group_change, sender=TransitionApprovalMeta.groups.through)
-# m2m_changed.connect(post_permissions_change, sender=TransitionApprovalMeta.permissions.through)
 
 post_save.connect(post_save_model, sender=TransitionApprovalMeta)

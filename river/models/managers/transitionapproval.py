@@ -10,18 +10,18 @@ class TransitionApprovalManager(CTEManager):
         super(TransitionApprovalManager, self).__init__(*args, **kwargs)
 
     def filter(self, *args, **kwarg):
-        object = kwarg.pop('workflow_object', None)
-        if object:
-            kwarg['content_type'] = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(object)
-            kwarg['object_id'] = object.pk
+        workflow_object = kwarg.pop('workflow_object', None)
+        if workflow_object:
+            kwarg['content_type'] = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
+            kwarg['object_id'] = workflow_object.pk
 
         return super(TransitionApprovalManager, self).filter(*args, **kwarg)
 
     def update_or_create(self, *args, **kwarg):
-        object = kwarg.pop('workflow_object', None)
-        if object:
-            kwarg['content_type'] = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(object)
-            kwarg['object_id'] = object.pk
+        workflow_object = kwarg.pop('workflow_object', None)
+        if workflow_object:
+            kwarg['content_type'] = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(workflow_object)
+            kwarg['object_id'] = workflow_object.pk
 
         return super(TransitionApprovalManager, self).update_or_create(*args, **kwarg)
 
