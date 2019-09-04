@@ -16,6 +16,3 @@ class BaseModel(models.Model):
 
     def details(self):
         return {'pk': self.pk}
-
-    def authenticate_header(self, request):
-        return None

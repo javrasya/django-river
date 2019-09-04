@@ -23,7 +23,7 @@ PENDING = 0
 APPROVED = 1
 REJECTED = 2
 
-PROCEEDING_STATUSES = [
+STATUSES = [
     (PENDING, _('Pending')),
     (APPROVED, _('Approved')),
     (REJECTED, _('Rejected')),
@@ -54,7 +54,7 @@ class TransitionApproval(BaseModel):
     transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True, on_delete=CASCADE)
     transaction_date = models.DateTimeField(null=True, blank=True)
 
-    status = models.IntegerField(_('Status'), choices=PROCEEDING_STATUSES, default=PENDING)
+    status = models.IntegerField(_('Status'), choices=STATUSES, default=PENDING)
 
     skipped = models.BooleanField(_('Skip'), default=False)
 
@@ -65,8 +65,6 @@ class TransitionApproval(BaseModel):
     enabled = models.BooleanField(_('Enabled?'), default=True)
 
     previous = TreeOneToOneField("self", verbose_name=_('Previous Transition'), related_name="next_transition", null=True, blank=True, on_delete=CASCADE)
-
-    cloned = models.BooleanField(_('Cloned?'), default=False)
 
     skipped_from = models.ManyToManyField("self", verbose_name=_("Skipped from"), related_name='created_after_skipped', null=True, blank=True)
 
@@ -79,9 +77,9 @@ class TransitionApproval(BaseModel):
         self.save()
 
         if self._can_skip_whole_step:
-            self._bind_with_downstream(self.source_state)
+            self._link_to_downstream(self.source_state)
             for skipped_peer in self.peers.filter(skipped=True):
-                self._bind_with_downstream(skipped_peer.source_state)
+                self._link_to_downstream(skipped_peer.source_state)
 
         self.downstream.filter(skipped=False).update(skipped=True)
 
@@ -106,7 +104,7 @@ class TransitionApproval(BaseModel):
     def _can_skip_whole_step(self):
         return self.peers.filter(skipped=False).count() == 0
 
-    def _bind_with_downstream(self, source_state):
+    def _link_to_downstream(self, source_state):
         for downstream_approval in self.downstream.filter(skipped=False):
             transition_approval, created = TransitionApproval.objects.update_or_create(  # pylint: disable=unused-variable
                 workflow_object=self.workflow_object,

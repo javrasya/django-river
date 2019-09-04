@@ -55,10 +55,9 @@ class StateField(models.ForeignKey):
         super(StateField, self).contribute_to_class(cls, name)
 
         if id(cls) not in workflow_registry.workflows:
-            post_save.connect(_post_save, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
+            post_save.connect(_on_workflow_object_saved, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
 
         workflow_registry.add(self.field_name, cls)
-
 
     @staticmethod
     def _add_to_class(cls, key, value, ignore_exists=False):
@@ -66,11 +65,11 @@ class StateField(models.ForeignKey):
             cls.add_to_class(key, value)
 
 
-def _post_save(sender, instance, created, *args, **kwargs):  # signal, sender, instance):
-    for workflow in instance.river.all(instance.__class__):
+def _on_workflow_object_saved(sender, instance, created, *args, **kwargs):
+    for instance_workflow in instance.river.all(instance.__class__):
         if created:
-            workflow.initialize_approvals()
-        if not workflow.get_state():
-            init_state = getattr(instance.__class__.river, workflow.name).initial_state
-            workflow.set_state(init_state)
+            instance_workflow.initialize_approvals()
+        if not instance_workflow.get_state():
+            init_state = getattr(instance.__class__.river, instance_workflow.name).initial_state
+            instance_workflow.set_state(init_state)
             instance.save()
