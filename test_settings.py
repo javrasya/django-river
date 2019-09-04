@@ -15,6 +15,21 @@ DATABASES = {
     },
 }
 
+# TEST_DB_PORT = os.environ['POSTGRES_5432_TCP_PORT']
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'river',
+#         'USER': 'river',
+#         'PASSWORD': 'river',
+#         'HOST': 'localhost',
+#         'PORT': TEST_DB_PORT,
+#         'TEST': {
+#             'NAME': 'test-db' + str(uuid4()),
+#         },
+#     }
+# }
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
