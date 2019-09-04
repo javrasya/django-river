@@ -15,7 +15,7 @@ __author__ = 'ahmetdal'
 
 class StateFieldTest(TestCase):
 
-    def test_shouldInjectTheField(self):
+    def test_shouldInjectTheField(self):  # pylint: disable=no-self-use
         assert_that(BasicTestModel, has_property('river', is_(instance_of(RiverObject))))
         assert_that(BasicTestModel.river, has_property('my_field', is_(instance_of(ClassWorkflowObject))))
 

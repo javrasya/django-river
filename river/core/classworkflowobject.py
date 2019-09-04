@@ -1,8 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 
-from river.models import State, TransitionApprovalMeta, Workflow, TransitionApproval
-from river.utils.error_code import ErrorCode
-from river.utils.exceptions import RiverException
+from river.models import State, TransitionApprovalMeta, Workflow
 
 
 class ClassWorkflowObject(object):

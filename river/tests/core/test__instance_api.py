@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length
+from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not
 
 from river.models import TransitionApproval
 from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory
@@ -39,6 +39,9 @@ class InstanceApiTest(TestCase):
         assert_that(available_approvals, has_length(1))
         assert_that(list(available_approvals), has_item(
             has_property("workflow_object", workflow_object1.model)
+        ))
+        assert_that(list(available_approvals), has_item(
+            is_not(has_property("workflow_object", workflow_object2.model))
         ))
 
     def test_shouldNotAllowUnauthorizedUserToProceedToNextState(self):
@@ -92,7 +95,6 @@ class InstanceApiTest(TestCase):
         team_leader_permission = PermissionObjectFactory()
 
         manager = UserObjectFactory(user_permissions=[manager_permission])
-        team_leader = UserObjectFactory(user_permissions=[team_leader_permission])
 
         state1 = StateObjectFactory(label="state1")
         state2 = StateObjectFactory(label="state2")
@@ -126,7 +128,6 @@ class InstanceApiTest(TestCase):
         manager_permission = PermissionObjectFactory()
         team_leader_permission = PermissionObjectFactory()
 
-        manager = UserObjectFactory(user_permissions=[manager_permission])
         team_leader = UserObjectFactory(user_permissions=[team_leader_permission])
 
         state1 = StateObjectFactory(label="state1")

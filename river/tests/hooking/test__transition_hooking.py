@@ -1,5 +1,4 @@
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from hamcrest import equal_to, assert_that, none, has_entry
 

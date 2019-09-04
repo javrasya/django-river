@@ -5,7 +5,7 @@ from hamcrest import assert_that, has_value, is_not, has_key, has_property, has_
 from river.config import app_config
 from river.hooking.backends.loader import load_callback_backend
 from river.hooking.transition import PostTransitionHooking
-from river.models.factories import UserObjectFactory, PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory
+from river.models.factories import PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
