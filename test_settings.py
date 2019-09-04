@@ -1,6 +1,5 @@
 import os
 import sys
-from uuid import UUID, uuid4
 
 import django
 
@@ -15,7 +14,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
 }
-
 
 # TEST_DB_PORT = os.environ['POSTGRES_5432_TCP_PORT']
 # DATABASES = {

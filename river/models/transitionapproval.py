@@ -108,7 +108,7 @@ class TransitionApproval(BaseModel):
 
     def _bind_with_downstream(self, source_state):
         for downstream_approval in self.downstream.filter(skipped=False):
-            transition_approval, created = TransitionApproval.objects.update_or_create(
+            transition_approval, created = TransitionApproval.objects.update_or_create(  # pylint: disable=unused-variable
                 workflow_object=self.workflow_object,
                 workflow=self.workflow,
                 source_state=source_state,
