@@ -1,6 +1,4 @@
 language: python
-services:
-  - docker
 sudo: false
 cache: pip
 matrix:

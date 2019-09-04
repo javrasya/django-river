@@ -31,7 +31,7 @@ class InstanceWorkflowObject(object):
     def initialize_approvals(self):
         if not self.initialized:
             workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
-            if workflow and workflow.transition_approvals.count() == 0:
+            if workflow and workflow.transition_approvals.filter(workflow_object=self.workflow_object).count() == 0:
                 transition_approval_metas = workflow.transition_approval_metas.all()
                 meta_dict = six.moves.reduce(
                     lambda agg, meta: dict(agg, **{self._to_key(meta.source_state): agg.get(self._to_key(meta.source_state), []) + [meta]}),

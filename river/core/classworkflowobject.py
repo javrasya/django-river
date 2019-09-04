@@ -1,7 +1,7 @@
 from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Window, F, Q, IntegerField
-from django.db.models.functions import Rank, Cast
+from django.db.models import F, Q, IntegerField, Min
+from django.db.models.functions import Cast
 from django_cte import With
 
 from river.models import State, TransitionApprovalMeta, TransitionApproval, PENDING, Workflow
@@ -27,13 +27,12 @@ class ClassWorkflowObject(object):
         return self.wokflow_object_class.objects.filter(pk__in=object_ids)
 
     def get_available_approvals(self, as_user):
-        approvals_with_priority_rank = With(
-            TransitionApproval.objects.filter(workflow=self.workflow, status=PENDING, skipped=False, enabled=True).annotate(
-                priority_rank=Window(
-                    expression=Rank(),
-                    order_by=F('priority').asc(),
-                    partition_by=[F('workflow'), F('object_id'), F('source_state'), F('destination_state')])
-            )
+        those_with_max_priority = With(
+            TransitionApproval.objects.filter(
+                workflow=self.workflow, status=PENDING, skipped=False, enabled=True
+            ).values(
+                'workflow', 'object_id', 'source_state', 'destination_state'
+            ).annotate(min_priority=Min('priority'))
         )
 
         workflow_objects = With(
@@ -41,15 +40,24 @@ class ClassWorkflowObject(object):
             name="workflow_object"
         )
 
-        approvals_after_ranking = approvals_with_priority_rank \
-            .join(self._authorized_approvals(as_user), id=approvals_with_priority_rank.col.id) \
-            .with_cte(approvals_with_priority_rank) \
-            .annotate(object_id_as_int=Cast('object_id', IntegerField()), priority_rank=approvals_with_priority_rank.col.priority_rank) \
-            .filter(priority_rank=1)
+        approvals_with_max_priority = those_with_max_priority.join(
+            self._authorized_approvals(as_user),
+            workflow_id=those_with_max_priority.col.workflow_id,
+            object_id=those_with_max_priority.col.object_id,
+            source_state_id=those_with_max_priority.col.source_state_id,
+            destination_state_id=those_with_max_priority.col.destination_state_id,
+        ).with_cte(
+            those_with_max_priority
+        ).annotate(
+            object_id_as_int=Cast('object_id', IntegerField()),
+            min_priority=those_with_max_priority.col.min_priority
+        ).filter(min_priority=F("priority"))
 
-        return workflow_objects.join(approvals_after_ranking, object_id_as_int=workflow_objects.col.pk) \
-            .with_cte(workflow_objects) \
-            .filter(source_state=getattr(workflow_objects.col, self.field_name + "_id"))
+        return workflow_objects.join(
+            approvals_with_max_priority, object_id_as_int=workflow_objects.col.pk
+        ).with_cte(
+            workflow_objects
+        ).filter(source_state=getattr(workflow_objects.col, self.field_name + "_id"))
 
     @property
     def initial_state(self):
