@@ -13,9 +13,6 @@ post_transition = Signal(providing_args=["workflow_object", "field_name", "sourc
 pre_approve = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
 post_approve = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
 
-pre_reject = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
-post_reject = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
-
 LOGGER = logging.getLogger(__name__)
 
 

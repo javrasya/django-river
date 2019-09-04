@@ -21,12 +21,10 @@ __author__ = 'ahmetdal'
 
 PENDING = 0
 APPROVED = 1
-REJECTED = 2
 
 STATUSES = [
     (PENDING, _('Pending')),
     (APPROVED, _('Approved')),
-    (REJECTED, _('Rejected')),
 ]
 
 LOGGER = logging.getLogger(__name__)
