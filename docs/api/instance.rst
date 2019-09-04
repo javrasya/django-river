@@ -17,7 +17,7 @@ approve
 -------
 
 This is the function that helps you to approve next approval of the object easily. ``django-river`` will handle all
-the availibility and the authorization issues. 
+the availability and the authorization issues.
 
 >>> my_model.river.my_state_field.approve(as_user=team_leader)
 >>> my_model.river.my_state_field.approve(as_user=team_leader, next_state=State.objects.get(name='re_opened_state'))
@@ -43,9 +43,6 @@ the availibility and the authorization issues.
 |            |       |         |            |             | | If the given next state is not        |
 |            |       |         |            |             | | a valid next state a `RiverException` |
 |            |       |         |            |             | | will be thrown.                       |
-+------------+-------+---------+------------+-------------+-----------------------------------------+
-| god_mod    | input | False   | True       | Boolean     | | Authorization will be skipped if      |
-|            |       |         |            |             | | this is `True`                        |
 +------------+-------+---------+------------+-------------+-----------------------------------------+
 
 get_available_approvals
@@ -78,9 +75,6 @@ destination states. If the source state is not provided, ``django-river`` will p
 |                   |        |                |          |                          | | will be found for all available        |
 |                   |        |                |          |                          | | destination states                     |
 +-------------------+--------+----------------+----------+--------------------------+------------------------------------------+
-| god_mod           | input  | False          | True     | Boolean                  | | Authorization will be skipped if       |
-|                   |        |                |          |                          | | this is `True`                         |
-+-------------------+--------+----------------+----------+--------------------------+------------------------------------------+
 |                   | Output |                |          | List<TransitionApproval> | | List of available transition approvals |
 +-------------------+--------+----------------+----------+--------------------------+------------------------------------------+
 
@@ -103,7 +97,8 @@ next_approvals
 
 This is a property that the list of transition approvals as a next step.
 
->>> transition_approvals = my_model.river.my_state_field.next_approvals
+>>> transition_approvals == my_model.river.my_state_field.next_approvals
+True
 
 +--------+--------------------------+--------------------------------------+
 |  Type  |          Format          |             Description              |
@@ -115,11 +110,12 @@ This is a property that the list of transition approvals as a next step.
 
 
 on_initial_state
---------------
+----------------
 
 This is a property that indicates if object is on initial state.
 
->>> True == my_model.river.my_state_field.on_initial_state
+>>> my_model.river.my_state_field.on_initial_state
+True
 
 +--------+---------+------------------------------------+
 |  Type  | Format  |            Description             |
@@ -132,7 +128,8 @@ on_final_state
 
 This is a property that indicates if object is on final state.
 
->>> True == my_model.river.my_state_field.on_final_state
+>>> my_model.river.my_state_field.on_final_state
+True
 
 +--------+---------+--------------------------------------+
 |  Type  | Format  |             Description              |
@@ -147,7 +144,8 @@ This is a property that indicates if object is on final state.
 hook_pre_transition
 --------------------
 
-This is a function that helps you to hook pre-transtion. For more detail please look at :ref:`transition_callback_function`.
+This is a function that helps you to hook pre-transtion. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`transition_callback_function`.
 
     .. code-block:: python
 
@@ -173,7 +171,8 @@ This is a function that helps you to hook pre-transtion. For more detail please 
 hook_post_transition
 --------------------
 
-This is a function that helps you to hook post-transtion. For more detail please look at :ref:`transition_callback_function`.
+This is a function that helps you to hook post-transtion. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`transition_callback_function`.
 
     .. code-block:: python
 
@@ -199,7 +198,8 @@ This is a function that helps you to hook post-transtion. For more detail please
 hook_pre_complete
 --------------------
 
-This is a function that helps you to hook pre-complete. For more detail please look at :ref:`on_complete_callback_function`.
+This is a function that helps you to hook pre-complete. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`on_complete_callback_function`.
 
     .. code-block:: python
 
@@ -220,7 +220,8 @@ This is a function that helps you to hook pre-complete. For more detail please l
 hook_post_complete
 --------------------
 
-This is a function that helps you to hook post-complete. For more detail please look at :ref:`on_complete_callback_function`.
+This is a function that helps you to hook post-complete. This is gonna be executed only for the model object which it has been registered with.
+For more detail please look at :ref:`on_complete_callback_function`.
 
     .. code-block:: python
 

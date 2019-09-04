@@ -6,8 +6,8 @@ Hooking Guide
 Hooking is one of the powerful side of ``django-river``. It is basically allowing you to have some callback functions due to some 
 circumtances like transitions or workflow completions.
 
-How Should Callback Functions Look Like
----------------------------------------
+How should callback functions look like?
+----------------------------------------
 
 You can register your callback function for some circumtances via ``django-river`` hooking feature. It can either be when a spesific
 transition happend or when a workflow is complete for an object. Your callback functions should look like how ``django-river`` wants

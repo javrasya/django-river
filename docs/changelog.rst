@@ -3,8 +3,26 @@
 Change Logs
 ===========
 
-1.0.2 (Stable)
+2.0.0 (Stable)
 --------------
+    * **Improvement** -  [ # 90_,# 36_ ]: Finding available approvals has been speeded up ~x400 times at scale
+    * **Improvement** -  # 92_ : It is mandatory to provide initial state by the system user to avoid confusion and possible mistakes
+    * **Improvement** -  # 93_ : Tests are revisited, separated, simplified and easy to maintain right now
+    * **Improvement** -  # 94_ : Support class level hooking. Meaning that, a hook can be registered for all the objects through the class api
+    * **Bug** -  # 91_ : Callbacks get removed when the related workflow object is deleted
+    * **Improvement** -  Whole ``django-river`` source code is revisited and simplified
+    * **Improvement** -  Support ``Django v2.2``
+    * **Deprecation** -  ``Django v1.7``, ``v1.8``, ``v1.9`` and ``v1.10`` supports have been dropped
+
+.. _36: https://github.com/javrasya/django-river/issues/36
+.. _90: https://github.com/javrasya/django-river/issues/90
+.. _91: https://github.com/javrasya/django-river/issues/91
+.. _92: https://github.com/javrasya/django-river/issues/92
+.. _93: https://github.com/javrasya/django-river/issues/93
+.. _94: https://github.com/javrasya/django-river/issues/94
+
+1.0.2
+-----
     * **Bug** - # 77_ : Migrations for the models that have state field is no longer kept getting recreated.
     * **Bug** - It is crashing when there is no workflow in the workspace.
 
@@ -26,7 +44,7 @@ There are also more documentation with this version. Stay tuned :-)
 
     * **Improvement** - Support ``Django2.1``
     * **Improvement** - Support multiple state fields in a model
-    * **Improvement** - Make the API very easy and useful by accessing everyhing via model objects and model classes
+    * **Improvement** - Make the API very easy and useful by accessing everything via model objects and model classes
     * **Improvement** - Simplify the concepts
     * **Improvement** - Migrate ProceedingMeta and Transition into TransitionApprovalMeta for simplification
     * **Improvement** - Rename Proceeding as TransitionApproval
