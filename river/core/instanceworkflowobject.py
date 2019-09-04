@@ -154,7 +154,7 @@ class InstanceWorkflowObject(object):
             available_transition_approvals = self.get_available_approvals(as_user=as_user, god_mod=god_mod)
             c = available_transition_approvals.count()
             if c == 0:
-                raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available state for destination for the user.")
+                raise RiverException(ErrorCode.NO_AVAILABLE_NEXT_STATE_FOR_USER, "There is no available approval for the user")
             if c > 1:
                 if next_state:
                     available_transition_approvals = available_transition_approvals.filter(destination_state=next_state)
@@ -188,7 +188,8 @@ class InstanceWorkflowObject(object):
             transition_status = True
 
             # Next states should be PENDING back again if there is circle.
-            self._cycle_proceedings()
+            if self._check_if_it_cycled(transition_approval.destination_state):
+                self._re_create_cycled_path(transition_approval.destination_state)
             # ProceedingService.get_next_proceedings(workflow_object).update(status=PENDING)
 
         with ProceedingSignal(self.workflow_object, self.field_name, transition_approval), \
@@ -224,33 +225,38 @@ class InstanceWorkflowObject(object):
 
         return proceedings
 
-    @atomic
-    def _cycle_proceedings(self):
-        """
-         Finds next proceedings and clone them for cycling if it exists.
-        """
-        next_approvals = self._get_next_approvals().exclude(
-            status=PENDING).exclude(cloned=True)
-        for ta in next_approvals:
-            clone_transition_approval, c = TransitionApproval.objects.get_or_create(
-                source_state=ta.source_state,
-                destination_state=ta.destination_state,
-                content_type=ta.content_type,
-                object_id=ta.object_id,
+    def _check_if_it_cycled(self, new_state):
+        return TransitionApproval.objects.filter(
+            workflow_object=self.workflow_object,
+            workflow=self.class_workflow.workflow,
+            source_state=new_state,
+            status=APPROVED
+        ).count() > 0
+
+    def _re_create_cycled_path(self, from_state):
+        approvals = TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow=self.class_workflow.workflow, source_state=from_state)
+        cycle_ended = False
+        while not cycle_ended:
+            for old_approval in approvals:
+                if old_approval.enabled:
+                    TransitionApproval.objects.get_or_create(
+                        source_state=old_approval.source_state,
+                        destination_state=old_approval.destination_state,
+                        workflow=old_approval.workflow,
+                        object_id=old_approval.workflow_object.pk,
+                        content_type=old_approval.content_type,
+                        skip=False,
+                        priority=old_approval.priority,
+                        enabled=True,
+                        status=PENDING,
+                        meta=old_approval.meta
+                    )
+            approvals = TransitionApproval.objects.filter(
+                workflow_object=self.workflow_object,
                 workflow=self.class_workflow.workflow,
-                skip=ta.skip,
-                priority=ta.priority,
-                enabled=ta.enabled,
-                status=PENDING,
-                meta=ta.meta
+                source_state__in=approvals.values_list("destination_state", flat=TransitionApproval)
             )
-
-            if c:
-                clone_transition_approval.permissions.add(*ta.permissions.all())
-                clone_transition_approval.groups.add(*ta.groups.all())
-            next_approvals.update(cloned=True)
-
-        return True if next_approvals.count() else False
+            cycle_ended = approvals.filter(source_state=from_state).count() > 0
 
     def get_state(self):
         return getattr(self.workflow_object, self.field_name)
