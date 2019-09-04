@@ -13,7 +13,7 @@ from river.utils.exceptions import RiverException
 class InstanceApiTest(TestCase):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(InstanceApiTest, self).__init__(*args, **kwargs)
         self.content_type = ContentType.objects.get_for_model(BasicTestModel)
 
     def test_shouldNotReturnOtherObjectsApprovalsForTheAuthorizedUser(self):
