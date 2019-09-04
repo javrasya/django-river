@@ -1,22 +1,23 @@
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
+from django.test import TestCase
+from hamcrest import assert_that, has_property, is_, instance_of
 
-from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory
-from river.core.riverobject import RiverObject
-from river.core.instanceworkflowobject import InstanceWorkflowObject
 from river.core.classworkflowobject import ClassWorkflowObject
-from river.tests.base_test import BaseTestCase
+from river.core.instanceworkflowobject import InstanceWorkflowObject
+from river.core.riverobject import RiverObject
+from river.models import State
+from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory
 from river.tests.models import BasicTestModel
 
 __author__ = 'ahmetdal'
 
 
-class StateFieldTest(BaseTestCase):
+class StateFieldTest(TestCase):
 
-    def test_injections(self):
-        self.assertTrue(hasattr(BasicTestModel, 'river'))
-        self.assertIsInstance(BasicTestModel.river, RiverObject)
-        self.assertTrue(hasattr(BasicTestModel.river, "my_field"))
-        self.assertIsInstance(BasicTestModel.river.my_field, ClassWorkflowObject)
+    def test_shouldInjectTheField(self):  # pylint: disable=no-self-use
+        assert_that(BasicTestModel, has_property('river', is_(instance_of(RiverObject))))
+        assert_that(BasicTestModel.river, has_property('my_field', is_(instance_of(ClassWorkflowObject))))
 
         content_type = ContentType.objects.get_for_model(BasicTestModel)
 
@@ -32,17 +33,11 @@ class StateFieldTest(BaseTestCase):
             priority=0
         )
         test_model = BasicTestModel.objects.create()
-        self.assertTrue(hasattr(test_model, "river"))
-        self.assertIsInstance(test_model.river, RiverObject)
-        self.assertTrue(hasattr(test_model.river, "my_field"))
-        self.assertIsInstance(test_model.river.my_field, InstanceWorkflowObject)
+        assert_that(test_model, has_property('river', is_(instance_of(RiverObject))))
+        assert_that(test_model.river, has_property('my_field', is_(instance_of(InstanceWorkflowObject))))
+        assert_that(BasicTestModel.river.my_field, has_property('initial_state', is_(instance_of(State))))
+        assert_that(BasicTestModel.river.my_field, has_property('final_states', is_(instance_of(QuerySet))))
 
-        self.assertTrue(hasattr(test_model.river.my_field, "approve"))
-        self.assertTrue(callable(test_model.river.my_field.approve))
-
-        self.assertTrue(test_model.river.my_field.on_initial_state)
-        self.assertFalse(test_model.river.my_field.on_final_state)
-
-        self.assertEqual(state1, BasicTestModel.river.my_field.initial_state)
-        self.assertEqual(1, BasicTestModel.river.my_field.final_states.count())
-        self.assertEqual(state2, BasicTestModel.river.my_field.final_states[0])
+        assert_that(test_model.river.my_field, has_property('approve', has_property("__call__")))
+        assert_that(test_model.river.my_field, has_property('on_initial_state', is_(instance_of(bool))))
+        assert_that(test_model.river.my_field, has_property('on_final_state', is_(instance_of(bool))))

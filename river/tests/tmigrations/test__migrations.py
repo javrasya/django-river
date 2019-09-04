@@ -2,6 +2,7 @@ import os
 import sys
 
 from django.test.utils import override_settings
+from hamcrest import assert_that, equal_to, has_length
 
 try:
     from StringIO import StringIO
@@ -15,13 +16,13 @@ _author_ = 'ahmetdal'
 
 
 def clean_migrations():
-    for f in os.listdir("river/tests/transient/river/"):
+    for f in os.listdir("river/tests/volatile/river/"):
         if f != "__init__.py" and f != "__pycache__":
-            os.remove(os.path.join("river/tests/transient/river/", f))
+            os.remove(os.path.join("river/tests/volatile/river/", f))
 
-    for f in os.listdir("river/tests/transient/river_tests/"):
+    for f in os.listdir("river/tests/volatile/river_tests/"):
         if f != "__init__.py" and f != "__pycache__":
-            os.remove(os.path.join("river/tests/transient/river_tests/", f))
+            os.remove(os.path.join("river/tests/volatile/river_tests/", f))
 
 
 class MigrationTests(TestCase):
@@ -44,38 +45,36 @@ class MigrationTests(TestCase):
         """
         clean_migrations()
 
-    @override_settings(MIGRATION_MODULES={"river": "river.tests.transient.river"})
-    def test_should_not_be_missing_migrations(self):
+    @override_settings(MIGRATION_MODULES={"river": "river.tests.volatile.river"})
+    def test_shouldCreateAllMigrations(self):
         for f in os.listdir("river/migrations"):
             if f != "__init__.py" and f != "__pycache__" and not f.endswith(".pyc"):
-                open(os.path.join("river/tests/transient/river/", f), 'wb').write(open(os.path.join("river/migrations", f), 'rb').read())
+                open(os.path.join("river/tests/volatile/river/", f), 'wb').write(open(os.path.join("river/migrations", f), 'rb').read())
 
-        self.migrations_before = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/transient/river/')))
+        self.migrations_before = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/volatile/river/')))
 
         out = StringIO()
         sys.stout = out
 
         call_command('makemigrations', 'river', stdout=out)
 
-        self.migrations_after = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/transient/river/')))
+        self.migrations_after = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/volatile/river/')))
 
-        self.assertEqual("No changes detected in app 'river'\n", out.getvalue())
+        assert_that(out.getvalue(), equal_to("No changes detected in app 'river'\n"))
+        assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
-        self.assertEqual(len(self.migrations_before), len(self.migrations_after))
-
-    @override_settings(MIGRATION_MODULES={"tests": "river.tests.transient.river_tests"})
-    def test__should_not_keep_recreating_migrations_when_no_change(self):
+    @override_settings(MIGRATION_MODULES={"tests": "river.tests.volatile.river_tests"})
+    def test__shouldNotKeepRecreatingMigrationsWhenNoChange(self):
         call_command('makemigrations', 'tests')
 
-        self.migrations_before = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/transient/river_tests/')))
+        self.migrations_before = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/volatile/river_tests/')))
 
         out = StringIO()
         sys.stout = out
 
         call_command('makemigrations', 'tests', stdout=out)
 
-        self.migrations_after = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/transient/river_tests/')))
+        self.migrations_after = list(filter(lambda f: f.endswith('.py') and f != '__init__.py', os.listdir('river/tests/volatile/river_tests/')))
 
-        self.assertEqual("No changes detected in app 'tests'\n", out.getvalue())
-
-        self.assertEqual(len(self.migrations_before), len(self.migrations_after))
+        assert_that(out.getvalue(), equal_to("No changes detected in app 'tests'\n"))
+        assert_that(self.migrations_after, has_length(len(self.migrations_before)))
