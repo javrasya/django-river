@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from unittest import skip
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -128,7 +127,6 @@ class ClassApiTest(TestCase):
             )
         ))
 
-    @skip("This test proves the implementation is terrible at scale")
     def test__shouldReturnApprovalsOnTimeWhenTooManyWorkflowObject(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
