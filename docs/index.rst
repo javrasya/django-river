@@ -46,6 +46,7 @@ Contents
    overview
    admin/index
    api/index
+   authorization
    hooking/index
    changelog
 
