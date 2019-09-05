@@ -26,7 +26,8 @@ setup(
         "Django",
         "mock",
         "factory-boy",
-        "django-mptt"
+        "django-mptt",
+        "django_cte"
     ],
     include_package_data=True,
     zip_safe=False,
