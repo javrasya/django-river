@@ -20,7 +20,9 @@ class Hooking(object):
         kwargs.pop('signal', None)
         kwargs.pop('sender', None)
 
-        for callback in callback_backend.get_callbacks(cls, workflow_object, field_name, *args, **kwargs):
+        object_callbacks = callback_backend.get_callbacks(cls, workflow_object, field_name, *args, **kwargs)
+        class_callbacks = callback_backend.get_callbacks(cls, None, field_name, *args, **kwargs)
+        for callback in object_callbacks + class_callbacks:
             exclusions = cls.get_result_exclusions()
             callback(workflow_object, field_name, *args, **{k: v for k, v in kwargs.items() if k not in exclusions})
             LOGGER.debug(
