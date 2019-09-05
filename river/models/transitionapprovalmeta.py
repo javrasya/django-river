@@ -33,7 +33,7 @@ class TransitionApprovalMeta(BaseModel):
     parents = models.ManyToManyField('self', verbose_name='parents', related_name='children', symmetrical=False, db_index=True, blank=True)
 
     def natural_key(self):
-        return self.field_name, self.content_type, self.source_state, self.destination_state, self.priority
+        return self.workflow, self.source_state, self.destination_state, self.priority
 
     def __str__(self):
         return 'Field Name:%s, %s -> %s,Permissions:%s, Groups:%s, Order:%s' % (
