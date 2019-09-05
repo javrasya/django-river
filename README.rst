@@ -31,7 +31,7 @@ Django River
 
 |Logo|
    
-|Build Status| |Coverage Status| |Health Status| |Documentation Status| |Quality Status|
+|Build Status| |Coverage Status| |Documentation Status| |Quality Status|
 
 
 Contributors are welcome. Come and give a hand :-)
