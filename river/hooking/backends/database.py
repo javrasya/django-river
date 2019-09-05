@@ -33,9 +33,9 @@ class DatabaseHookingBackend(MemoryHookingBackend):
         return callbacks
 
     def register(self, hooking_cls, callback, workflow_object, field_name, override=False, *args, **kwargs):
-        hash = super(DatabaseHookingBackend, self).register(hooking_cls, callback, workflow_object, field_name, override=override, *args, **kwargs)
+        callback_hash = super(DatabaseHookingBackend, self).register(hooking_cls, callback, workflow_object, field_name, override=override, *args, **kwargs)
         callback_obj, created = Callback.objects.update_or_create(
-            hash=hash,
+            hash=callback_hash,
             defaults={
                 'method': '%s.%s' % (callback.__module__, callback.__name__),
                 'hooking_cls': '%s.%s' % (hooking_cls.__module__, hooking_cls.__name__),
@@ -46,7 +46,16 @@ class DatabaseHookingBackend(MemoryHookingBackend):
         else:
             LOGGER.debug("Callback '%s' is already registered in database as method %s and module %s. " % (callback_obj.hash, callback.__name__, callback.__module__))
 
-        return hash
+        return callback_hash
+
+    def unregister(self, hooking_cls, workflow_object, field_name, *args, **kwargs):
+        callback_hash, callback_method = super(DatabaseHookingBackend, self).unregister(hooking_cls, workflow_object, field_name, *args, **kwargs)
+        if callback_hash:
+            callback_obj = Callback.objects.filter(hash=callback_hash).first()
+            if callback_obj:
+                callback_obj.delete()
+                LOGGER.debug("Callback '%s'  as method %s and module %s. is registered in database" % (callback_obj.hash, callback_method.__name__, callback_method.__module__))
+        return callback_hash, callback_method
 
     def get_callbacks(self, hooking_cls, workflow_object, field_name, *args, **kwargs):
         callbacks = super(DatabaseHookingBackend, self).get_callbacks(hooking_cls, workflow_object, field_name, *args, **kwargs)

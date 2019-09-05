@@ -3,7 +3,7 @@ from django.test import TestCase
 from hamcrest import is_not, assert_that, has_key, has_property, has_value, has_length, has_item
 
 from river.config import app_config
-from river.hooking.backends.loader import load_callback_backend
+from river.hooking.backends.loader import callback_backend
 from river.hooking.transition import PostTransitionHooking
 from river.models.callback import Callback
 from river.models.factories import WorkflowFactory, TransitionApprovalMetaFactory, StateObjectFactory, PermissionObjectFactory
@@ -37,7 +37,7 @@ class DatabaseHookingBackendTest(TestCase):
         )
 
         app_config.HOOKING_BACKEND_CLASS = 'river.hooking.backends.database.DatabaseHookingBackend'
-        self.handler_backend = load_callback_backend()
+        self.handler_backend = callback_backend
         self.handler_backend.callbacks = {}
 
     def test_shouldRegisterAHooking(self):
@@ -52,8 +52,6 @@ class DatabaseHookingBackendTest(TestCase):
         assert_that(self.handler_backend.callbacks, has_key(hooking_hash))
         assert_that(self.handler_backend.callbacks, has_value(has_property("__name__", test_callback.__name__)))
 
-        self.handler_backend.register(PostTransitionHooking, test_callback, workflow_objects[1], self.field_name)
-
     def test_shouldRegisterAHookingResilientlyToMultiProcessing(self):
         workflow_objects = BasicTestModelObjectFactory.create_batch(2)
 
@@ -66,7 +64,7 @@ class DatabaseHookingBackendTest(TestCase):
         assert_that(Callback.objects.all(), has_length(1))
 
         def worker2(q):
-            second_handler_backend = load_callback_backend()
+            second_handler_backend = callback_backend
             handlers = second_handler_backend.get_callbacks(PostTransitionHooking, workflow_objects[1], self.field_name)
             q.put([f.__name__ for f in handlers])
 
@@ -88,7 +86,7 @@ class DatabaseHookingBackendTest(TestCase):
         assert_that(handlers, has_length(1))
         assert_that(handlers, has_item(has_property("__name__", test_callback.__name__)))
 
-    def test_get_handlers_in_multiprocessing(self):
+    def test_shouldReturnTheRegisteredHookingInMultiProcessing(self):
         workflow_objects = BasicTestModelObjectFactory.create_batch(2)
 
         from multiprocessing import Process, Queue
@@ -113,3 +111,41 @@ class DatabaseHookingBackendTest(TestCase):
         handlers = q.get(timeout=1)
         assert_that(handlers, has_length(1))
         assert_that(handlers, has_item(test_callback.__name__))
+
+    def test_shouldUnregisterAHooking(self):
+        workflow_objects = BasicTestModelObjectFactory.create_batch(2)
+
+        hooking_hash = '%s.%s_object%s_field_name%s' % (PostTransitionHooking.__module__, PostTransitionHooking.__name__, workflow_objects[1].pk, self.field_name)
+
+        assert_that(self.handler_backend.callbacks, is_not(has_key(hooking_hash)))
+
+        self.handler_backend.register(PostTransitionHooking, test_callback, workflow_objects[1], self.field_name)
+
+        assert_that(self.handler_backend.callbacks, has_key(hooking_hash))
+        assert_that(self.handler_backend.callbacks, has_value(has_property("__name__", test_callback.__name__)))
+
+        self.handler_backend.unregister(PostTransitionHooking, workflow_objects[1], self.field_name)
+
+        assert_that(self.handler_backend.callbacks, is_not(has_key(hooking_hash)))
+        assert_that(self.handler_backend.callbacks, is_not(has_value(has_property("__name__", test_callback.__name__))))
+
+    def test_shouldRemoveTheHookingAndCallbackFromDBWhenWorkflowObjectIsDeleted(self):
+        workflow_object = BasicTestModelObjectFactory().model
+
+        hooking_hash = '%s.%s_object%s_field_name%s' % (PostTransitionHooking.__module__, PostTransitionHooking.__name__, workflow_object.pk, self.field_name)
+
+        assert_that(self.handler_backend.callbacks, is_not(has_key(hooking_hash)))
+        assert_that(self.handler_backend.callbacks, is_not(has_value(has_property("__name__", test_callback.__name__))))
+
+        self.handler_backend.register(PostTransitionHooking, test_callback, workflow_object, self.field_name)
+
+        assert_that(self.handler_backend.callbacks, has_key(hooking_hash))
+        assert_that(self.handler_backend.callbacks, has_value(has_property("__name__", test_callback.__name__)))
+        assert_that(Callback.objects.filter(hash=hooking_hash), has_length(1))
+
+        workflow_object.delete()
+
+        assert_that(self.handler_backend.callbacks, is_not(has_key(hooking_hash)))
+        assert_that(self.handler_backend.callbacks, is_not(has_value(has_property("__name__", test_callback.__name__))))
+
+        assert_that(Callback.objects.filter(hash=hooking_hash), has_length(0))

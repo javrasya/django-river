@@ -1,11 +1,12 @@
 import logging
-from uuid import uuid4
 
 from django.db.models import CASCADE
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 
 from river.core.riverobject import RiverObject
 from river.core.workflowregistry import workflow_registry
+from river.hooking.completed import PreCompletedHooking, PostCompletedHooking
+from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 
 try:
     from django.contrib.contenttypes.fields import GenericRelation
@@ -56,6 +57,7 @@ class StateField(models.ForeignKey):
 
         if id(cls) not in workflow_registry.workflows:
             post_save.connect(_on_workflow_object_saved, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
+            post_delete.connect(_on_workflow_object_deleted, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))
 
         workflow_registry.add(self.field_name, cls)
 
@@ -73,3 +75,11 @@ def _on_workflow_object_saved(sender, instance, created, *args, **kwargs):
             init_state = getattr(instance.__class__.river, instance_workflow.name).initial_state
             instance_workflow.set_state(init_state)
             instance.save()
+
+
+def _on_workflow_object_deleted(sender, instance, *args, **kwargs):
+    for field_name in instance.river.all_field_names(instance.__class__):
+        PreCompletedHooking.unregister(instance, field_name, *args, **kwargs)
+        PostCompletedHooking.unregister(instance, field_name, *args, **kwargs)
+        PreTransitionHooking.unregister(instance, field_name, *args, **kwargs)
+        PostTransitionHooking.unregister(instance, field_name, *args, **kwargs)
