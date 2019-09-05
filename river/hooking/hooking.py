@@ -33,5 +33,9 @@ class Hooking(object):
         callback_backend.register(cls, callback, workflow_object, field_name, override, *args, **kwargs)
 
     @classmethod
+    def unregister(cls, workflow_object, field_name, *args, **kwargs):
+        callback_backend.unregister(cls, workflow_object, field_name, *args, **kwargs)
+
+    @classmethod
     def get_hash(cls, workflow_object, field_name, *args, **kwargs):
         return 'object' + (str(workflow_object.pk) if workflow_object else '') + '_field_name' + field_name

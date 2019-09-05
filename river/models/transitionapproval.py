@@ -64,7 +64,7 @@ class TransitionApproval(BaseModel):
 
     previous = TreeOneToOneField("self", verbose_name=_('Previous Transition'), related_name="next_transition", null=True, blank=True, on_delete=CASCADE)
 
-    skipped_from = models.ManyToManyField("self", verbose_name=_("Skipped from"), related_name='created_after_skipped', null=True, blank=True)
+    skipped_from = models.ManyToManyField("self", verbose_name=_("Skipped from"), related_name='created_after_skipped')
 
     @transaction.atomic
     def skip(self):
