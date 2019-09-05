@@ -27,10 +27,10 @@ Getting Started
         class MyModel(models.Model):
             my_state_field = StateField()
 
-3. Create all your ``state``s on the admin page
-4. Create a ``workflow`` with your model (``MyModel`` - ``my_state_field``) information on the admin page
-4. Create your ``transition approval metadata``s within the workflow created earlier and authorization rules along with their priority on the admin page
-5. Enjoy your ``django-river`` journey.
+3. Create all your ``states`` on the admin page
+4. Create a ``workflow`` with your model ( ``MyModel`` - ``my_state_field`` ) information on the admin page
+5. Create your ``transition approval metadata`` within the workflow created earlier and authorization rules along with their priority on the admin page
+6. Enjoy your ``django-river`` journey.
 
     .. code-block:: python
 
