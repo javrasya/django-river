@@ -12,7 +12,7 @@ from river.tests.models import BasicTestModel
 
 __author__ = 'ahmetdal'
 
-
+# noinspection PyMethodMayBeStatic
 class StateFieldTest(TestCase):
 
     def test_shouldInjectTheField(self):  # pylint: disable=no-self-use

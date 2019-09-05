@@ -23,3 +23,6 @@ class RiverObject(object):
 
     def all(self, cls):
         return list([getattr(self, field_name) for field_name in workflow_registry.workflows[id(cls)]])
+
+    def all_field_names(self, cls):
+        return [field_name for field_name in workflow_registry.workflows[id(cls)]]
