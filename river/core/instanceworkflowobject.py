@@ -174,7 +174,7 @@ class InstanceWorkflowObject(object):
         while not cycle_ended:
             for old_approval in approvals:
                 if old_approval.enabled:
-                    TransitionApproval.objects.get_or_create(
+                    cycled_approval, _ = TransitionApproval.objects.get_or_create(
                         source_state=old_approval.source_state,
                         destination_state=old_approval.destination_state,
                         workflow=old_approval.workflow,
@@ -186,6 +186,8 @@ class InstanceWorkflowObject(object):
                         status=PENDING,
                         meta=old_approval.meta
                     )
+                    cycled_approval.permissions.set(old_approval.permissions.all())
+                    cycled_approval.groups.set(old_approval.groups.all())
             approvals = TransitionApproval.objects.filter(
                 workflow_object=self.workflow_object,
                 workflow=self.class_workflow.workflow,

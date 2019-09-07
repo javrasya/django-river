@@ -1,9 +1,10 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not
+from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of
 
-from river.models import TransitionApproval
+from river.models import TransitionApproval, PENDING
 from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory
+from river.tests.matchers import has_permission
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 from river.utils.exceptions import RiverException
@@ -309,7 +310,8 @@ class InstanceApiTest(TestCase):
         off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        meta_1 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_1,
             destination_state=cycle_state_2,
@@ -317,7 +319,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        meta_2 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_2,
             destination_state=cycle_state_3,
@@ -325,7 +327,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        meta_3 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=cycle_state_1,
@@ -333,7 +335,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        meta_4 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
@@ -352,8 +354,74 @@ class InstanceApiTest(TestCase):
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
         assert_that(approvals, has_length(4))
 
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_1.source_state),
+                    has_property("destination_state", meta_1.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_2.source_state),
+                    has_property("destination_state", meta_2.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_3.source_state),
+                    has_property("destination_state", meta_3.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
         assert_that(approvals, has_length(7))
+
+        assert_that(approvals, has_item(
+            all_of(
+                has_property("source_state", meta_1.source_state),
+                has_property("destination_state", meta_1.destination_state),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            all_of(
+                has_property("source_state", meta_2.source_state),
+                has_property("destination_state", meta_2.destination_state),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            all_of(
+                has_property("source_state", meta_3.source_state),
+                has_property("destination_state", meta_3.destination_state),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
+            )
+        ))
