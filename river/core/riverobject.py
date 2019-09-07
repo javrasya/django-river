@@ -5,6 +5,7 @@ from river.core.instanceworkflowobject import InstanceWorkflowObject
 from river.core.workflowregistry import workflow_registry
 
 
+# noinspection PyMethodMayBeStatic
 class RiverObject(object):
 
     def __init__(self, owner, field_name):
@@ -24,5 +25,5 @@ class RiverObject(object):
     def all(self, cls):
         return list([getattr(self, field_name) for field_name in workflow_registry.workflows[id(cls)]])
 
-    def all_field_names(self, cls):
+    def all_field_names(self, cls):  # pylint: disable=no-self-use
         return [field_name for field_name in workflow_registry.workflows[id(cls)]]

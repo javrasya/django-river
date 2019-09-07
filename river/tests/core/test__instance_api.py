@@ -335,7 +335,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        meta_4 = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,

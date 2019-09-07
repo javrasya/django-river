@@ -13,7 +13,7 @@ class BaseHookingBackend(object):
     def register(self, hooking_cls, callback, workflow_object, field_name, override=False, *args, **kwargs):
         raise NotImplementedError()
 
-    def unregister(self, hooking_cls, callback, workflow_object, field_name, override=False, *args, **kwargs):
+    def unregister(self, hooking_cls, workflow_object, field_name, *args, **kwargs):
         raise NotImplementedError()
 
     def get_callbacks(self, hooking_cls, workflow_object, field_name, *args, **kwargs):
