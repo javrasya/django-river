@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from django.db import models
+from django.db import models, transaction
 from django.db.models import CASCADE
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.utils.translation import ugettext_lazy as _
 
 from river.config import app_config
@@ -63,4 +63,11 @@ def post_save_model(sender, instance, *args, **kwargs):
         child.parents.add(instance)
 
 
+@transaction.atomic
+def pre_delete_model(sender, instance, *args, **kwargs):
+    from river.models.transitionapproval import PENDING
+    instance.transition_approvals.filter(status=PENDING).delete()
+
+
 post_save.connect(post_save_model, sender=TransitionApprovalMeta)
+pre_delete.connect(pre_delete_model, sender=TransitionApprovalMeta)
