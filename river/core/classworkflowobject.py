@@ -9,9 +9,8 @@ from river.models import State, TransitionApprovalMeta, TransitionApproval, PEND
 
 class ClassWorkflowObject(object):
 
-    def __init__(self, wokflow_object_class, name, field_name):
+    def __init__(self, wokflow_object_class, field_name):
         self.wokflow_object_class = wokflow_object_class
-        self.name = name
         self.field_name = field_name
         self._cached_workflow = None
 
@@ -61,7 +60,7 @@ class ClassWorkflowObject(object):
 
     @property
     def initial_state(self):
-        workflow = Workflow.objects.filter(content_type=self._content_type, field_name=self.name).first()
+        workflow = Workflow.objects.filter(content_type=self._content_type, field_name=self.field_name).first()
         return workflow.initial_state if workflow else None
 
     @property
