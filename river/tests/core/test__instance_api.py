@@ -443,3 +443,31 @@ class InstanceApiTest(TestCase):
 
         assert_that(workflow_object.model.status1, equal_to(state1))
         assert_that(workflow_object.model.status2, none())
+
+    def test__shouldReturnNextApprovals(self):
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+        )
+
+        meta2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+            priority=0,
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        next_approvals = workflow_object.model.river.my_field.next_approvals
+        assert_that(next_approvals, has_length(2))
+        assert_that(next_approvals, has_item(meta1.transition_approvals.first()))
+        assert_that(next_approvals, has_item(meta2.transition_approvals.first()))
