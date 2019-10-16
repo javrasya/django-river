@@ -103,6 +103,50 @@ Usage
     Whenever a model object is saved, it's state field will be initialized with the
     state is given at step-4 above by ``django-river``.
 
+Hooking Up With The Events
+--------------------------
+
+`django-river` provides you to have your custom code run on certain events. And since version v2.1.0 this has also been supported for on the fly changes. You can
+create your functions and also the hooks to a certain events by just creating few database items. Let's see what event types that can be hooked a function to;
+
+* An approval is approved
+* A transition goes through
+* The workflow is complete
+
+For all these event types, you can create a hooking with a given function which is created separately and preliminary than the hookings for all the workflow objects you have
+or you will possible have, or for a specific workflow object. You can also hook up before or after the events happen.
+
+Create Function
+^^^^^^^^^^^^^^^
+
+This will be the description of your functions. So you define them once and you can use them with multiple hooking up. Just go to `/admin/river/function/` admin page
+and create your functions there. `django-river` function admin support python code highlights.
+
+   .. code:: python
+
+       INSTALLED_APPS=[
+           ...
+           codemirror2
+           river
+           ...
+       ]
+
+Here is an example function;
+
+   .. code:: python
+        from datetime import datetime
+
+        def handle(context):
+            print(datetime.now())
+            print(context)
+
+`django-river` will pass a `context` down to your function in respect to in order for you to know why the function is triggered. And the `context` will look different for
+different type of events
+
+
+
+
+
 Contribute
 ----------
 

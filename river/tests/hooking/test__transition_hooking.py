@@ -1,8 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
-from hamcrest import equal_to, assert_that, has_entry, none, all_of
+from hamcrest import equal_to, assert_that, has_entry, none, all_of, has_key
 
 from river.models import TransitionApproval
 from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory
+from river.models.hook import AFTER
 from river.tests.hooking.base_hooking_test import BaseHookingTest
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
@@ -53,16 +54,19 @@ class TransitionHooking(BaseHookingTest):
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
         last_approval = TransitionApproval.objects.get(object_id=workflow_object.model.pk, source_state=state2, destination_state=state3)
-        assert_that(
-            self.get_output(), has_entry(
-                "kwargs",
-                all_of(
-                    has_entry(equal_to("workflow_object"), equal_to(workflow_object.model)),
-                    has_entry(equal_to("transition_approval"), equal_to(last_approval))
 
-                )
+        output = self.get_output()
+        assert_that(output, has_key("hook"))
+        assert_that(output["hook"], has_entry("type", "on-transit"))
+        assert_that(output["hook"], has_entry("when", AFTER))
+        assert_that(output["hook"], has_entry(
+            "payload",
+            all_of(
+                has_entry(equal_to("workflow_object"), equal_to(workflow_object.model)),
+                has_entry(equal_to("transition_approval"), equal_to(last_approval))
+
             )
-        )
+        ))
 
     def test_shouldInvokeCallbackThatIsRegisteredWithoutInstanceWhenTransitionHappens(self):
         authorized_permission = PermissionObjectFactory()
@@ -106,13 +110,15 @@ class TransitionHooking(BaseHookingTest):
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
         last_approval = TransitionApproval.objects.get(object_id=workflow_object.model.pk, source_state=state2, destination_state=state3)
-        assert_that(
-            self.get_output(), has_entry(
-                "kwargs",
-                all_of(
-                    has_entry(equal_to("workflow_object"), equal_to(workflow_object.model)),
-                    has_entry(equal_to("transition_approval"), equal_to(last_approval))
+        output = self.get_output()
+        assert_that(output, has_key("hook"))
+        assert_that(output["hook"], has_entry("type", "on-transit"))
+        assert_that(output["hook"], has_entry("when", AFTER))
+        assert_that(output["hook"], has_entry(
+            "payload",
+            all_of(
+                has_entry(equal_to("workflow_object"), equal_to(workflow_object.model)),
+                has_entry(equal_to("transition_approval"), equal_to(last_approval))
 
-                )
             )
-        )
+        ))
