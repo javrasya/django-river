@@ -30,10 +30,10 @@ class Hook(BaseModel):
     object_id = models.PositiveIntegerField(blank=True, null=True)
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
-    hook_type = models.CharField(_('Status'), choices=HOOK_TYPES, max_length=50)
+    hook_type = models.CharField(_('When?'), choices=HOOK_TYPES, max_length=50)
 
     def execute(self, context):
         try:
-            self.callback_function.get()(**context)
+            self.callback_function.get()(context)
         except Exception as e:
             LOGGER.exception(e)
