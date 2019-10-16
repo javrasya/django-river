@@ -2,8 +2,6 @@ from django.db import models
 
 from river.models.fields.state import StateField
 
-__author__ = 'ahmetdal'
-
 
 class BasicTestModel(models.Model):
     test_field = models.CharField(max_length=50, null=True, blank=True)
@@ -20,3 +18,8 @@ class ModelForSlowCase1(models.Model):
 
 class ModelForSlowCase2(models.Model):
     status = StateField()
+
+
+class ModelWithTwoStateFields(models.Model):
+    status1 = StateField()
+    status2 = StateField()

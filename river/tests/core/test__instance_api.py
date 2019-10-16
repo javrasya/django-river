@@ -1,12 +1,12 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of
+from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none
 
 from river.models import TransitionApproval, PENDING
 from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory
 from river.tests.matchers import has_permission
-from river.tests.models import BasicTestModel
-from river.tests.models.factories import BasicTestModelObjectFactory
+from river.tests.models import BasicTestModel, ModelWithTwoStateFields
+from river.tests.models.factories import BasicTestModelObjectFactory, ModelWithTwoStateFieldsObjectFactory
 from river.utils.exceptions import RiverException
 
 
@@ -425,3 +425,21 @@ class InstanceApiTest(TestCase):
                 has_property("status", PENDING),
             )
         ))
+
+    def test__shouldHandleUndefinedSecondWorkflowCase(self):
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+
+        content_type = ContentType.objects.get_for_model(ModelWithTwoStateFields)
+        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="status1")
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+        )
+
+        workflow_object = ModelWithTwoStateFieldsObjectFactory()
+
+        assert_that(workflow_object.model.status1, equal_to(state1))
+        assert_that(workflow_object.model.status2, none())
