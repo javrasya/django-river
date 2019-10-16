@@ -16,9 +16,6 @@ class RiverApp(AppConfig):
 
     def ready(self):
 
-        from river.hooking.backends.database import DatabaseHookingBackend
-        from river.hooking.backends.loader import callback_backend
-
         for field_name in self._get_all_workflow_fields():
             try:
                 workflows = self.get_model('Workflow').objects.filter(field_name=field_name)
@@ -27,12 +24,6 @@ class RiverApp(AppConfig):
             except (OperationalError, ProgrammingError):
                 pass
 
-        if isinstance(callback_backend, DatabaseHookingBackend):
-            try:
-                self.get_model('Callback').objects.exists()
-                callback_backend.initialize_callbacks()
-            except (OperationalError, ProgrammingError):
-                pass
         LOGGER.debug('RiverApp is loaded.')
 
     @classmethod
