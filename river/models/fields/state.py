@@ -1,12 +1,13 @@
 import logging
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import CASCADE
 from django.db.models.signals import post_save, post_delete
 
 from river.core.riverobject import RiverObject
 from river.core.workflowregistry import workflow_registry
-from river.hooking.completed import PreCompletedHooking, PostCompletedHooking
-from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
+
+from river.models import OnApprovedHook, OnTransitHook, OnCompleteHook
 
 try:
     from django.contrib.contenttypes.fields import GenericRelation
@@ -78,8 +79,6 @@ def _on_workflow_object_saved(sender, instance, created, *args, **kwargs):
 
 
 def _on_workflow_object_deleted(sender, instance, *args, **kwargs):
-    for field_name in instance.river.all_field_names(instance.__class__):
-        PreCompletedHooking.unregister(instance, field_name, *args, **kwargs)
-        PostCompletedHooking.unregister(instance, field_name, *args, **kwargs)
-        PreTransitionHooking.unregister(instance, field_name, *args, **kwargs)
-        PostTransitionHooking.unregister(instance, field_name, *args, **kwargs)
+    OnApprovedHook.objects.filter(object_id=instance.pk, content_type=ContentType.objects.get_for_model(instance.__class__)).delete()
+    OnTransitHook.objects.filter(object_id=instance.pk, content_type=ContentType.objects.get_for_model(instance.__class__)).delete()
+    OnCompleteHook.objects.filter(object_id=instance.pk, content_type=ContentType.objects.get_for_model(instance.__class__)).delete()

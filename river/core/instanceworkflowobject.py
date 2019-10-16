@@ -7,8 +7,6 @@ from django.db.transaction import atomic
 from django.utils import timezone
 
 from river.config import app_config
-from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
-from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow
 from river.signals import ApproveSignal, TransitionSignal, OnCompleteSignal
 from river.utils.error_code import ErrorCode
@@ -140,18 +138,6 @@ class InstanceWorkflowObject(object):
 
     def _on_complete_signal(self):
         return OnCompleteSignal(self.workflow_object, self.field_name)
-
-    def hook_post_transition(self, callback, *args, **kwargs):
-        PostTransitionHooking.register(callback, self.workflow_object, self.field_name, *args, **kwargs)
-
-    def hook_pre_transition(self, callback, *args, **kwargs):
-        PreTransitionHooking.register(callback, self.workflow_object, self.field_name, *args, **kwargs)
-
-    def hook_post_complete(self, callback):
-        PostCompletedHooking.register(callback, self.workflow_object, self.field_name)
-
-    def hook_pre_complete(self, callback):
-        PreCompletedHooking.register(callback, self.workflow_object, self.field_name)
 
     @property
     def _content_type(self):

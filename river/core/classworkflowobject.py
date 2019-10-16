@@ -4,8 +4,6 @@ from django.db.models import F, Q, IntegerField, Min
 from django.db.models.functions import Cast
 from django_cte import With
 
-from river.hooking.completed import PostCompletedHooking, PreCompletedHooking
-from river.hooking.transition import PostTransitionHooking, PreTransitionHooking
 from river.models import State, TransitionApprovalMeta, TransitionApproval, PENDING, Workflow
 
 
@@ -70,18 +68,6 @@ class ClassWorkflowObject(object):
     def final_states(self):
         final_approvals = TransitionApprovalMeta.objects.filter(workflow=self.workflow, children__isnull=True)
         return State.objects.filter(pk__in=final_approvals.values_list("destination_state", flat=True))
-
-    def hook_post_transition(self, callback, *args, **kwargs):
-        PostTransitionHooking.register(callback, None, self.field_name, *args, **kwargs)
-
-    def hook_pre_transition(self, callback, *args, **kwargs):
-        PreTransitionHooking.register(callback, None, self.field_name, *args, **kwargs)
-
-    def hook_post_complete(self, callback):
-        PostCompletedHooking.register(callback, None, self.field_name)
-
-    def hook_pre_complete(self, callback):
-        PreCompletedHooking.register(callback, None, self.field_name)
 
     def _authorized_approvals(self, as_user):
         group_q = Q()

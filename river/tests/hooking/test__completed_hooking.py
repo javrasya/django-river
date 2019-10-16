@@ -1,20 +1,15 @@
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
-from hamcrest import assert_that, equal_to, none
+from hamcrest import assert_that, equal_to, has_entry, none
 
 from river.models.factories import PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, UserObjectFactory
+from river.tests.hooking.base_hooking_test import BaseHookingTest
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
-__author__ = 'ahmetdal'
-
 
 # noinspection DuplicatedCode
-class CompletedHookingTest(TestCase):
-    def setUp(self):
-        super(CompletedHookingTest, self).setUp()
-
-    def test_shouldInvokeTheRegisteredViaInstanceApiCallBackWhenFlowIsCompleteForTheObject(self):
+class CompletedHookingTest(BaseHookingTest):
+    def test_shouldInvokeCallbackThatIsRegisteredWithInstanceWhenFlowIsComplete(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
@@ -42,29 +37,21 @@ class CompletedHookingTest(TestCase):
 
         workflow_object = BasicTestModelObjectFactory()
 
-        self.test_args = None
-        self.test_kwargs = None
-
-        def test_callback(*args, **kwargs):
-            self.test_args = args
-            self.test_kwargs = kwargs
-
-        workflow_object.model.river.my_field.hook_post_complete(test_callback)
-
-        assert_that(self.test_args, none())
+        self.hook_post_complete(workflow, workflow_object=workflow_object.model)
+        assert_that(self.get_output(), none())
 
         assert_that(workflow_object.model.my_field, equal_to(state1))
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(state2))
 
-        assert_that(self.test_args, none())
+        assert_that(self.get_output(), none())
 
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
-        assert_that(self.test_args, equal_to((workflow_object.model, "my_field")))
+        assert_that(self.get_output(), has_entry("kwargs", has_entry(equal_to("workflow_object"), equal_to(workflow_object.model))))
 
-    def test_shouldInvokeTheRegisteredViaClassApiCallBackWhenFlowIsCompleteForTheObject(self):
+    def test_shouldInvokeCallbackThatIsRegisteredWithoutInstanceWhenFlowIsComplete(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
@@ -92,24 +79,15 @@ class CompletedHookingTest(TestCase):
 
         workflow_object = BasicTestModelObjectFactory()
 
-        self.test_args = None
-        self.test_kwargs = None
-
-        def test_callback(*args, **kwargs):
-            self.test_args = args
-            self.test_kwargs = kwargs
-
-        BasicTestModel.river.my_field.hook_post_complete(test_callback)
-
-        assert_that(self.test_args, none())
+        self.hook_post_complete(workflow)
+        assert_that(self.get_output(), none())
 
         assert_that(workflow_object.model.my_field, equal_to(state1))
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(state2))
-
-        assert_that(self.test_args, none())
+        assert_that(self.get_output(), none())
 
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
-        assert_that(self.test_args, equal_to((workflow_object.model, "my_field")))
+        assert_that(self.get_output(), has_entry("kwargs", has_entry(equal_to("workflow_object"), equal_to(workflow_object.model))))
