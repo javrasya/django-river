@@ -22,14 +22,14 @@ class InstanceWorkflowObject(object):
         self.workflow_object = workflow_object
         self.content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
         self.field_name = field_name
+        self.workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
         self.initialized = False
 
     @transaction.atomic
     def initialize_approvals(self):
         if not self.initialized:
-            workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
-            if workflow and workflow.transition_approvals.filter(workflow_object=self.workflow_object).count() == 0:
-                transition_approval_metas = workflow.transition_approval_metas.all()
+            if self.workflow and self.workflow.transition_approvals.filter(workflow_object=self.workflow_object).count() == 0:
+                transition_approval_metas = self.workflow.transition_approval_metas.all()
                 meta_dict = six.moves.reduce(
                     lambda agg, meta: dict(agg, **{self._to_key(meta.source_state): agg.get(self._to_key(meta.source_state), []) + [meta]}),
                     transition_approval_metas,
@@ -46,7 +46,7 @@ class InstanceWorkflowObject(object):
                             destination_state=next_meta.destination_state,
                             priority=next_meta.priority,
                             meta=next_meta,
-                            workflow=workflow,
+                            workflow=self.workflow,
                             defaults={
                                 'status': PENDING,
                             }
@@ -70,8 +70,7 @@ class InstanceWorkflowObject(object):
     @property
     def next_approvals(self):
         return TransitionApproval.objects.filter(
-            content_type=self.content_type,
-            field_name=self.field_name,
+            workflow=self.workflow,
             object_id=self.workflow_object.pk,
             source_state=self.get_state()
         )
