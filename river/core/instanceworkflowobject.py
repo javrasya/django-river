@@ -17,11 +17,10 @@ LOGGER = logging.getLogger(__name__)
 
 class InstanceWorkflowObject(object):
 
-    def __init__(self, workflow_object, name, field_name):
-        self.class_workflow = getattr(workflow_object.__class__.river, name)
+    def __init__(self, workflow_object, field_name):
+        self.class_workflow = getattr(workflow_object.__class__.river, field_name)
         self.workflow_object = workflow_object
         self.content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
-        self.name = name
         self.field_name = field_name
         self.initialized = False
 
@@ -80,7 +79,7 @@ class InstanceWorkflowObject(object):
     @property
     def recent_approval(self):
         try:
-            return getattr(self.workflow_object, self.name + "_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
+            return getattr(self.workflow_object, self.field_name + "_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
         except TransitionApproval.DoesNotExist:
             return None
 
