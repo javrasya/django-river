@@ -5,6 +5,7 @@ from hamcrest import assert_that, has_length, calling, raises
 
 from river.models import TransitionApproval, APPROVED
 from river.models.factories import WorkflowFactory, StateObjectFactory, TransitionApprovalMetaFactory
+
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
