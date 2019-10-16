@@ -44,7 +44,7 @@ class TransitionSignal(object):
                         hook_type=BEFORE
                     )
             ):
-                hook.execute(self._get_context())
+                hook.execute(self._get_context(BEFORE))
 
             LOGGER.debug("The signal that is fired right before the transition ( %s -> %s ) happened for %s" % (
                 self.transition_approval.source_state.label, self.transition_approval.destination_state.label, self.workflow_object))
@@ -60,15 +60,21 @@ class TransitionSignal(object):
                         hook_type=AFTER
                     )
             ):
-                hook.execute(self._get_context())
+                hook.execute(self._get_context(AFTER))
             LOGGER.debug("The signal that is fired right after the transition ( %s -> %s ) happened for %s" % (
                 self.transition_approval.source_state.label, self.transition_approval.destination_state.label, self.workflow_object))
 
-    def _get_context(self):
+    def _get_context(self, when):
         return {
-            "workflow": self.workflow,
-            "workflow_object": self.workflow_object,
-            "transition_approval": self.transition_approval
+            "hook": {
+                "type": "on-transit",
+                "when": when,
+                "payload": {
+                    "workflow": self.workflow,
+                    "workflow_object": self.workflow_object,
+                    "transition_approval": self.transition_approval
+                }
+            },
         }
 
 
@@ -89,7 +95,7 @@ class ApproveSignal(object):
                     hook_type=BEFORE
                 )
         ):
-            hook.execute(self._get_context())
+            hook.execute(self._get_context(BEFORE))
 
         LOGGER.debug("The signal that is fired right before a transition approval is approved for %s due to transition %s -> %s" % (
             self.workflow_object, self.transition_approval.source_state.label, self.transition_approval.destination_state.label))
@@ -103,15 +109,21 @@ class ApproveSignal(object):
                     hook_type=AFTER
                 )
         ):
-            hook.execute(self._get_context())
+            hook.execute(self._get_context(AFTER))
         LOGGER.debug("The signal that is fired right after a transition approval is approved for %s due to transition %s -> %s" % (
             self.workflow_object, self.transition_approval.source_state.label, self.transition_approval.destination_state.label))
 
-    def _get_context(self):
+    def _get_context(self, when):
         return {
-            "workflow": self.workflow,
-            "workflow_object": self.workflow_object,
-            "transition_approval": self.transition_approval
+            "hook": {
+                "type": "on-approved",
+                "when": when,
+                "payload": {
+                    "workflow": self.workflow,
+                    "workflow_object": self.workflow_object,
+                    "transition_approval": self.transition_approval
+                }
+            },
         }
 
 
@@ -133,7 +145,7 @@ class OnCompleteSignal(object):
                         hook_type=BEFORE
                     )
             ):
-                hook.execute(self._get_context())
+                hook.execute(self._get_context(BEFORE))
             LOGGER.debug("The signal that is fired right before the workflow of %s is complete" % self.workflow_object)
 
     def __exit__(self, type, value, traceback):
@@ -145,11 +157,17 @@ class OnCompleteSignal(object):
                         hook_type=AFTER
                     )
             ):
-                hook.execute(self._get_context())
+                hook.execute(self._get_context(AFTER))
             LOGGER.debug("The signal that is fired right after the workflow of %s is complete" % self.workflow_object)
 
-    def _get_context(self):
+    def _get_context(self, when):
         return {
-            "workflow": self.workflow,
-            "workflow_object": self.workflow_object,
+            "hook": {
+                "type": "on-complete",
+                "when": when,
+                "payload": {
+                    "workflow": self.workflow,
+                    "workflow_object": self.workflow_object,
+                }
+            },
         }

@@ -11,12 +11,9 @@ callback_output = {
 
 callback_method = """
 from river.tests.hooking.base_hooking_test import callback_output
-def handle(*args, **kwargs):
-    print(kwargs)
-    callback_output['%s'] = {
-        "args": args,
-        "kwargs": kwargs
-    }
+def handle(context):
+    print(context)
+    callback_output['%s'] = context
 """
 
 

@@ -24,10 +24,9 @@ setup(
     long_description=long_description,
     install_requires=[
         "Django",
-        "mock",
-        "factory-boy",
-        "django-mptt",
-        "django_cte"
+        "django-mptt==0.9.1",
+        "django-cte==1.1.4",
+        "django-codemirror2==0.2"
     ],
     include_package_data=True,
     zip_safe=False,

@@ -15,6 +15,9 @@ class Function(BaseModel):
     body = models.TextField(verbose_name=_("Function Body"), max_length=100000, null=False, blank=False)
     version = models.IntegerField(verbose_name=_("Function Version"), default=0)
 
+    def __str__(self):
+        return "%s - %s" % (self.name, "v%s" % self.version)
+
     def get(self):
         func = loaded_functions.get(self.name, None)
         if not func or func["version"] != self.version:
@@ -23,10 +26,10 @@ class Function(BaseModel):
         return func["function"]
 
     def _load(self):
-        func_body = "def _wrapper(*args, **kwargs):\n"
+        func_body = "def _wrapper(context):\n"
         for line in self.body.split("\n"):
             func_body += "\t" + line + "\n"
-        func_body += "\thandle(*args,**kwargs)\n"
+        func_body += "\thandle(context)\n"
         exec(func_body)
         return eval("_wrapper")
 
