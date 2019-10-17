@@ -14,7 +14,6 @@
 .. |Quality Status| image:: https://api.codacy.com/project/badge/Grade/c3c73d157fe045e6b966d8d4416b6b17
    :alt: Codacy Badge
    :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
-   
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
@@ -116,11 +115,11 @@ create your functions and also the hooks to a certain events by just creating fe
 For all these event types, you can create a hooking with a given function which is created separately and preliminary than the hookings for all the workflow objects you have
 or you will possible have, or for a specific workflow object. You can also hook up before or after the events happen.
 
-Create Function
-^^^^^^^^^^^^^^^
+1. Create Function
+^^^^^^^^^^^^^^^^^^
 
 This will be the description of your functions. So you define them once and you can use them with multiple hooking up. Just go to `/admin/river/function/` admin page
-and create your functions there. `django-river` function admin support python code highlights.
+and create your functions there. ``django-river`` function admin support python code highlights.
 
    .. code:: python
 
@@ -134,17 +133,46 @@ and create your functions there. `django-river` function admin support python co
 Here is an example function;
 
    .. code:: python
+
         from datetime import datetime
 
         def handle(context):
             print(datetime.now())
-            print(context)
 
-`django-river` will pass a `context` down to your function in respect to in order for you to know why the function is triggered. And the `context` will look different for
-different type of events
+**Important:** **YOUR FUNCTION SHOULD BE NAMED AS** ``handle``. Otherwise ``django-river`` won't execute your function.
+
+``django-river`` will pass a ``context`` down to your function in order for you to know why the function is triggered or for which object or so. And the ``context`` will look different for
+different type of events. Please see detailed `context documentation`_ to know more on what you would get from context in your functions.
+
+You can find an `advance function example`_ on the link.
+
+.. _`context documentation`: https://django-river.readthedocs.io/en/latest/hooking/function.html#context-parameter
+.. _`advance function example`: https://django-river.readthedocs.io/en/latest/hooking/function.html#example-function
+
+2. Hook It Up
+^^^^^^^^^^^^^
+
+The hookings in ``django-river`` can be created both specifically for a workflow object or for a whole workflow. ``django-river`` comes with some model objects and admin interfaces which you can use
+to create the hooks.
+
+* To create one for whole workflow regardless of what the workflow object is, go to
+    * ``/admin/river/onapprovedhook/`` to hook up to an approval
+    * ``/admin/river/ontransithook/`` to hook up to a transition
+    * ``/admin/river/oncompletehook/`` to hook up to the completion of the workflow
+
+* To create one for a specific workflow object you should use the admin interface for the workflow object itself. One amazing feature of ``django-river`` is now that it creates a default admin interface
+with the hookings for your workflow model class. If you have already defined one, ``django-river`` enriches your already defined admin with the hooking section. It is default enabled. To disable it
+just define ``RIVER_INJECT_MODEL_ADMIN`` to be ``False`` in the ``settings.py``.
 
 
+**Note:** They can programmatically be created as well since they are model objects. If it is needed to be at workflow level, just don't provide the workflow object column. If it is needed
+to be for a specific workflow object then provide it.
 
+Here are the list of hook model object
+
+* OnApprovedHook
+* OnTransitHook
+* OnCompleteHook
 
 
 Contribute
