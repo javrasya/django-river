@@ -22,8 +22,11 @@ class RiverApp(AppConfig):
             except (OperationalError, ProgrammingError):
                 pass
 
-        for model_class in self._get_all_workflow_classes():
-            self._register_hook_inlines(model_class)
+        from river.config import app_config
+
+        if app_config.INJECT_ADMIN:
+            for model_class in self._get_all_workflow_classes():
+                self._register_hook_inlines(model_class)
 
         LOGGER.debug('RiverApp is loaded.')
 
@@ -90,7 +93,6 @@ class RiverApp(AppConfig):
                 admin.site._registry[model] = registered_admin
         else:
             admin.site.register(model, DefaultWorkflowModelAdmin)
-
 
 
 def handle(context):

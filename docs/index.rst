@@ -47,7 +47,8 @@ Contents
    admin/index
    api/index
    authorization
-   hooking/index
+   hooking/function
+   hooking/hooking
    changelog
 
 
