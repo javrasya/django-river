@@ -1,5 +1,3 @@
-__author__ = 'ahmetdal'
-
 from .base_model import *
 from .state import *
 from .workflow import *
