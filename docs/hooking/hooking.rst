@@ -7,6 +7,7 @@ The hookings in ``django-river`` can be created both specifically for a workflow
 to create the hooks.
 
 * To create one for whole workflow regardless of what the workflow object is, go to
+
     * ``/admin/river/onapprovedhook/`` to hook up to an approval
     * ``/admin/river/ontransithook/`` to hook up to a transition
     * ``/admin/river/oncompletehook/`` to hook up to the completion of the workflow
@@ -16,10 +17,10 @@ with the hookings for your workflow model class. If you have already defined one
 just define ``RIVER_INJECT_MODEL_ADMIN`` to be ``False`` in the ``settings.py``.
 
 
-**Note: ** They can programmatically be created as well since they are model objects. If it is needed to be at workflow level, just don't provide the workflow object column. If it is needed
+**Note:** They can programmatically be created as well since they are model objects. If it is needed to be at workflow level, just don't provide the workflow object column. If it is needed
 to be for a specific workflow object then provide it.
 
-Here are the list of hook model object
+Here are the list of hook models;
 
 * OnApprovedHook
 * OnTransitHook
