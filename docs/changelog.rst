@@ -3,6 +3,16 @@
 Change Logs
 ===========
 
+2.1.0 (Dev)
+--------------
+    * **Bug**         -  # 106_: It crashes when saving a workflow object when there is no workflow definition for a state field
+    * **Bug**         -  # 107_: next_approvals api of the instance is broken
+    * **Improvement** -  # 105_: More dynamic and better way for hooks.On the fly function and hook creations, update or delete are also supported now. It also comes with useful admin interfaces for hooks and functions. This is a huge improvement for callback lovers :-)
+
+.. _105: https://github.com/javrasya/django-river/issues/105
+.. _106: https://github.com/javrasya/django-river/issues/106
+.. _107: https://github.com/javrasya/django-river/issues/107
+
 2.0.0 (Stable)
 --------------
     * **Improvement** -  [ # 90_,# 36_ ]: Finding available approvals has been speeded up ~x400 times at scale

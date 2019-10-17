@@ -4,7 +4,7 @@ Functions
 =========
 
 Functions are the description in ``Python`` of what you want to do on certain events happen. So you define them once and you can use them
-with multiple hooking up. Just go to `/admin/river/function/` admin page and create your functions there.`django-river` function admin support
+with multiple hooking up. Just go to ``/admin/river/function/`` admin page and create your functions there.``django-river`` function admin support
 python code highlighting as well if you enable the ``codemirror2`` app. Don't forget to collect statics for production deployments.
 
 
@@ -31,7 +31,7 @@ Here is an example function;
 Context Parameter
 -----------------
 
-`django-river` will pass a ``context`` down to your function in order for you to know why the function is triggered or for which object or so. And the `context`
+``django-river`` will pass a ``context`` down to your function in order for you to know why the function is triggered or for which object or so. And the ``context``
 will look different for different type of events. But it also has some common parts for all the events. Let's look at how it looks;
 
 
@@ -107,7 +107,7 @@ Example Function
 
         from river.models.hook import BEFORE, AFTER
 
-        def handle_transition(hook):
+        def _handle_my_transitions(hook):
             workflow = hook['payload']['workflow']
             workflow_object = hook['payload']['workflow_object']
             source_state = hook['payload']['transition_approval'].meta.source_state
@@ -119,7 +119,7 @@ Example Function
                 print('A transition from %s to %s has just happened on the object with id:%s and field_name:%s!' % (source_state.label, destination_state.label, workflow_object.pk, workflow.field_name))
             print('Who approved it lately is %s' % last_approved_by.username)
 
-        def handle_approval(hook):
+        def _handle_my_approvals(hook):
             workflow = hook['payload']['workflow']
             workflow_object = hook['payload']['workflow_object']
             approved_by = hook['payload']['transition_approval'].transactioner
@@ -128,7 +128,7 @@ Example Function
             elif hook['when'] == AFTER:
                 print('An approval has just happened by %s  on the object with id:%s and field_name:%s!' % ( approved_by.username, workflow_object.pk, workflow.field_name ))
 
-        def handle_complete(hook):
+        def _handle_completions(hook):
             workflow = hook['payload']['workflow']
             workflow_object = hook['payload']['workflow_object']
             if hook['when'] == BEFORE:
@@ -139,10 +139,10 @@ Example Function
         def handle(context):
             hook = context['hook']
             if hook['type'] == 'on-transit':
-                handle_transition(hook)
+                _handle_my_transitions(hook)
             elif hook['type'] == 'on-approved':
-                handle_approval(hook)
+                _handle_my_approvals(hook)
             elif hook['type'] == 'on-complete':
-                handle_complete(hook)
+                _handle_completions(hook)
             else:
                 print("Unknown event type %s" % hook['type'])
