@@ -8,6 +8,11 @@ class BasicTestModel(models.Model):
     my_field = StateField()
 
 
+class BasicTestModelWithoutAdmin(models.Model):
+    test_field = models.CharField(max_length=50, null=True, blank=True)
+    my_field = StateField()
+
+
 class ModelWithoutStateField(models.Model):
     test_field = models.CharField(max_length=50, null=True, blank=True)
 

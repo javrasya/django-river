@@ -108,7 +108,7 @@ SITE_ID = 1
 SECRET_KEY = 'abcde12345'
 
 ROOT_URLCONF = 'test_urls'
-
+RIVER_INJECT_MODEL_ADMIN = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
