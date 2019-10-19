@@ -24,7 +24,7 @@ class RiverApp(AppConfig):
 
         from river.config import app_config
 
-        if app_config.INJECT_ADMIN:
+        if app_config.INJECT_MODEL_ADMIN:
             for model_class in self._get_all_workflow_classes():
                 self._register_hook_inlines(model_class)
 
@@ -47,54 +47,14 @@ class RiverApp(AppConfig):
 
     def _register_hook_inlines(self, model):
         from django.contrib import admin
-        from django.contrib.contenttypes.admin import GenericTabularInline
-
-        from river.models import OnApprovedHook, OnTransitHook, OnCompleteHook
-        _get_workflow_class_fields = self._get_workflow_class_fields
-
-        class BaseHookInline(GenericTabularInline):
-            fields = ("callback_function", "hook_type")
-
-        class OnApprovedHookInline(BaseHookInline):
-            model = OnApprovedHook
-
-            def __init__(self, *args, **kwargs):
-                super(OnApprovedHookInline, self).__init__(*args, **kwargs)
-                self.fields += ("transition_approval_meta",)
-
-        class OnTransitHookInline(BaseHookInline):
-            model = OnTransitHook
-
-            def __init__(self, *args, **kwargs):
-                super(OnTransitHookInline, self).__init__(*args, **kwargs)
-                self.fields += ("source_state", "destination_state",)
-
-        class OnCompleteHookInline(BaseHookInline):
-            model = OnCompleteHook
-
-        class DefaultWorkflowModelAdmin(admin.ModelAdmin):
-            inlines = [
-                OnApprovedHookInline,
-                OnTransitHookInline,
-                OnCompleteHookInline
-            ]
-
-            def __init__(self, *args, **kwargs):
-                super(DefaultWorkflowModelAdmin, self).__init__(*args, **kwargs)
-                self.readonly_fields += tuple(_get_workflow_class_fields(model))
+        from river.core.workflowregistry import workflow_registry
+        from river.admin import OnApprovedHookInline, OnTransitHookInline, OnCompleteHookInline, DefaultWorkflowModelAdmin
 
         registered_admin = admin.site._registry.get(model, None)
         if registered_admin:
             if OnApprovedHookInline not in registered_admin.inlines:
-                registered_admin.inlines.append(OnApprovedHookInline)
-                registered_admin.inlines.append(OnTransitHookInline)
-                registered_admin.inlines.append(OnCompleteHookInline)
-                registered_admin.readonly_fields = list(set(list(registered_admin.readonly_fields) + list(_get_workflow_class_fields(model))))
+                registered_admin.inlines = list(set(registered_admin.inlines + [OnApprovedHookInline, OnTransitHookInline, OnCompleteHookInline]))
+                registered_admin.readonly_fields = list(set(list(registered_admin.readonly_fields) + list(workflow_registry.get_class_fields(model))))
                 admin.site._registry[model] = registered_admin
         else:
             admin.site.register(model, DefaultWorkflowModelAdmin)
-
-
-def handle(context):
-    print(datetime.now())
-    print(context)

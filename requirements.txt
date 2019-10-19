@@ -1,3 +1,4 @@
+django
 django-mptt==0.9.1
 factory-boy==2.11.1
 mock==2.0.0
