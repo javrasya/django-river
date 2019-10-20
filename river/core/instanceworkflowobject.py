@@ -7,7 +7,7 @@ from django.db.transaction import atomic
 from django.utils import timezone
 
 from river.config import app_config
-from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow
+from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow, CANCELLED
 from river.signals import ApproveSignal, TransitionSignal, OnCompleteSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
@@ -114,6 +114,8 @@ class InstanceWorkflowObject(object):
         approval.transaction_date = timezone.now()
         approval.previous = self.recent_approval
         approval.save()
+
+        approval.peers.filter(status=PENDING).exclude(destination_state=approval.destination_state).update(status=CANCELLED)
 
         has_transit = False
         if approval.peers.filter(status=PENDING).count() == 0:
