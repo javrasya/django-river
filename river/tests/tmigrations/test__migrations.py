@@ -1,8 +1,10 @@
 import os
+import sqlite3
 import sys
+from unittest import skipUnless
 
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection
+from django.db import connection, transaction
 from django.test.utils import override_settings
 from hamcrest import assert_that, equal_to, has_length
 
@@ -86,6 +88,7 @@ class MigrationTests(TestCase):
         assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
     @override_settings(MIGRATION_MODULES={"tests": "river.tests.volatile.river_tests"})
+    @skipUnless(sqlite3.sqlite_version <= "3.24.0", "This test is not able to run with newer version of sqlite")
     def test__shouldMigrateTransitionApprovalStatusToStringInDB(self):
         out = StringIO()
         sys.stout = out

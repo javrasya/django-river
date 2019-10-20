@@ -21,12 +21,10 @@ __author__ = 'ahmetdal'
 
 PENDING = "pending"
 APPROVED = "approved"
-CANCELLED = "cancelled"
 
 STATUSES = [
     (PENDING, _('Pending')),
     (APPROVED, _('Approved')),
-    (CANCELLED, _('Cancelled')),
 ]
 
 LOGGER = logging.getLogger(__name__)
@@ -89,6 +87,7 @@ class TransitionApproval(BaseModel):
             workflow_object=self.workflow_object,
             workflow=self.workflow,
             source_state=self.source_state,
+            destination_state=self.destination_state
         ).exclude(pk=self.pk)
 
     @property
