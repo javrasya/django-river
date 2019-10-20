@@ -1,6 +1,8 @@
 import os
 import sys
+from unittest import skipUnless
 
+import django
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.test.utils import override_settings
@@ -86,6 +88,7 @@ class MigrationTests(TestCase):
         assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
     @override_settings(MIGRATION_MODULES={"tests": "river.tests.volatile.river_tests"})
+    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
     def test__shouldMigrateTransitionApprovalStatusToStringInDB(self):
         out = StringIO()
         sys.stout = out
@@ -114,7 +117,7 @@ class MigrationTests(TestCase):
             result = cur.execute("select status from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
             assert_that(result[0][0], equal_to(0))
 
-        call_command('migrate', 'river', stdout=out)
+        call_command('migrate', 'river', '0005', stdout=out)
 
         with connection.cursor() as cur:
             schema = cur.execute("PRAGMA table_info('river_transitionapproval');").fetchall()
