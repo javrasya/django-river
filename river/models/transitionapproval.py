@@ -19,8 +19,8 @@ from river.config import app_config
 
 __author__ = 'ahmetdal'
 
-PENDING = 0
-APPROVED = 1
+PENDING = "pending"
+APPROVED = "approved"
 
 STATUSES = [
     (PENDING, _('Pending')),
@@ -52,7 +52,7 @@ class TransitionApproval(BaseModel):
     transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True, on_delete=SET_NULL)
     transaction_date = models.DateTimeField(null=True, blank=True)
 
-    status = models.IntegerField(_('Status'), choices=STATUSES, default=PENDING)
+    status = models.CharField(_('Status'), choices=STATUSES, max_length=100, default=PENDING)
 
     skipped = models.BooleanField(_('Skip'), default=False)
 
