@@ -572,3 +572,228 @@ class InstanceApiTest(TestCase):
                 has_item(has_property("status", CANCELLED))
             )
         )
+
+    def test_shouldAssessIterationsCorrectly(self):
+        authorized_permission1 = PermissionObjectFactory()
+        authorized_permission2 = PermissionObjectFactory()
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta3 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=1,
+            permissions=[authorized_permission2]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(3))
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta1),
+                    has_property("iteration", 0),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta2),
+                    has_property("iteration", 1),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta3),
+                    has_property("iteration", 1),
+                )
+            )
+        )
+
+    def test_shouldAssessIterationsCorrectlyWhenCycled(self):
+        authorized_permission1 = PermissionObjectFactory()
+        authorized_permission2 = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission1, authorized_permission2])
+
+        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
+        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
+        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
+        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+
+        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
+
+        meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=cycle_state_2,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta_21 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta_22 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+            priority=1,
+            permissions=[authorized_permission2]
+        )
+
+        meta_3 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=cycle_state_1,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        final_meta = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=off_the_cycle_state,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(5))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(10))
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_1),
+                    has_property("iteration", 0),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_21),
+                    has_property("iteration", 1),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_22),
+                    has_property("iteration", 1),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_3),
+                    has_property("iteration", 2),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", final_meta),
+                    has_property("iteration", 2),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_1),
+                    has_property("iteration", 3),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_21),
+                    has_property("iteration", 4),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_22),
+                    has_property("iteration", 4),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", meta_3),
+                    has_property("iteration", 5),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", final_meta),
+                    has_property("iteration", 5),
+                )
+            )
+        )

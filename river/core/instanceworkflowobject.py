@@ -35,11 +35,11 @@ class InstanceWorkflowObject(object):
                     transition_approval_metas,
                     {})
 
+                iteration = 0
                 next_metas = meta_dict.get(self._to_key(self.class_workflow.initial_state), [])
                 while next_metas:
                     source_states = []
                     for next_meta in next_metas:
-
                         transition_approval, created = TransitionApproval.objects.update_or_create(
                             workflow_object=self.workflow_object,
                             source_state=next_meta.source_state,
@@ -55,7 +55,10 @@ class InstanceWorkflowObject(object):
                             source_states.append(next_meta.destination_state)
                             transition_approval.permissions.add(*next_meta.permissions.all())
                             transition_approval.groups.add(*next_meta.groups.all())
+                            transition_approval.iteration = iteration
+                            transition_approval.save()
                     next_metas = [m for source_state in source_states for m in meta_dict.get(self._to_key(source_state), [])]
+                    iteration += 1
                 self.initialized = True
                 LOGGER.debug("Transition approvals are initialized for the workflow object %s" % self.workflow_object)
 
@@ -123,7 +126,7 @@ class InstanceWorkflowObject(object):
             self.set_state(approval.destination_state)
             has_transit = True
             if self._check_if_it_cycled(approval.destination_state):
-                self._re_create_cycled_path(approval.destination_state)
+                self._re_create_cycled_path(approval.destination_state, approval.iteration)
             LOGGER.debug("Workflow object %s is proceeded for next transition. Transition: %s -> %s" % (
                 self.workflow_object, previous_state, self.get_state()))
 
@@ -154,13 +157,14 @@ class InstanceWorkflowObject(object):
             status=APPROVED
         ).count() > 0
 
-    def _re_create_cycled_path(self, from_state):
+    def _re_create_cycled_path(self, from_state, last_iteration):
         approvals = TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow=self.class_workflow.workflow, source_state=from_state)
         cycle_ended = False
+        iteration = last_iteration + 1
         while not cycle_ended:
             for old_approval in approvals:
                 if old_approval.enabled:
-                    cycled_approval, _ = TransitionApproval.objects.get_or_create(
+                    cycled_approval = TransitionApproval.objects.create(
                         source_state=old_approval.source_state,
                         destination_state=old_approval.destination_state,
                         workflow=old_approval.workflow,
@@ -170,6 +174,7 @@ class InstanceWorkflowObject(object):
                         priority=old_approval.priority,
                         enabled=True,
                         status=PENDING,
+                        iteration=iteration,
                         meta=old_approval.meta
                     )
                     cycled_approval.permissions.set(old_approval.permissions.all())
@@ -180,6 +185,7 @@ class InstanceWorkflowObject(object):
                 source_state__in=approvals.values_list("destination_state", flat=TransitionApproval)
             )
             cycle_ended = approvals.filter(source_state=from_state).count() > 0
+            iteration += 1
 
     def get_state(self):
         return getattr(self.workflow_object, self.field_name)
