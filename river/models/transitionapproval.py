@@ -66,6 +66,8 @@ class TransitionApproval(BaseModel):
 
     skipped_from = models.ManyToManyField("self", verbose_name=_("Skipped from"), related_name='created_after_skipped')
 
+    iteration = models.IntegerField(default=0, verbose_name=_('Priority'))
+
     @transaction.atomic
     def skip(self):
         if self.skipped:
