@@ -1,14 +1,17 @@
 import os
 import sys
+from datetime import datetime, timedelta
 from unittest import skipUnless
 
 import django
+import six
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.test.utils import override_settings
-from hamcrest import assert_that, equal_to, has_length
+from hamcrest import assert_that, equal_to, has_length, has_item, is_not, less_than
 
-from river.models.factories import StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory
+from river.models import TransitionApproval
+from river.models.factories import StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, UserObjectFactory
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
@@ -87,7 +90,6 @@ class MigrationTests(TestCase):
         assert_that(out.getvalue(), equal_to("No changes detected in app 'tests'\n"))
         assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
-    @override_settings(MIGRATION_MODULES={"tests": "river.tests.volatile.river_tests"})
     @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
     def test__shouldMigrateTransitionApprovalStatusToStringInDB(self):
         out = StringIO()
@@ -126,3 +128,222 @@ class MigrationTests(TestCase):
 
             result = cur.execute("select status from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
             assert_that(result[0][0], equal_to("pending"))
+
+    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    def test__shouldAssessIterationsForExistingApprovals(self):
+        out = StringIO()
+        sys.stout = out
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+        state4 = StateObjectFactory(label="state4")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=ContentType.objects.get_for_model(BasicTestModel), field_name="my_field")
+        meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0
+        )
+        meta_2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=0
+        )
+
+        meta_3 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=1
+        )
+
+        meta_4 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state4,
+            priority=0
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(4))
+            assert_that(result, has_item(equal_to((meta_1.pk, 0))))
+            assert_that(result, has_item(equal_to((meta_2.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_4.pk, 1))))
+
+        call_command('migrate', 'river', '0006', stdout=out)
+
+        with connection.cursor() as cur:
+            schema = cur.execute("PRAGMA table_info('river_transitionapproval');").fetchall()
+            columns = six.moves.map(lambda column: column[1], schema)
+            assert_that(columns, is_not(has_item("iteration")))
+
+        call_command('migrate', 'river', '0007', stdout=out)
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(4))
+            assert_that(result, has_item(equal_to((meta_1.pk, 0))))
+            assert_that(result, has_item(equal_to((meta_2.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_4.pk, 1))))
+
+    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    def test__shouldAssessIterationsForExistingApprovalsWhenThereIsCycle(self):
+        out = StringIO()
+        sys.stout = out
+
+        authorized_permission1 = PermissionObjectFactory()
+        authorized_permission2 = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission1, authorized_permission2])
+
+        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
+        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
+        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
+        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+
+        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=ContentType.objects.get_for_model(BasicTestModel), field_name="my_field")
+
+        meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=cycle_state_2,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta_21 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        meta_22 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+            priority=1,
+            permissions=[authorized_permission2]
+        )
+
+        meta_3 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=cycle_state_1,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        final_meta = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=off_the_cycle_state,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(5))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(10))
+            assert_that(result, has_item(equal_to((meta_1.pk, 0))))
+            assert_that(result, has_item(equal_to((meta_21.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_22.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 2))))
+            assert_that(result, has_item(equal_to((final_meta.pk, 2))))
+            assert_that(result, has_item(equal_to((meta_1.pk, 3))))
+            assert_that(result, has_item(equal_to((meta_21.pk, 4))))
+            assert_that(result, has_item(equal_to((meta_22.pk, 4))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 5))))
+            assert_that(result, has_item(equal_to((final_meta.pk, 5))))
+
+        call_command('migrate', 'river', '0006', stdout=out)
+
+        with connection.cursor() as cur:
+            schema = cur.execute("PRAGMA table_info('river_transitionapproval');").fetchall()
+            columns = six.moves.map(lambda column: column[1], schema)
+            assert_that(columns, is_not(has_item("iteration")))
+
+        call_command('migrate', 'river', '0007', stdout=out)
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(10))
+            assert_that(result, has_item(equal_to((meta_1.pk, 0))))
+            assert_that(result, has_item(equal_to((meta_21.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_22.pk, 1))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 2))))
+            assert_that(result, has_item(equal_to((final_meta.pk, 2))))
+            assert_that(result, has_item(equal_to((meta_1.pk, 3))))
+            assert_that(result, has_item(equal_to((meta_21.pk, 4))))
+            assert_that(result, has_item(equal_to((meta_22.pk, 4))))
+            assert_that(result, has_item(equal_to((meta_3.pk, 5))))
+            assert_that(result, has_item(equal_to((final_meta.pk, 5))))
+
+    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    def test__shouldMigrationForIterationMustFinishInShortAmountOfTimeWithTooManyObject(self):
+        out = StringIO()
+        sys.stout = out
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+        state4 = StateObjectFactory(label="state4")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=ContentType.objects.get_for_model(BasicTestModel), field_name="my_field")
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=0
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+            priority=1
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state4,
+            priority=0
+        )
+
+        BasicTestModelObjectFactory.create_batch(500)
+
+        call_command('migrate', 'river', '0006', stdout=out)
+
+        before = datetime.now()
+        call_command('migrate', 'river', '0007', stdout=out)
+        after = datetime.now()
+        assert_that(after - before, less_than(timedelta(seconds=60)))

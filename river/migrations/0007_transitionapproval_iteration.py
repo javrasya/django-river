@@ -3,10 +3,26 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.db.migrations import RunPython
+
+
+def migrate_iteration(apps, schema_editor):
+    Workflow = apps.get_model('river', 'Workflow')
+    for workflow in Workflow.objects.all():
+        model_class = apps.get_model(workflow.content_type.app_label, workflow.content_type.model)
+        for workflow_obj in model_class.objects.all():
+            approvals = workflow.transition_approvals.filter(content_type=workflow.content_type, object_id=workflow_obj.pk)
+            iteration = 0
+            current_source_state = workflow.initial_state
+            for approval in approvals:
+                if approval.source_state != current_source_state:
+                    current_source_state = approval.source_state
+                    iteration += 1
+                approval.iteration = iteration
+                approval.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('river', '0006_auto_20191020_1121'),
     ]
@@ -17,4 +33,5 @@ class Migration(migrations.Migration):
             name='iteration',
             field=models.IntegerField(default=0, verbose_name='Priority'),
         ),
+        migrations.RunPython(migrate_iteration, reverse_code=RunPython.noop),
     ]
