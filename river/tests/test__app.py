@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.test import TestCase, override_settings
-from hamcrest import assert_that, is_not, has_item, instance_of, has_key
+from django.test import TestCase
+from hamcrest import assert_that, is_not, has_item, instance_of
 
 from river.admin import OnApprovedHookInline, OnTransitHookInline, OnCompleteHookInline, DefaultWorkflowModelAdmin
 from river.models import Function
