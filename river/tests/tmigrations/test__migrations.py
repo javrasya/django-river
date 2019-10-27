@@ -339,11 +339,128 @@ class MigrationTests(TestCase):
             priority=0
         )
 
-        BasicTestModelObjectFactory.create_batch(500)
+        BasicTestModelObjectFactory.create_batch(250)
 
         call_command('migrate', 'river', '0006', stdout=out)
 
         before = datetime.now()
         call_command('migrate', 'river', '0007', stdout=out)
         after = datetime.now()
-        assert_that(after - before, less_than(timedelta(seconds=60)))
+        assert_that(after - before, less_than(timedelta(minutes=5)))
+
+    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    def test__shouldAssessIterationsForExistingApprovalsWhenThereIsMoreAdvanceCycle(self):
+        out = StringIO()
+        sys.stout = out
+
+        authorized_permission1 = PermissionObjectFactory()
+        authorized_permission2 = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission1, authorized_permission2])
+
+        opn = StateObjectFactory(label="open")
+        in_progress = StateObjectFactory(label="in_progress")
+        resolved = StateObjectFactory(label="resolved")
+        re_opened = StateObjectFactory(label="re_opened")
+        closed = StateObjectFactory(label="closed")
+        final = StateObjectFactory(label="final")
+
+        workflow = WorkflowFactory(initial_state=opn, content_type=ContentType.objects.get_for_model(BasicTestModel), field_name="my_field")
+
+        open_to_in_progress = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=opn,
+            destination_state=in_progress,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        in_progress_to_resolved = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=in_progress,
+            destination_state=resolved,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        resolved_to_re_opened = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=resolved,
+            destination_state=re_opened,
+            priority=0,
+            permissions=[authorized_permission2]
+        )
+
+        re_opened_to_in_progress = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=re_opened,
+            destination_state=in_progress,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        resolved_to_closed = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=resolved,
+            destination_state=closed,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        closed_to_final = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=closed,
+            destination_state=final,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(opn))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(in_progress))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(resolved))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=re_opened)
+        assert_that(workflow_object.model.my_field, equal_to(re_opened))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(in_progress))
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(11))
+            assert_that(result, has_item(equal_to((open_to_in_progress.pk, 0))))
+            assert_that(result, has_item(equal_to((in_progress_to_resolved.pk, 1))))
+            assert_that(result, has_item(equal_to((resolved_to_closed.pk, 2))))
+            assert_that(result, has_item(equal_to((resolved_to_re_opened.pk, 2))))
+            assert_that(result, has_item(equal_to((re_opened_to_in_progress.pk, 3))))
+            assert_that(result, has_item(equal_to((closed_to_final.pk, 3))))
+            assert_that(result, has_item(equal_to((in_progress_to_resolved.pk, 4))))
+            assert_that(result, has_item(equal_to((resolved_to_closed.pk, 5))))
+            assert_that(result, has_item(equal_to((resolved_to_re_opened.pk, 5))))
+            assert_that(result, has_item(equal_to((re_opened_to_in_progress.pk, 6))))
+            assert_that(result, has_item(equal_to((closed_to_final.pk, 6))))
+
+        call_command('migrate', 'river', '0006', stdout=out)
+
+        with connection.cursor() as cur:
+            schema = cur.execute("PRAGMA table_info('river_transitionapproval');").fetchall()
+            columns = six.moves.map(lambda column: column[1], schema)
+            assert_that(columns, is_not(has_item("iteration")))
+
+        call_command('migrate', 'river', '0007', stdout=out)
+
+        with connection.cursor() as cur:
+            result = cur.execute("select meta_id, iteration from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(11))
+            assert_that(result, has_item(equal_to((open_to_in_progress.pk, 0))))
+            assert_that(result, has_item(equal_to((in_progress_to_resolved.pk, 1))))
+            assert_that(result, has_item(equal_to((resolved_to_closed.pk, 2))))
+            assert_that(result, has_item(equal_to((resolved_to_re_opened.pk, 2))))
+            assert_that(result, has_item(equal_to((re_opened_to_in_progress.pk, 3))))
+            assert_that(result, has_item(equal_to((closed_to_final.pk, 3))))
+            assert_that(result, has_item(equal_to((in_progress_to_resolved.pk, 4))))
+            assert_that(result, has_item(equal_to((resolved_to_closed.pk, 5))))
+            assert_that(result, has_item(equal_to((resolved_to_re_opened.pk, 5))))
+            assert_that(result, has_item(equal_to((re_opened_to_in_progress.pk, 6))))
+            assert_that(result, has_item(equal_to((closed_to_final.pk, 6))))
