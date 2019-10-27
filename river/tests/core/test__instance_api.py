@@ -308,6 +308,7 @@ class InstanceApiTest(TestCase):
         cycle_state_2 = StateObjectFactory(label="cycle_state_2")
         cycle_state_3 = StateObjectFactory(label="cycle_state_3")
         off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+        final_state = StateObjectFactory(label="final_state")
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
@@ -335,10 +336,18 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        final_meta = TransitionApprovalMetaFactory.create(
+        meta_4 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        final_meta = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -352,7 +361,7 @@ class InstanceApiTest(TestCase):
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(4))
+        assert_that(approvals, has_length(5))
 
         assert_that(approvals, has_item(
             is_not(
@@ -394,6 +403,18 @@ class InstanceApiTest(TestCase):
             is_not(
                 all_of(
                     has_property("source_state", meta_3.source_state),
+                    has_property("destination_state", meta_4.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_4.source_state),
                     has_property("destination_state", final_meta.destination_state),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
@@ -406,7 +427,7 @@ class InstanceApiTest(TestCase):
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(8))
+        assert_that(approvals, has_length(10))
 
         assert_that(approvals, has_item(
             all_of(
@@ -442,6 +463,18 @@ class InstanceApiTest(TestCase):
             is_not(
                 all_of(
                     has_property("source_state", meta_3.source_state),
+                    has_property("destination_state", meta_4.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_4.source_state),
                     has_property("destination_state", final_meta.destination_state),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
@@ -454,6 +487,18 @@ class InstanceApiTest(TestCase):
             is_not(
                 all_of(
                     has_property("source_state", meta_3.source_state),
+                    has_property("destination_state", meta_4.destination_state),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", meta_4.source_state),
                     has_property("destination_state", final_meta.destination_state),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
@@ -573,6 +618,220 @@ class InstanceApiTest(TestCase):
             )
         )
 
+    def test_shouldCancelAllOtherStateTransitionDescendants(self):
+        authorized_permission = PermissionObjectFactory()
+
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+        state4 = StateObjectFactory(label="state4")
+        state5 = StateObjectFactory(label="state5")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        meta2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        meta3 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state4,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        meta4 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=state4,
+            destination_state=state5,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state3)
+        assert_that(workflow_object.model.my_field, equal_to(state3))
+
+        assert_that(
+            meta2.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", APPROVED))
+            )
+        ),
+
+        assert_that(
+            meta1.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        ),
+
+        assert_that(
+            meta3.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        )
+
+        assert_that(
+            meta4.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        )
+
+    def test_shouldNotCancelDescendantsIfItIsPartOfPossibleFuture(self):
+        authorized_permission = PermissionObjectFactory()
+
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        first_state = StateObjectFactory(label="first")
+        diamond_left_state_1 = StateObjectFactory(label="diamond-left-1")
+        diamond_left_state_2 = StateObjectFactory(label="diamond-left-2")
+        diamond_right_state_1 = StateObjectFactory(label="diamond-right-1")
+        diamond_right_state_2 = StateObjectFactory(label="diamond-right-2")
+        diamond_join_state = StateObjectFactory(label="diamond-join")
+        final_state = StateObjectFactory(label="final")
+
+        workflow = WorkflowFactory(initial_state=first_state, content_type=self.content_type, field_name="my_field")
+        first_to_left = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=first_state,
+            destination_state=diamond_left_state_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        first_to_right = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=first_state,
+            destination_state=diamond_right_state_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        left_follow_up = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_left_state_1,
+            destination_state=diamond_left_state_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        right_follow_up = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_right_state_1,
+            destination_state=diamond_right_state_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        left_join = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_left_state_2,
+            destination_state=diamond_join_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        right_join = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_right_state_2,
+            destination_state=diamond_join_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        join_to_final = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_join_state,
+            destination_state=final_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(first_state))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=diamond_left_state_1)
+        assert_that(workflow_object.model.my_field, equal_to(diamond_left_state_1))
+
+        assert_that(
+            first_to_left.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", APPROVED))
+            )
+        ),
+
+        assert_that(
+            left_follow_up.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", PENDING))
+            )
+        )
+
+        assert_that(
+            left_join.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", PENDING))
+            )
+        )
+
+        assert_that(
+            first_to_right.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        ),
+
+        assert_that(
+            right_follow_up.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        )
+
+        assert_that(
+            right_join.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        )
+
+        assert_that(
+            join_to_final.transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", PENDING))
+            )
+        )
+
     def test_shouldAssessIterationsCorrectly(self):
         authorized_permission1 = PermissionObjectFactory()
         authorized_permission2 = PermissionObjectFactory()
@@ -646,6 +905,7 @@ class InstanceApiTest(TestCase):
         cycle_state_2 = StateObjectFactory(label="cycle_state_2")
         cycle_state_3 = StateObjectFactory(label="cycle_state_3")
         off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+        final_state = StateObjectFactory(label="final_state")
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
@@ -681,10 +941,18 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission1]
         )
 
-        final_meta = TransitionApprovalMetaFactory.create(
+        meta_4 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
+            priority=0,
+            permissions=[authorized_permission1]
+        )
+
+        final_meta = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
             priority=0,
             permissions=[authorized_permission1]
         )
@@ -700,13 +968,13 @@ class InstanceApiTest(TestCase):
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(5))
+        assert_that(approvals, has_length(6))
 
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(10))
+        assert_that(approvals, has_length(12))
 
         assert_that(
             approvals, has_item(
@@ -747,8 +1015,17 @@ class InstanceApiTest(TestCase):
         assert_that(
             approvals, has_item(
                 all_of(
-                    has_property("meta", final_meta),
+                    has_property("meta", meta_4),
                     has_property("iteration", 2),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", final_meta),
+                    has_property("iteration", 3),
                 )
             )
         )
@@ -792,8 +1069,17 @@ class InstanceApiTest(TestCase):
         assert_that(
             approvals, has_item(
                 all_of(
-                    has_property("meta", final_meta),
+                    has_property("meta", meta_4),
                     has_property("iteration", 5),
+                )
+            )
+        )
+
+        assert_that(
+            approvals, has_item(
+                all_of(
+                    has_property("meta", final_meta),
+                    has_property("iteration", 6),
                 )
             )
         )

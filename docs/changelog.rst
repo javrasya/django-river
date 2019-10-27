@@ -10,6 +10,7 @@ Change Logs
     * **Improvement** -  # 108_: Status column of transition approvals are now kept as string in the DB instead of number to maintain readability and avoid mistakenly changed ordinals.
     * **Improvement** -  # 109_: Cancel all other peer approvals that are with different branching state.
     * **Improvement** -  # 110_: Introduce an iteration to keep track of the order of the transitions even the cycling ones. This comes with a migration that will assess the iteration of all of your existing approvals so far. According to the tests, 250 workflow objects that have 5 approvals each will take ~1 minutes with the slowest django `v1.11`.
+    * **Improvement** -  # 111_: Cancel all approvals that are not part of the possible future instead of only impossible the peers when something approved and re-create the whole rest of the pipeline when it cycles
     * **Improvement** -  # 105_: More dynamic and better way for hooks.On the fly function and hook creations, update or delete are also supported now. It also comes with useful admin interfaces for hooks and functions. This is a huge improvement for callback lovers :-)
 
 
@@ -19,6 +20,7 @@ Change Logs
 .. _108: https://github.com/javrasya/django-river/issues/108
 .. _109: https://github.com/javrasya/django-river/issues/109
 .. _110: https://github.com/javrasya/django-river/issues/110
+.. _111: https://github.com/javrasya/django-river/issues/110
 
 2.0.0 (Stable)
 --------------
