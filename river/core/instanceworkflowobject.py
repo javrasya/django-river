@@ -3,6 +3,7 @@ import logging
 import six
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -118,7 +119,7 @@ class InstanceWorkflowObject(object):
         approval.previous = self.recent_approval
         approval.save()
 
-        approval.peers.filter(status=PENDING).exclude(destination_state=approval.destination_state).update(status=CANCELLED)
+        self.cancel_impossible_future(approval)
 
         has_transit = False
         if approval.peers.filter(status=PENDING).count() == 0:
@@ -132,6 +133,52 @@ class InstanceWorkflowObject(object):
 
         with self._approve_signal(approval), self._transition_signal(has_transit, approval), self._on_complete_signal():
             self.workflow_object.save()
+
+    def cancel_impossible_future(self, approved_approval):
+        cancelled_approvals_qs = Q(pk=-1)
+        qs = Q(
+            workflow=self.workflow,
+            object_id=self.workflow_object.pk,
+            iteration=approved_approval.iteration,
+            source_state=approved_approval.source_state,
+        ) & ~Q(destination_state=approved_approval.destination_state)
+
+        approvals = TransitionApproval.objects.filter(qs)
+        iteration = approved_approval.iteration + 1
+        while approvals:
+            cancelled_approvals_qs = cancelled_approvals_qs | qs
+            qs = Q(
+                workflow=self.workflow,
+                object_id=self.workflow_object.pk,
+                iteration=iteration,
+                source_state__pk__in=approvals.values_list("destination_state__pk", flat=True)
+            )
+            approvals = TransitionApproval.objects.filter(qs)
+            iteration += 1
+
+        uncancelled_approvals_qs = Q(pk=-1)
+        qs = Q(
+            workflow=self.workflow,
+            object_id=self.workflow_object.pk,
+            iteration=approved_approval.iteration,
+            source_state=approved_approval.source_state,
+            destination_state=approved_approval.destination_state
+        )
+        approvals = TransitionApproval.objects.filter(qs)
+        iteration = approved_approval.iteration + 1
+        while approvals:
+            uncancelled_approvals_qs = uncancelled_approvals_qs | qs
+            qs = Q(
+                workflow=self.workflow,
+                object_id=self.workflow_object.pk,
+                iteration=iteration,
+                source_state__pk__in=approvals.values_list("destination_state__pk", flat=True),
+                status=PENDING
+            )
+            approvals = TransitionApproval.objects.filter(qs)
+            iteration += 1
+
+        TransitionApproval.objects.filter(cancelled_approvals_qs & ~uncancelled_approvals_qs).update(status=CANCELLED)
 
     def _approve_signal(self, approval):
         return ApproveSignal(self.workflow_object, self.field_name, approval)
@@ -159,9 +206,8 @@ class InstanceWorkflowObject(object):
 
     def _re_create_cycled_path(self, from_state, last_iteration):
         approvals = TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow=self.class_workflow.workflow, source_state=from_state)
-        cycle_ended = False
         iteration = last_iteration + 1
-        while not cycle_ended:
+        while approvals:
             for old_approval in approvals:
                 if old_approval.enabled:
                     cycled_approval = TransitionApproval.objects.create(
@@ -183,8 +229,7 @@ class InstanceWorkflowObject(object):
                 workflow_object=self.workflow_object,
                 workflow=self.class_workflow.workflow,
                 source_state__in=approvals.values_list("destination_state", flat=TransitionApproval)
-            )
-            cycle_ended = approvals.filter(source_state=from_state).count() > 0
+            ).exclude(source_state=from_state)
             iteration += 1
 
     def get_state(self):
