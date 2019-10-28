@@ -312,7 +312,7 @@ class InstanceApiTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
-        meta_1 = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_1,
             destination_state=cycle_state_2,
@@ -320,7 +320,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        meta_2 = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_2,
             destination_state=cycle_state_3,
@@ -328,7 +328,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        meta_3 = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=cycle_state_1,
@@ -336,7 +336,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        meta_4 = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
@@ -344,7 +344,7 @@ class InstanceApiTest(TestCase):
             permissions=[authorized_permission]
         )
 
-        final_meta = TransitionApprovalMetaFactory.create(
+        TransitionApprovalMetaFactory.create(
             workflow=workflow,
             source_state=off_the_cycle_state,
             destination_state=final_state,
@@ -366,8 +366,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_1.source_state),
-                    has_property("destination_state", meta_1.destination_state),
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 0),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -378,8 +379,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_2.source_state),
-                    has_property("destination_state", meta_2.destination_state),
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 1),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -390,8 +392,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_3.source_state),
-                    has_property("destination_state", meta_3.destination_state),
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 2),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -402,8 +405,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_3.source_state),
-                    has_property("destination_state", meta_4.destination_state),
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 2),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -414,8 +418,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_4.source_state),
-                    has_property("destination_state", final_meta.destination_state),
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 3),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -430,40 +435,50 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_length(10))
 
         assert_that(approvals, has_item(
-            all_of(
-                has_property("source_state", meta_1.source_state),
-                has_property("destination_state", meta_1.destination_state),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_property("source_state", meta_2.source_state),
-                has_property("destination_state", meta_2.destination_state),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_property("source_state", meta_3.source_state),
-                has_property("destination_state", meta_3.destination_state),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 0),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
             )
         ))
 
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_3.source_state),
-                    has_property("destination_state", meta_4.destination_state),
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 1),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 2),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 2),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", CANCELLED),
@@ -474,8 +489,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_4.source_state),
-                    has_property("destination_state", final_meta.destination_state),
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 3),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", CANCELLED),
@@ -486,8 +502,9 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_3.source_state),
-                    has_property("destination_state", meta_4.destination_state),
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 4),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
@@ -498,11 +515,387 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_item(
             is_not(
                 all_of(
-                    has_property("source_state", meta_4.source_state),
-                    has_property("destination_state", final_meta.destination_state),
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 5),
                     has_permission("permissions", has_length(1)),
                     has_permission("permissions", has_item(authorized_permission)),
                     has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 6),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 6),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 7),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+    def test_shouldHandleSecondCycleProperly(self):
+        authorized_permission = PermissionObjectFactory()
+
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
+        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
+        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
+        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+        final_state = StateObjectFactory(label="final_state")
+
+        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=cycle_state_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=cycle_state_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=off_the_cycle_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(5))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 0),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 1),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 2),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 2),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 3),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", PENDING),
+                )
+            )
+        ))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+
+        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(approvals, has_length(15))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 0),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 1),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 2),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 2),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 3),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 3),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 4),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 5),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 5),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 6),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_1),
+                    has_property("destination_state", cycle_state_2),
+                    has_property("iteration", 6),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_2),
+                    has_property("destination_state", cycle_state_3),
+                    has_property("iteration", 7),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", cycle_state_1),
+                    has_property("iteration", 8),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", APPROVED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", cycle_state_3),
+                    has_property("destination_state", off_the_cycle_state),
+                    has_property("iteration", 8),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
+                )
+            )
+        ))
+
+        assert_that(approvals, has_item(
+            is_not(
+                all_of(
+                    has_property("source_state", off_the_cycle_state),
+                    has_property("destination_state", final_state),
+                    has_property("iteration", 9),
+                    has_permission("permissions", has_length(1)),
+                    has_permission("permissions", has_item(authorized_permission)),
+                    has_property("status", CANCELLED),
                 )
             )
         ))
