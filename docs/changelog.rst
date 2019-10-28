@@ -7,6 +7,7 @@ Change Logs
 --------------
     * **Bug**         -  # 106_: It crashes when saving a workflow object when there is no workflow definition for a state field
     * **Bug**         -  # 107_: next_approvals api of the instance is broken
+    * **Bug**         -  # 112_: Next approval after it cycles doesn't break the workflow anymore. Multiple cycles are working just fine.
     * **Improvement** -  # 108_: Status column of transition approvals are now kept as string in the DB instead of number to maintain readability and avoid mistakenly changed ordinals.
     * **Improvement** -  # 109_: Cancel all other peer approvals that are with different branching state.
     * **Improvement** -  # 110_: Introduce an iteration to keep track of the order of the transitions even the cycling ones. This comes with a migration that will assess the iteration of all of your existing approvals so far. According to the tests, 250 workflow objects that have 5 approvals each will take ~1 minutes with the slowest django `v1.11`.
@@ -21,6 +22,7 @@ Change Logs
 .. _109: https://github.com/javrasya/django-river/issues/109
 .. _110: https://github.com/javrasya/django-river/issues/110
 .. _111: https://github.com/javrasya/django-river/issues/110
+.. _112: https://github.com/javrasya/django-river/issues/112
 
 2.0.0 (Stable)
 --------------

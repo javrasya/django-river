@@ -3,7 +3,7 @@ import logging
 import six
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -196,16 +196,30 @@ class InstanceWorkflowObject(object):
     def _to_key(self, source_state):
         return str(self.content_type.pk) + self.field_name + source_state.label
 
-    def _check_if_it_cycled(self, new_state):
-        return TransitionApproval.objects.filter(
+    def _get_approval_images(self, from_states, exclude=None):
+        last_approvals = TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
             workflow=self.class_workflow.workflow,
-            source_state=new_state,
-            status=APPROVED
-        ).count() > 0
+            source_state__pk__in=from_states
+        ).values('source_state', 'priority').annotate(
+            max_iteration=Max('iteration')
+        )
+        q_statement = Q(pk=-1)
+        for pair in last_approvals:
+            if pair['source_state'] != exclude:
+                q_statement |= Q(source_state__pk=pair['source_state'], iteration=pair['max_iteration'])
+        return TransitionApproval.objects.filter(q_statement)
+
+    def _check_if_it_cycled(self, new_state):
+        qs = TransitionApproval.objects.filter(
+            workflow_object=self.workflow_object,
+            workflow=self.class_workflow.workflow,
+            source_state=new_state
+        )
+        return qs.filter(status=APPROVED).count() > 0 and qs.filter(status=PENDING).count() == 0
 
     def _re_create_cycled_path(self, from_state, last_iteration):
-        approvals = TransitionApproval.objects.filter(workflow_object=self.workflow_object, workflow=self.class_workflow.workflow, source_state=from_state)
+        approvals = self._get_approval_images([from_state.pk])
         iteration = last_iteration + 1
         while approvals:
             for old_approval in approvals:
@@ -225,11 +239,8 @@ class InstanceWorkflowObject(object):
                     )
                     cycled_approval.permissions.set(old_approval.permissions.all())
                     cycled_approval.groups.set(old_approval.groups.all())
-            approvals = TransitionApproval.objects.filter(
-                workflow_object=self.workflow_object,
-                workflow=self.class_workflow.workflow,
-                source_state__in=approvals.values_list("destination_state", flat=TransitionApproval)
-            ).exclude(source_state=from_state)
+
+            approvals = self._get_approval_images(approvals.values_list("destination_state", flat=True), exclude=from_state.pk)
             iteration += 1
 
     def get_state(self):
