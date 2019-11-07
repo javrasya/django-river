@@ -178,3 +178,11 @@ Contribute
 ----------
 
 Contributions are welcome! Please join making always totally free ``django-river`` better.
+
+.. _license:
+
+License
+=======
+
+This software is licensed under the `New BSD License`. See the ``LICENSE``
+file in the top distribution directory for the full license text.
