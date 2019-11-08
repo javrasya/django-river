@@ -23,13 +23,14 @@
 
 .. |Closed With Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624968/88b5f278-515a-11e5-996b-b62d6e224357.png
 
-.. |Logo| image:: https://cloud.githubusercontent.com/assets/1279644/9602162/f198bb06-50ae-11e5-8eef-e9d03ff5f113.png
+.. |Logo| image:: docs/logo.svg
+    :width: 200
 
 Django River
 ============
 
 |Logo|
-   
+
 |Build Status| |Coverage Status| |Documentation Status| |Quality Status|
 
 
