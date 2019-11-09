@@ -37,6 +37,7 @@ class TransitionSignal(object):
         if self.status:
             for hook in OnTransitHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
+                    (Q(iteration__isnull=True) | Q(iteration=self.transition_approval.iteration)) &
                     Q(
                         workflow__field_name=self.field_name,
                         source_state=self.transition_approval.source_state,
@@ -53,6 +54,7 @@ class TransitionSignal(object):
         if self.status:
             for hook in OnTransitHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
+                    (Q(iteration__isnull=True) | Q(iteration=self.transition_approval.iteration)) &
                     Q(
                         workflow=self.workflow,
                         source_state=self.transition_approval.source_state,
@@ -89,6 +91,7 @@ class ApproveSignal(object):
     def __enter__(self):
         for hook in OnApprovedHook.objects.filter(
                 (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
+                (Q(transition_approval__isnull=True) | Q(transition_approval=self.transition_approval)) &
                 Q(
                     workflow__field_name=self.field_name,
                     transition_approval_meta=self.transition_approval.meta,
@@ -103,6 +106,7 @@ class ApproveSignal(object):
     def __exit__(self, type, value, traceback):
         for hook in OnApprovedHook.objects.filter(
                 (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
+                (Q(transition_approval__isnull=True) | Q(transition_approval=self.transition_approval)) &
                 Q(
                     workflow__field_name=self.field_name,
                     transition_approval_meta=self.transition_approval.meta,

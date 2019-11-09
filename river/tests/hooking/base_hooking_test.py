@@ -13,7 +13,8 @@ callback_method = """
 from river.tests.hooking.base_hooking_test import callback_output
 def handle(context):
     print(context)
-    callback_output['%s'] = context
+    key = '%s'
+    callback_output[key] = callback_output.get(key,[]) + [context]
 """
 
 
@@ -26,42 +27,46 @@ class BaseHookingTest(TestCase):
     def get_output(self):
         return callback_output.get(self.identifier, None)
 
-    def hook_pre_transition(self, workflow, source_state, destination_state, workflow_object=None):
+    def hook_pre_transition(self, workflow, source_state, destination_state, workflow_object=None, iteration=None):
         OnTransitHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
             source_state=source_state,
             destination_state=destination_state,
             hook_type=BEFORE,
-            workflow_object=workflow_object
+            workflow_object=workflow_object,
+            iteration=iteration
         )
 
-    def hook_post_transition(self, workflow, source_state, destination_state, workflow_object=None):
+    def hook_post_transition(self, workflow, source_state, destination_state, workflow_object=None, iteration=None):
         OnTransitHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
             source_state=source_state,
             destination_state=destination_state,
             hook_type=AFTER,
-            workflow_object=workflow_object
+            workflow_object=workflow_object,
+            iteration=iteration
         )
 
-    def hook_pre_approve(self, workflow, transition_approval_meta, workflow_object=None):
+    def hook_pre_approve(self, workflow, transition_approval_meta, workflow_object=None, transition_approval=None):
         OnApprovedHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
             transition_approval_meta=transition_approval_meta,
             hook_type=BEFORE,
-            workflow_object=workflow_object
+            workflow_object=workflow_object,
+            transition_approval=transition_approval
         )
 
-    def hook_post_approve(self, workflow, transition_approval_meta, workflow_object=None):
+    def hook_post_approve(self, workflow, transition_approval_meta, workflow_object=None, transition_approval=None):
         OnApprovedHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
             transition_approval_meta=transition_approval_meta,
             hook_type=AFTER,
-            workflow_object=workflow_object
+            workflow_object=workflow_object,
+            transition_approval=transition_approval
         )
 
     def hook_pre_complete(self, workflow, workflow_object=None):
