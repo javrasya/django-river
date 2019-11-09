@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from hamcrest import assert_that, equal_to, has_entry, none, has_key
+from hamcrest import assert_that, equal_to, has_entry, none, has_key, has_length
 
 from river.models.factories import PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, UserObjectFactory
 from river.models.hook import AFTER
@@ -51,10 +51,11 @@ class CompletedHookingTest(BaseHookingTest):
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
         output = self.get_output()
-        assert_that(output, has_key("hook"))
-        assert_that(output["hook"], has_entry("type", "on-complete"))
-        assert_that(output["hook"], has_entry("when", AFTER))
-        assert_that(output["hook"], has_entry(
+        assert_that(output, has_length(1))
+        assert_that(output[0], has_key("hook"))
+        assert_that(output[0]["hook"], has_entry("type", "on-complete"))
+        assert_that(output[0]["hook"], has_entry("when", AFTER))
+        assert_that(output[0]["hook"], has_entry(
             "payload",
             has_entry(equal_to("workflow_object"), equal_to(workflow_object.model))
         ))
@@ -99,10 +100,11 @@ class CompletedHookingTest(BaseHookingTest):
         assert_that(workflow_object.model.my_field, equal_to(state3))
 
         output = self.get_output()
-        assert_that(output, has_key("hook"))
-        assert_that(output["hook"], has_entry("type", "on-complete"))
-        assert_that(output["hook"], has_entry("when", AFTER))
-        assert_that(output["hook"], has_entry(
+        assert_that(output, has_length(1))
+        assert_that(output[0], has_key("hook"))
+        assert_that(output[0]["hook"], has_entry("type", "on-complete"))
+        assert_that(output[0]["hook"], has_entry("when", AFTER))
+        assert_that(output[0]["hook"], has_entry(
             "payload",
             has_entry(equal_to("workflow_object"), equal_to(workflow_object.model))
         ))
