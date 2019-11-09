@@ -13,6 +13,8 @@ Change Logs
     * **Improvement** -  # 110_: Introduce an iteration to keep track of the order of the transitions even the cycling ones. This comes with a migration that will assess the iteration of all of your existing approvals so far. According to the tests, 250 workflow objects that have 5 approvals each will take ~1 minutes with the slowest django `v1.11`.
     * **Improvement** -  # 111_: Cancel all approvals that are not part of the possible future instead of only impossible the peers when something approved and re-create the whole rest of the pipeline when it cycles
     * **Improvement** -  # 105_: More dynamic and better way for hooks.On the fly function and hook creations, update or delete are also supported now. It also comes with useful admin interfaces for hooks and functions. This is a huge improvement for callback lovers :-)
+    * **Improvement** -  # 113_: Support defining an approval hook with a specific approval.
+    * **Improvement** -  # 114_: Support defining a transition hook with a specific iteration.
 
 
 .. _105: https://github.com/javrasya/django-river/issues/105
@@ -23,6 +25,8 @@ Change Logs
 .. _110: https://github.com/javrasya/django-river/issues/110
 .. _111: https://github.com/javrasya/django-river/issues/110
 .. _112: https://github.com/javrasya/django-river/issues/112
+.. _113: https://github.com/javrasya/django-river/issues/113
+.. _114: https://github.com/javrasya/django-river/issues/114
 
 2.0.0 (Stable)
 --------------
