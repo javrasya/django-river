@@ -7,10 +7,11 @@ from river.core.classworkflowobject import ClassWorkflowObject
 from river.core.instanceworkflowobject import InstanceWorkflowObject
 from river.core.riverobject import RiverObject
 from river.models import State
-from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory
+from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory, TransitionMetaFactory
 from river.tests.models import BasicTestModel
 
 __author__ = 'ahmetdal'
+
 
 # noinspection PyMethodMayBeStatic
 class StateFieldTest(TestCase):
@@ -26,10 +27,15 @@ class StateFieldTest(TestCase):
 
         workflow = WorkflowFactory(content_type=content_type, field_name="my_field", initial_state=state1)
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=0
         )
         test_model = BasicTestModel.objects.create()

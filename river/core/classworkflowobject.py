@@ -30,7 +30,7 @@ class ClassWorkflowObject(object):
             TransitionApproval.objects.filter(
                 workflow=self.workflow, status=PENDING
             ).values(
-                'workflow', 'object_id', 'source_state', 'destination_state'
+                'workflow', 'object_id', 'transition'
             ).annotate(min_priority=Min('priority'))
         )
 
@@ -43,8 +43,7 @@ class ClassWorkflowObject(object):
             self._authorized_approvals(as_user),
             workflow_id=those_with_max_priority.col.workflow_id,
             object_id=those_with_max_priority.col.object_id,
-            source_state_id=those_with_max_priority.col.source_state_id,
-            destination_state_id=those_with_max_priority.col.destination_state_id,
+            transition_id=those_with_max_priority.col.transition_id,
         ).with_cte(
             those_with_max_priority
         ).annotate(
@@ -56,7 +55,7 @@ class ClassWorkflowObject(object):
             approvals_with_max_priority, object_id_as_int=workflow_objects.col.pk
         ).with_cte(
             workflow_objects
-        ).filter(source_state=getattr(workflow_objects.col, self.field_name + "_id"))
+        ).filter(transition__source_state=getattr(workflow_objects.col, self.field_name + "_id"))
 
     @property
     def initial_state(self):
@@ -66,7 +65,7 @@ class ClassWorkflowObject(object):
     @property
     def final_states(self):
         final_approvals = TransitionApprovalMeta.objects.filter(workflow=self.workflow, children__isnull=True)
-        return State.objects.filter(pk__in=final_approvals.values_list("destination_state", flat=True))
+        return State.objects.filter(pk__in=final_approvals.values_list("transition_meta__destination_state", flat=True))
 
     def _authorized_approvals(self, as_user):
         group_q = Q()

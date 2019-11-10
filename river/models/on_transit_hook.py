@@ -1,15 +1,14 @@
 from django.db import models
-from django.db.models import CASCADE
+from django.db.models import CASCADE, PROTECT
 from django.utils.translation import ugettext_lazy as _
 
-from river.models import State
+from river.models import State, TransitionMeta, Transition
 from river.models.hook import Hook
 
 
 class OnTransitHook(Hook):
     class Meta:
-        unique_together = [('callback_function', 'workflow', 'source_state', 'destination_state', 'content_type', 'object_id', 'iteration')]
+        unique_together = [('callback_function', 'workflow', 'transition_meta', 'content_type', 'object_id', 'transition')]
 
-    source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='on_transition_hook_as_source', on_delete=CASCADE)
-    destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='on_transition_hook_as_destination', on_delete=CASCADE)
-    iteration = models.IntegerField(default=0, verbose_name=_('Priority'), null=True, blank=True)
+    transition_meta = models.ForeignKey(TransitionMeta, verbose_name=_("Transition Meta"), related_name='on_transit_hooks', on_delete=CASCADE)
+    transition = models.ForeignKey(Transition, verbose_name=_("Transition"), related_name='on_transit_hooks', null=True, blank=True, on_delete=CASCADE)

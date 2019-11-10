@@ -29,8 +29,9 @@ Getting Started
 
 3. Create all your ``states`` on the admin page
 4. Create a ``workflow`` with your model ( ``MyModel`` - ``my_state_field`` ) information on the admin page
-5. Create your ``transition approval metadata`` within the workflow created earlier and authorization rules along with their priority on the admin page
-6. Enjoy your ``django-river`` journey.
+5. Create your ``transition metadata`` within the workflow created earlier, source and destination states
+6. Create your ``transition approval metadata`` within the workflow created earlier and authorization rules along with their priority on the admin page
+7. Enjoy your ``django-river`` journey.
 
     .. code-block:: python
 
