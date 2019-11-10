@@ -27,26 +27,24 @@ class BaseHookingTest(TestCase):
     def get_output(self):
         return callback_output.get(self.identifier, None)
 
-    def hook_pre_transition(self, workflow, source_state, destination_state, workflow_object=None, iteration=None):
+    def hook_pre_transition(self, workflow, transition_meta, workflow_object=None, transition=None):
         OnTransitHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
-            source_state=source_state,
-            destination_state=destination_state,
+            transition_meta=transition_meta,
+            transition=transition,
             hook_type=BEFORE,
             workflow_object=workflow_object,
-            iteration=iteration
         )
 
-    def hook_post_transition(self, workflow, source_state, destination_state, workflow_object=None, iteration=None):
+    def hook_post_transition(self, workflow, transition_meta, workflow_object=None, transition=None):
         OnTransitHook.objects.create(
             workflow=workflow,
             callback_function=self.callback_function,
-            source_state=source_state,
-            destination_state=destination_state,
+            transition_meta=transition_meta,
+            transition=transition,
             hook_type=AFTER,
             workflow_object=workflow_object,
-            iteration=iteration
         )
 
     def hook_pre_approve(self, workflow, transition_approval_meta, workflow_object=None, transition_approval=None):

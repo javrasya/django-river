@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from factory import DjangoModelFactory
 
-from river.models import Workflow
+from river.models import Workflow, TransitionMeta
 from river.models.state import State
 from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
@@ -89,12 +89,31 @@ class WorkflowFactory(DjangoModelFactory):
     initial_state = factory.SubFactory(StateObjectFactory)
 
 
+class TransitionMetaFactory(DjangoModelFactory):
+    class Meta:
+        model = TransitionMeta
+
+    source_state = factory.SubFactory(StateObjectFactory)
+    destination_state = factory.SubFactory(StateObjectFactory)
+    workflow = factory.SubFactory(WorkflowFactory)
+
+    @factory.post_generation
+    def permissions(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for permission in extracted:
+                self.permissions.add(permission)
+
+
 class TransitionApprovalMetaFactory(DjangoModelFactory):
     class Meta:
         model = TransitionApprovalMeta
 
-    source_state = factory.SubFactory(StateObjectFactory)
-    destination_state = factory.SubFactory(StateObjectFactory)
+    transition_meta = factory.SubFactory(TransitionMetaFactory)
     workflow = factory.SubFactory(WorkflowFactory)
 
     @factory.post_generation

@@ -4,7 +4,7 @@ from django.test import TestCase
 from hamcrest import assert_that, has_length, calling, raises
 
 from river.models import TransitionApproval, APPROVED
-from river.models.factories import WorkflowFactory, StateObjectFactory, TransitionApprovalMetaFactory
+from river.models.factories import WorkflowFactory, StateObjectFactory, TransitionApprovalMetaFactory, TransitionMetaFactory
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
@@ -20,7 +20,13 @@ class TransitionApprovalModelTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
 
-        TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2, priority=0)
+        transition_meta = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
         BasicTestModelObjectFactory()
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
@@ -41,8 +47,20 @@ class TransitionApprovalModelTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
 
-        TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2, priority=0)
-        TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state2, destination_state=state3, priority=0)
+        transition_meta_1 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+        )
+
+        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
+        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
 
         BasicTestModelObjectFactory()
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
@@ -63,8 +81,20 @@ class TransitionApprovalModelTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
 
-        TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2, priority=0)
-        TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state2, destination_state=state3, priority=0)
+        transition_meta_1 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+        )
+
+        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
+        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
 
         BasicTestModelObjectFactory()
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)

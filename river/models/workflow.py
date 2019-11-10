@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import CASCADE
+from django.db.models import PROTECT
 from django.utils.translation import ugettext_lazy as _
 
 from river.config import app_config
@@ -16,9 +16,9 @@ class Workflow(BaseModel):
 
     objects = WorkflowManager()
 
-    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=CASCADE)
+    content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=PROTECT)
     field_name = models.CharField(_("Field Name"), max_length=200)
-    initial_state = models.ForeignKey(State, verbose_name=_("Initial State"), related_name='workflow_this_set_as_initial_state', on_delete=CASCADE)
+    initial_state = models.ForeignKey(State, verbose_name=_("Initial State"), related_name='workflow_this_set_as_initial_state', on_delete=PROTECT)
 
     def natural_key(self):
         return self.content_type, self.field_name

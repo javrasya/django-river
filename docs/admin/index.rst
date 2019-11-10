@@ -12,5 +12,6 @@ is to provide them by using their Django admin pages.
     :maxdepth: 2
 
     state
+    transition_meta
     transition_approval_meta
     

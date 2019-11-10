@@ -7,7 +7,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         ('river', '0007_transitionapproval_iteration'),
@@ -17,12 +16,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='onapprovedhook',
             name='transition_approval',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='on_approved_hooks', to='river.TransitionApproval', verbose_name='Transition Approval'),
-        ),
-        migrations.AddField(
-            model_name='ontransithook',
-            name='iteration',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Priority'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='on_approved_hooks', to='river.TransitionApproval',
+                                    verbose_name='Transition Approval'),
         ),
         migrations.AlterField(
             model_name='onapprovedhook',
@@ -32,9 +27,5 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='onapprovedhook',
             unique_together=set([('callback_function', 'workflow', 'transition_approval_meta', 'content_type', 'object_id', 'transition_approval')]),
-        ),
-        migrations.AlterUniqueTogether(
-            name='ontransithook',
-            unique_together=set([('callback_function', 'workflow', 'source_state', 'destination_state', 'content_type', 'object_id', 'iteration')]),
-        ),
+        )
     ]
