@@ -15,6 +15,7 @@ Change Logs
     * **Improvement** -  # 105_: More dynamic and better way for hooks.On the fly function and hook creations, update or delete are also supported now. It also comes with useful admin interfaces for hooks and functions. This is a huge improvement for callback lovers :-)
     * **Improvement** -  # 113_: Support defining an approval hook with a specific approval.
     * **Improvement** -  # 114_: Support defining a transition hook with a specific iteration.
+    * **Drop** -         # 115_: Drop skipping and disabling approvals to cut the unnecessary complexity.
 
 
 .. _105: https://github.com/javrasya/django-river/issues/105
@@ -27,6 +28,7 @@ Change Logs
 .. _112: https://github.com/javrasya/django-river/issues/112
 .. _113: https://github.com/javrasya/django-river/issues/113
 .. _114: https://github.com/javrasya/django-river/issues/114
+.. _115: https://github.com/javrasya/django-river/issues/115
 
 2.0.0 (Stable)
 --------------
