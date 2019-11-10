@@ -3,7 +3,7 @@ from django.test import TestCase
 from hamcrest import assert_that, has_length, has_item, has_property, none
 
 from river.models import TransitionApproval, APPROVED, PENDING
-from river.models.factories import WorkflowFactory, StateObjectFactory, TransitionApprovalMetaFactory
+from river.models.factories import WorkflowFactory, StateObjectFactory, TransitionApprovalMetaFactory, TransitionMetaFactory
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
@@ -19,7 +19,12 @@ class TransitionApprovalMetaModelTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
 
-        meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2, priority=0)
+        transition_meta = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+        meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
         BasicTestModelObjectFactory()
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
@@ -41,7 +46,12 @@ class TransitionApprovalMetaModelTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
 
-        meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2, priority=0)
+        transition_meta = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+        meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
         BasicTestModelObjectFactory()
         TransitionApproval.objects.filter(workflow=workflow).update(status=PENDING)

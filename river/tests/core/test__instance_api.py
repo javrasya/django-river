@@ -2,9 +2,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none
 
-from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED
-from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory
-from river.tests.matchers import has_permission
+from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED, Transition
+from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory, TransitionMetaFactory
+from river.tests.matchers import has_permission, has_transition
 from river.tests.models import BasicTestModel, ModelWithTwoStateFields
 from river.tests.models.factories import BasicTestModelObjectFactory, ModelWithTwoStateFieldsObjectFactory
 from river.utils.exceptions import RiverException
@@ -24,10 +24,14 @@ class InstanceApiTest(TestCase):
         state1 = StateObjectFactory(label="state1")
         state2 = StateObjectFactory(label="state2")
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[authorized_permission]
 
@@ -53,10 +57,14 @@ class InstanceApiTest(TestCase):
         authorized_permission = PermissionObjectFactory()
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -77,10 +85,15 @@ class InstanceApiTest(TestCase):
         state2 = StateObjectFactory(label="state2")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -101,10 +114,15 @@ class InstanceApiTest(TestCase):
         state2 = StateObjectFactory(label="state2")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=1,
             permissions=[manager_permission]
 
@@ -112,8 +130,7 @@ class InstanceApiTest(TestCase):
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[team_leader_permission]
         )
@@ -135,18 +152,22 @@ class InstanceApiTest(TestCase):
         state2 = StateObjectFactory(label="state2")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=1,
             permissions=[manager_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[team_leader_permission]
         )
@@ -168,10 +189,15 @@ class InstanceApiTest(TestCase):
         state2 = StateObjectFactory(label="state2")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=1,
             permissions=[manager_permission]
 
@@ -179,8 +205,7 @@ class InstanceApiTest(TestCase):
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
+            transition_meta=transition_meta,
             priority=0,
             permissions=[team_leader_permission]
         )
@@ -205,18 +230,29 @@ class InstanceApiTest(TestCase):
         state3 = StateObjectFactory(label="state3")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -238,18 +274,26 @@ class InstanceApiTest(TestCase):
         state3 = StateObjectFactory(label="state3")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -271,24 +315,33 @@ class InstanceApiTest(TestCase):
         invalid_state = StateObjectFactory(label="state4")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission]
         )
 
         workflow_object = BasicTestModelObjectFactory()
-
         assert_that(
             calling(workflow_object.model.river.my_field.approve).with_args(as_user=authorized_user, next_state=invalid_state),
             raises(RiverException,
@@ -312,42 +365,67 @@ class InstanceApiTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_1,
             destination_state=cycle_state_2,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_2 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_2,
             destination_state=cycle_state_3,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_3 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=cycle_state_1,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_4 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
+        )
+
+        transition_meta_5 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
+            transition_meta=transition_meta_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_4,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_5,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -360,207 +438,153 @@ class InstanceApiTest(TestCase):
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
 
+        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(transitions, has_length(5))
+
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
         assert_that(approvals, has_length(5))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 0),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=0),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 1),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=1),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 3),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
 
+        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(transitions, has_length(10))
+
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
         assert_that(approvals, has_length(10))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 0),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=0),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 1),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=1),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 3),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 4),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 5),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=4),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 6),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=5),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 6),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=5),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 7),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=6),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
@@ -577,42 +601,67 @@ class InstanceApiTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_1,
             destination_state=cycle_state_2,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_2 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_2,
             destination_state=cycle_state_3,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_3 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=cycle_state_1,
-            priority=0,
-            permissions=[authorized_permission]
         )
 
-        TransitionApprovalMetaFactory.create(
+        transition_meta_4 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_3,
             destination_state=off_the_cycle_state,
+        )
+
+        transition_meta_5 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
+            transition_meta=transition_meta_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_4,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_5,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -625,71 +674,54 @@ class InstanceApiTest(TestCase):
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
 
+        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        assert_that(transitions, has_length(5))
+
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
         assert_that(approvals, has_length(5))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 0),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=0),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 1),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=1),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 3),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", PENDING),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
@@ -706,197 +738,138 @@ class InstanceApiTest(TestCase):
         assert_that(approvals, has_length(15))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 0),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=0),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 1),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=1),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 2),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 3),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
+            )
+
+        ))
+
+        assert_that(approvals, has_item(
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=3),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 3),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=4),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 4),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=5),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", APPROVED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 5),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=5),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 5),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=6),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", CANCELLED),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 6),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(cycle_state_1, cycle_state_2, iteration=6),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_1),
-                    has_property("destination_state", cycle_state_2),
-                    has_property("iteration", 6),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_2, cycle_state_3, iteration=7),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_2),
-                    has_property("destination_state", cycle_state_3),
-                    has_property("iteration", 7),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, cycle_state_1, iteration=8),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", cycle_state_1),
-                    has_property("iteration", 8),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", APPROVED),
-                )
+            all_of(
+                has_transition(cycle_state_3, off_the_cycle_state, iteration=8),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
         assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", cycle_state_3),
-                    has_property("destination_state", off_the_cycle_state),
-                    has_property("iteration", 8),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            is_not(
-                all_of(
-                    has_property("source_state", off_the_cycle_state),
-                    has_property("destination_state", final_state),
-                    has_property("iteration", 9),
-                    has_permission("permissions", has_length(1)),
-                    has_permission("permissions", has_item(authorized_permission)),
-                    has_property("status", CANCELLED),
-                )
+            all_of(
+                has_transition(off_the_cycle_state, final_state, iteration=9),
+                has_permission("permissions", has_length(1)),
+                has_permission("permissions", has_item(authorized_permission)),
+                has_property("status", PENDING),
             )
         ))
 
@@ -906,10 +879,15 @@ class InstanceApiTest(TestCase):
 
         content_type = ContentType.objects.get_for_model(ModelWithTwoStateFields)
         workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="status1")
-        TransitionApprovalMetaFactory.create(
+
+        transition_meta = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
             priority=0,
         )
 
@@ -924,17 +902,28 @@ class InstanceApiTest(TestCase):
         state3 = StateObjectFactory(label="state3")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        meta1 = TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
         )
 
         meta2 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
         )
 
@@ -957,26 +946,42 @@ class InstanceApiTest(TestCase):
         state4 = StateObjectFactory(label="state4")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        meta1 = TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+
+        transition_meta_3 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state4,
+        )
+
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         meta2 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission]
         )
 
         meta3 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state4,
+            transition_meta=transition_meta_3,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -1023,34 +1028,55 @@ class InstanceApiTest(TestCase):
         state5 = StateObjectFactory(label="state5")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        meta1 = TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+
+        transition_meta_3 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state4,
+        )
+
+        transition_meta_4 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state4,
+            destination_state=state5,
+        )
+
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission]
         )
 
         meta2 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission]
         )
 
         meta3 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state1,
-            destination_state=state4,
+            transition_meta=transition_meta_3,
             priority=0,
             permissions=[authorized_permission]
         )
 
         meta4 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state4,
-            destination_state=state5,
+            transition_meta=transition_meta_4,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -1107,58 +1133,94 @@ class InstanceApiTest(TestCase):
         final_state = StateObjectFactory(label="final")
 
         workflow = WorkflowFactory(initial_state=first_state, content_type=self.content_type, field_name="my_field")
-        first_to_left = TransitionApprovalMetaFactory.create(
+
+        first_to_left_transition = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=first_state,
             destination_state=diamond_left_state_1,
+        )
+
+        first_to_right_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=first_state,
+            destination_state=diamond_right_state_1,
+        )
+
+        left_follow_up_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_left_state_1,
+            destination_state=diamond_left_state_2,
+        )
+
+        right_follow_up_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_right_state_1,
+            destination_state=diamond_right_state_2,
+        )
+
+        left_join_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_left_state_2,
+            destination_state=diamond_join_state
+        )
+
+        right_join_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_right_state_2,
+            destination_state=diamond_join_state
+        )
+
+        join_to_final_transition = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=diamond_join_state,
+            destination_state=final_state
+        )
+
+        first_to_left = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=first_to_left_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         first_to_right = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=first_state,
-            destination_state=diamond_right_state_1,
+            transition_meta=first_to_right_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         left_follow_up = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=diamond_left_state_1,
-            destination_state=diamond_left_state_2,
+            transition_meta=left_follow_up_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         right_follow_up = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=diamond_right_state_1,
-            destination_state=diamond_right_state_2,
+            transition_meta=right_follow_up_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         left_join = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=diamond_left_state_2,
-            destination_state=diamond_join_state,
+            transition_meta=left_join_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         right_join = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=diamond_right_state_2,
-            destination_state=diamond_join_state,
+            transition_meta=right_join_transition,
             priority=0,
             permissions=[authorized_permission]
         )
 
         join_to_final = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=diamond_join_state,
-            destination_state=final_state,
+            transition_meta=join_to_final_transition,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -1234,26 +1296,36 @@ class InstanceApiTest(TestCase):
         state3 = StateObjectFactory(label="state3")
 
         workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        meta1 = TransitionApprovalMetaFactory.create(
+
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=state1,
             destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+        )
+
+        meta1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         meta2 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         meta3 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
+            transition_meta=transition_meta_2,
             priority=1,
             permissions=[authorized_permission2]
         )
@@ -1266,7 +1338,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta1),
-                    has_property("iteration", 0),
+                    has_transition(state1, state2, iteration=0)
                 )
             )
         )
@@ -1275,7 +1347,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta2),
-                    has_property("iteration", 1),
+                    has_transition(state2, state3, iteration=1),
                 )
             )
         )
@@ -1284,7 +1356,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta3),
-                    has_property("iteration", 1),
+                    has_transition(state2, state3, iteration=1),
                 )
             )
         )
@@ -1302,50 +1374,74 @@ class InstanceApiTest(TestCase):
 
         workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
 
-        meta_1 = TransitionApprovalMetaFactory.create(
+        transition_meta_1 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_1,
             destination_state=cycle_state_2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_3,
+        )
+
+        transition_meta_3 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=cycle_state_1,
+        )
+
+        transition_meta_4 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=off_the_cycle_state,
+        )
+
+        transition_meta_5 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=final_state,
+        )
+
+        meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         meta_21 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_3,
+            transition_meta=transition_meta_2,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         meta_22 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_3,
+            transition_meta=transition_meta_2,
             priority=1,
             permissions=[authorized_permission2]
         )
 
         meta_3 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=cycle_state_1,
+            transition_meta=transition_meta_3,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         meta_4 = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=off_the_cycle_state,
+            transition_meta=transition_meta_4,
             priority=0,
             permissions=[authorized_permission1]
         )
 
         final_meta = TransitionApprovalMetaFactory.create(
             workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
+            transition_meta=transition_meta_5,
             priority=0,
             permissions=[authorized_permission1]
         )
@@ -1373,7 +1469,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_1),
-                    has_property("iteration", 0),
+                    has_transition(cycle_state_1, cycle_state_2, iteration=0)
                 )
             )
         )
@@ -1382,7 +1478,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_21),
-                    has_property("iteration", 1),
+                    has_transition(cycle_state_2, cycle_state_3, iteration=1)
                 )
             )
         )
@@ -1391,7 +1487,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_22),
-                    has_property("iteration", 1),
+                    has_transition(cycle_state_2, cycle_state_3, iteration=1)
                 )
             )
         )
@@ -1400,7 +1496,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_3),
-                    has_property("iteration", 2),
+                    has_transition(cycle_state_3, cycle_state_1, iteration=2)
                 )
             )
         )
@@ -1409,7 +1505,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_4),
-                    has_property("iteration", 2),
+                    has_transition(cycle_state_3, off_the_cycle_state, iteration=2)
                 )
             )
         )
@@ -1418,7 +1514,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", final_meta),
-                    has_property("iteration", 3),
+                    has_transition(off_the_cycle_state, final_state, iteration=3)
                 )
             )
         )
@@ -1427,7 +1523,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_1),
-                    has_property("iteration", 3),
+                    has_transition(cycle_state_1, cycle_state_2, iteration=3)
                 )
             )
         )
@@ -1436,7 +1532,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_21),
-                    has_property("iteration", 4),
+                    has_transition(cycle_state_2, cycle_state_3, iteration=4)
                 )
             )
         )
@@ -1445,7 +1541,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_22),
-                    has_property("iteration", 4),
+                    has_transition(cycle_state_2, cycle_state_3, iteration=4)
                 )
             )
         )
@@ -1454,7 +1550,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_3),
-                    has_property("iteration", 5),
+                    has_transition(cycle_state_3, cycle_state_1, iteration=5)
                 )
             )
         )
@@ -1463,7 +1559,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", meta_4),
-                    has_property("iteration", 5),
+                    has_transition(cycle_state_3, off_the_cycle_state, iteration=5)
                 )
             )
         )
@@ -1472,7 +1568,7 @@ class InstanceApiTest(TestCase):
             approvals, has_item(
                 all_of(
                     has_property("meta", final_meta),
-                    has_property("iteration", 6),
+                    has_transition(off_the_cycle_state, final_state, iteration=6)
                 )
             )
         )

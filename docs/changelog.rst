@@ -16,6 +16,7 @@ Change Logs
     * **Improvement** -  # 113_: Support defining an approval hook with a specific approval.
     * **Improvement** -  # 114_: Support defining a transition hook with a specific iteration.
     * **Drop** -         # 115_: Drop skipping and disabling approvals to cut the unnecessary complexity.
+    * **Improvement** -  # 116_: Allow creating transitions without any approvals. A new TransitionMeta and Transition models are introduced to keep transition information even though there is no transition approval yet.
 
 
 .. _105: https://github.com/javrasya/django-river/issues/105
@@ -29,6 +30,7 @@ Change Logs
 .. _113: https://github.com/javrasya/django-river/issues/113
 .. _114: https://github.com/javrasya/django-river/issues/114
 .. _115: https://github.com/javrasya/django-river/issues/115
+.. _116: https://github.com/javrasya/django-river/issues/116
 
 2.0.0 (Stable)
 --------------

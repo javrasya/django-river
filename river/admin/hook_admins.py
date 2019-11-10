@@ -22,7 +22,7 @@ class OnTransitHookInline(BaseHookInline):
 
     def __init__(self, *args, **kwargs):
         super(OnTransitHookInline, self).__init__(*args, **kwargs)
-        self.fields += ("source_state", "destination_state",)
+        self.fields += ("transition_meta",)
 
 
 class OnCompleteHookInline(BaseHookInline):
@@ -46,7 +46,7 @@ class OnApprovedHookAdmin(admin.ModelAdmin):
 
 
 class OnTransitHookAdmin(admin.ModelAdmin):
-    list_display = ('workflow', 'callback_function', 'source_state', 'destination_state')
+    list_display = ('workflow', 'callback_function', 'transition_meta')
 
 
 class OnCompleteHookAdmin(admin.ModelAdmin):

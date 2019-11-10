@@ -4,6 +4,7 @@ from django.db.models import CASCADE, PROTECT, SET_NULL
 from mptt.fields import TreeOneToOneField
 
 from river.models import State, TransitionApprovalMeta, Workflow
+from river.models.transition import Transition
 
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -48,8 +49,7 @@ class TransitionApproval(BaseModel):
     meta = models.ForeignKey(TransitionApprovalMeta, verbose_name=_('Meta'), related_name="transition_approvals", null=True, blank=True, on_delete=SET_NULL)
     workflow = models.ForeignKey(Workflow, verbose_name=_("Workflow"), related_name='transition_approvals', on_delete=PROTECT)
 
-    source_state = models.ForeignKey(State, verbose_name=_("Source State"), related_name='transition_approvals_as_source', on_delete=PROTECT)
-    destination_state = models.ForeignKey(State, verbose_name=_("Next State"), related_name='transition_approvals_as_destination', on_delete=PROTECT)
+    transition = models.ForeignKey(Transition, verbose_name=_("Transition"), related_name='transition_approvals', on_delete=PROTECT)
 
     transactioner = models.ForeignKey(app_config.USER_CLASS, verbose_name=_('Transactioner'), null=True, blank=True, on_delete=SET_NULL)
     transaction_date = models.DateTimeField(null=True, blank=True)
@@ -62,13 +62,10 @@ class TransitionApproval(BaseModel):
 
     previous = TreeOneToOneField("self", verbose_name=_('Previous Transition'), related_name="next_transition", null=True, blank=True, on_delete=CASCADE)
 
-    iteration = models.IntegerField(default=0, verbose_name=_('Priority'))
-
     @property
     def peers(self):
         return TransitionApproval.objects.filter(
             workflow_object=self.workflow_object,
             workflow=self.workflow,
-            source_state=self.source_state,
-            iteration=self.iteration
+            transition=self.transition,
         ).exclude(pk=self.pk)
