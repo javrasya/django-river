@@ -28,7 +28,7 @@ class ClassWorkflowObject(object):
     def get_available_approvals(self, as_user):
         those_with_max_priority = With(
             TransitionApproval.objects.filter(
-                workflow=self.workflow, status=PENDING, skipped=False, enabled=True
+                workflow=self.workflow, status=PENDING
             ).values(
                 'workflow', 'object_id', 'source_state', 'destination_state'
             ).annotate(min_priority=Min('priority'))

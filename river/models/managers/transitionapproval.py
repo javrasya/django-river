@@ -24,7 +24,3 @@ class TransitionApprovalManager(CTEManager):
             kwarg['object_id'] = workflow_object.pk
 
         return super(TransitionApprovalManager, self).update_or_create(*args, **kwarg)
-
-    def skip(self, *args, **kwargs):
-        for approval in self.filter(*args, **kwargs):
-            approval.skip()
