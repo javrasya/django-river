@@ -223,22 +223,19 @@ class InstanceWorkflowObject(object):
         iteration = last_iteration + 1
         while approvals:
             for old_approval in approvals:
-                if old_approval.enabled:
-                    cycled_approval = TransitionApproval.objects.create(
-                        source_state=old_approval.source_state,
-                        destination_state=old_approval.destination_state,
-                        workflow=old_approval.workflow,
-                        object_id=old_approval.workflow_object.pk,
-                        content_type=old_approval.content_type,
-                        skipped=False,
-                        priority=old_approval.priority,
-                        enabled=True,
-                        status=PENDING,
-                        iteration=iteration,
-                        meta=old_approval.meta
-                    )
-                    cycled_approval.permissions.set(old_approval.permissions.all())
-                    cycled_approval.groups.set(old_approval.groups.all())
+                cycled_approval = TransitionApproval.objects.create(
+                    source_state=old_approval.source_state,
+                    destination_state=old_approval.destination_state,
+                    workflow=old_approval.workflow,
+                    object_id=old_approval.workflow_object.pk,
+                    content_type=old_approval.content_type,
+                    priority=old_approval.priority,
+                    status=PENDING,
+                    iteration=iteration,
+                    meta=old_approval.meta
+                )
+                cycled_approval.permissions.set(old_approval.permissions.all())
+                cycled_approval.groups.set(old_approval.groups.all())
 
             approvals = self._get_approval_images(approvals.values_list("destination_state", flat=True), exclude=from_state.pk)
             iteration += 1
