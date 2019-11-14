@@ -31,6 +31,6 @@ setup(
     ],
     include_package_data=True,
     zip_safe=False,
-    license='GPLv3',
+    license='BSD',
     platforms=['any'],
 )
