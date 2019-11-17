@@ -46,7 +46,8 @@ class TransitionSignal(object):
             ):
                 hook.execute(self._get_context(BEFORE))
 
-            LOGGER.debug("The signal that is fired right before the transition ( %s ) happened for %s" % (self.transition_approval.transition, self.workflow_object))
+            LOGGER.debug("The signal that is fired right before the transition ( %s ) happened for %s"
+                         % (self.transition_approval.transition, self.workflow_object))
 
     def __exit__(self, type, value, traceback):
         if self.status:
@@ -60,7 +61,8 @@ class TransitionSignal(object):
                     )
             ):
                 hook.execute(self._get_context(AFTER))
-            LOGGER.debug("The signal that is fired right after the transition ( %s) happened for %s" % (self.transition_approval.transition, self.workflow_object))
+            LOGGER.debug("The signal that is fired right after the transition ( %s) happened for %s"
+                         % (self.transition_approval.transition, self.workflow_object))
 
     def _get_context(self, when):
         return {

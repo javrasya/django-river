@@ -53,8 +53,18 @@ class Transition(BaseModel):
 
     @property
     def next_transitions(self):
-        return Transition.objects.filter(workflow=self.workflow, workflow_object=self.workflow_object, source_state=self.destination_state, iteration=self.iteration + 1)
+        return Transition.objects.filter(
+            workflow=self.workflow,
+            workflow_object=self.workflow_object,
+            source_state=self.destination_state,
+            iteration=self.iteration + 1
+        )
 
     @property
     def peers(self):
-        return Transition.objects.filter(workflow=self.workflow, workflow_object=self.workflow_object, source_state=self.source_state, iteration=self.iteration).exclude(pk=self.pk)
+        return Transition.objects.filter(
+            workflow=self.workflow,
+            workflow_object=self.workflow_object,
+            source_state=self.source_state,
+            iteration=self.iteration
+        ).exclude(pk=self.pk)
