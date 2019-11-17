@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 
 from uuid import uuid4
 
-from django.db import migrations, models
 import django.db.models.deletion
-from django.db.models import F
+from django.db import migrations, models
 
 from river.models import CANCELLED, APPROVED
 from river.models.transition import DONE

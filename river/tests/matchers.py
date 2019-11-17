@@ -1,4 +1,4 @@
-from hamcrest import all_of, has_property, any_of
+from hamcrest import all_of, has_property
 from hamcrest.core.base_matcher import BaseMatcher
 from hamcrest.core.helpers.wrap_matcher import wrap_matcher
 
