@@ -51,6 +51,7 @@ Contents
    api/index
    authorization
    hooking/index
+   migration/index
    changelog
 
 
