@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from hamcrest import equal_to, assert_that, none, has_entry, all_of, has_key, has_length, is_, is_not, has_item
+from hamcrest import equal_to, assert_that, none, has_entry, all_of, has_key, has_length, is_not
 
 from river.models import TransitionApproval
 from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, TransitionMetaFactory

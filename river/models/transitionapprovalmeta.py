@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, transaction
-from django.db.models import CASCADE, PROTECT
+from django.db.models import PROTECT
 from django.db.models.signals import post_save, pre_delete
 from django.utils.translation import ugettext_lazy as _
 
 from river.config import app_config
-from river.models import Workflow, State
+from river.models import Workflow
 from river.models.base_model import BaseModel
 from river.models.managers.transitionmetada import TransitionApprovalMetadataManager
 from river.models.transitionmeta import TransitionMeta
