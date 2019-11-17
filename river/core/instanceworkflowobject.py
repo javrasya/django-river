@@ -3,7 +3,7 @@ import logging
 import six
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Q, Max, F
+from django.db.models import Q, Max
 from django.db.transaction import atomic
 from django.utils import timezone
 
