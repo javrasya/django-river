@@ -1,8 +1,8 @@
 from django.db import models
-from django.db.models import CASCADE, PROTECT
+from django.db.models import CASCADE
 from django.utils.translation import ugettext_lazy as _
 
-from river.models import State, TransitionMeta, Transition
+from river.models import TransitionMeta, Transition
 from river.models.hook import Hook
 
 

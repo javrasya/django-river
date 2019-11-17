@@ -18,7 +18,7 @@ class FunctionAdmin(admin.ModelAdmin):
     list_display = ('name', 'function_version', 'date_created', 'date_updated')
     readonly_fields = ('version', 'date_created', 'date_updated')
 
-    def function_version(self, obj):
+    def function_version(self, obj):  # pylint: disable=no-self-use
         return "v%s" % obj.version
 
 

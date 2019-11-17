@@ -1,8 +1,7 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 
 from river.models import TransitionMeta
-from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
 
 class TransitionMetaForm(forms.ModelForm):

@@ -250,7 +250,8 @@ class InstanceWorkflowObject(object):
                     cycled_approval.permissions.set(old_approval.permissions.all())
                     cycled_approval.groups.set(old_approval.groups.all())
 
-            old_transitions = self._get_transition_images(old_transitions.values_list("destination_state__pk", flat=True)).exclude(source_state=done_transition.destination_state)
+            old_transitions = self._get_transition_images(old_transitions.values_list("destination_state__pk", flat=True)).exclude(
+                source_state=done_transition.destination_state)
 
             iteration += 1
 

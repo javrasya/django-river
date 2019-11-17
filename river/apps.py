@@ -45,7 +45,7 @@ class RiverApp(AppConfig):
         from river.core.workflowregistry import workflow_registry
         return workflow_registry.workflows[id(model)]
 
-    def _register_hook_inlines(self, model):
+    def _register_hook_inlines(self, model):  # pylint: disable=no-self-use
         from django.contrib import admin
         from river.core.workflowregistry import workflow_registry
         from river.admin import OnApprovedHookInline, OnTransitHookInline, OnCompleteHookInline, DefaultWorkflowModelAdmin
