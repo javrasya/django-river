@@ -18,7 +18,7 @@ class RiverConfig(object):
             'USER_CLASS': settings.AUTH_USER_MODEL,
             'PERMISSION_CLASS': Permission,
             'GROUP_CLASS': Group,
-            'INJECT_MODEL_ADMIN': True
+            'INJECT_MODEL_ADMIN': False
         }
         if item in allowed_configurations.keys():
             default_value = allowed_configurations[item]
