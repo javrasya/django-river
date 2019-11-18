@@ -34,6 +34,18 @@ The main goal of developing this framework is **to be able to edit any
 workflow item on the fly.** This means that all the elements in a workflow like
 states, transitions or authorizations rules are editable at any time so that no changes requires a re-deploying of your application anymore.
 
+Donations
+=========
+
+This is a fully open source project and it can be better with your donations.
+
+If you are using ``django-river`` to create a commercial product,
+please consider becoming our `sponsor`_  , `patron`_ or donate over `PayPal`_
+
+.. _`patron`: https://www.patreon.com/javrasya
+.. _`PayPal`: https://paypal.me/ceahmetdal
+.. _`sponsor`: https://github.com/sponsors/javrasya
+
 Getting Started
 ===============
 
