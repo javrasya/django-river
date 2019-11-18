@@ -1,5 +1,7 @@
 .. _hooking_function_guide:
 
+.. |Create Function Page| image:: /_static/create-function.png
+
 Functions
 =========
 
@@ -27,6 +29,8 @@ Here is an example function;
             print(datetime.now())
 
 **Important:** **YOUR FUNCTION SHOULD BE NAMED AS** ``handle``. Otherwise ``django-river`` won't execute your function.
+
+|Create Function Page|
 
 Context Parameter
 -----------------

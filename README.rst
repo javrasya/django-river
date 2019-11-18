@@ -26,6 +26,8 @@
 .. |Logo| image:: docs/logo.svg
     :width: 200
 
+.. |Create Function Page| image:: docs/_static/create-function.png
+
 Django River
 ============
 
@@ -148,6 +150,8 @@ different type of events. Please see detailed `context documentation`_ to know m
 
 You can find an `advance function example`_ on the link.
 
+|Create Function Page|
+
 .. _`context documentation`: https://django-river.readthedocs.io/en/latest/hooking/function.html#context-parameter
 .. _`advance function example`: https://django-river.readthedocs.io/en/latest/hooking/function.html#example-function
 
@@ -163,9 +167,7 @@ to create the hooks.
     * ``/admin/river/ontransithook/`` to hook up to a transition
     * ``/admin/river/oncompletehook/`` to hook up to the completion of the workflow
 
-* To create one for a specific workflow object you should use the admin interface for the workflow object itself. One amazing feature of ``django-river`` is now that
-it creates a default admin interface with the hookings for your workflow model class. If you have already defined one, ``django-river`` enriches your already defined
-admin with the hooking section. It is default disabled. To enable it just define ``RIVER_INJECT_MODEL_ADMIN`` to be ``True`` in the ``settings.py``.
+* To create one for a specific workflow object you should use the admin interface for the workflow object itself. One amazing feature of ``django-river`` is now that it creates a default admin interface with the hookings for your workflow model class. If you have already defined one, ``django-river`` enriches your already defined admin with the hooking section. It is default disabled. To enable it just define ``RIVER_INJECT_MODEL_ADMIN`` to be ``True`` in the ``settings.py``.
 
 
 **Note:** They can programmatically be created as well since they are model objects. If it is needed to be at workflow level, just don't provide the workflow object column. If it is needed

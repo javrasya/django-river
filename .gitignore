@@ -10,7 +10,7 @@ junit-*.xml
 *egg-info*
 *sqlite3*
 .coverage
-docs/_*
+docs/_build
 dist
 .DS_Store
 .cache
