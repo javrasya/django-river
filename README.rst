@@ -48,6 +48,18 @@ states, transitions or authorizations rules are editable at any time so that no 
 
 **Playground**: There is a fake jira example repository as a playground of django-river. https://github.com/javrasya/fakejira
 
+Donations
+---------
+
+This is a fully open source project and it can be better with your donations.
+
+If you are using ``django-river`` to create a commercial product,
+please consider becoming our `sponsor`_  , `patron`_ or donate over `PayPal`_
+
+.. _`patron`: https://www.patreon.com/javrasya
+.. _`PayPal`: https://paypal.me/ceahmetdal
+.. _`sponsor`: https://github.com/sponsors/javrasya
+
 Documentation
 -------------
 
@@ -65,19 +77,6 @@ Requirements
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
 * Django (``1.11``, ``2.0``, ``2.1``, ``2.2``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
-
-Donations
----------
-
-This is a fully open source project and it can be better with your donations.
-
-If you are using ``django-river`` to create a commercial product,
-please consider becoming our `sponsor`_  , `patron`_ or donate over `PayPal`_
-
-.. _`patron`: https://www.patreon.com/javrasya
-.. _`PayPal`: https://paypal.me/ceahmetdal
-.. _`sponsor`: https://github.com/sponsors/javrasya
-
 
 Usage
 -----
