@@ -46,6 +46,13 @@ please consider becoming our `sponsor`_  , `patron`_ or donate over `PayPal`_
 .. _`PayPal`: https://paypal.me/ceahmetdal
 .. _`sponsor`: https://github.com/sponsors/javrasya
 
+Advance Admin
+-------------
+
+A very modern admin with some user friendly interfaces that is called `River Admin`_ has been published.
+
+.. _`River Admin`: https://github.com/javrasya/river-admin
+
 Getting Started
 ===============
 

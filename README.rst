@@ -53,6 +53,13 @@ Documentation
 
 Online documentation is available at http://django-river.rtfd.org/.
 
+Advance Admin
+-------------
+
+A very modern admin with some user friendly interfaces that is called `River Admin`_ has been published.
+
+.. _`River Admin`: https://github.com/javrasya/river-admin
+
 Requirements
 ------------
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
