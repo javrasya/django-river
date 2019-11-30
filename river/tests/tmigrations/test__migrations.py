@@ -22,8 +22,14 @@ except ImportError:
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.conf import settings
 
 _author_ = 'ahmetdal'
+
+MIGRATION_TEST_ENABLED = (
+    not django.VERSION[0] >= 2,
+    "Is not able to run with new version of django and sqlite3"
+)
 
 
 def clean_migrations():
@@ -90,7 +96,7 @@ class MigrationTests(TestCase):
         assert_that(out.getvalue(), equal_to("No changes detected in app 'tests'\n"))
         assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldMigrateTransitionApprovalStatusToStringInDB(self):
         out = StringIO()
         sys.stout = out
@@ -134,7 +140,7 @@ class MigrationTests(TestCase):
             result = cur.execute("select status from river_transitionapproval where object_id=%s;" % workflow_object.model.pk).fetchall()
             assert_that(result[0][0], equal_to("pending"))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldAssessIterationsForExistingApprovals(self):
         out = StringIO()
         sys.stout = out
@@ -219,7 +225,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((meta_3.pk, 1))))
             assert_that(result, has_item(equal_to((meta_4.pk, 1))))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldAssessIterationsForExistingApprovalsWhenThereIsCycle(self):
         out = StringIO()
         sys.stout = out
@@ -354,7 +360,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((meta_3.pk, 5))))
             assert_that(result, has_item(equal_to((final_meta.pk, 5))))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldMigrationForIterationMustFinishInShortAmountOfTimeWithTooManyObject(self):
         out = StringIO()
         sys.stout = out
@@ -414,7 +420,7 @@ class MigrationTests(TestCase):
         after = datetime.now()
         assert_that(after - before, less_than(timedelta(minutes=5)))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldAssessIterationsForExistingApprovalsWhenThereIsMoreAdvanceCycle(self):
         out = StringIO()
         sys.stout = out
@@ -568,7 +574,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((re_opened_to_in_progress.pk, 6))))
             assert_that(result, has_item(equal_to((closed_to_final.pk, 6))))
 
-    @skipUnless(django.VERSION[0] < 2, "Is not able to run with new version of django")
+    @skipUnless(*MIGRATION_TEST_ENABLED)
     def test__shouldCreateTransitionsAndTransitionMetasOutOfApprovalMetaAndApprovals(self):
         out = StringIO()
         sys.stout = out

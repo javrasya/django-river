@@ -1,28 +1,38 @@
 language: python
 sudo: false
 cache: pip
+services:
+  - docker
 matrix:
   include:
     - python: "2.7"
-      env: TOXENV=py27-dj1.11
+      env: TOXENV=py27-dj1.11-sqlite3
     - python: "3.4"
-      env: TOXENV=py34-dj1.11
+      env: TOXENV=py34-dj1.11-sqlite3
     - python: "3.5"
-      env: TOXENV=py35-dj1.11
+      env: TOXENV=py35-dj1.11-sqlite3
     - python: "3.5"
-      env: TOXENV=py35-dj2.0
+      env: TOXENV=py35-dj2.0-sqlite3
     - python: "3.5"
-      env: TOXENV=py35-dj2.1
+      env: TOXENV=py35-dj2.1-sqlite3
     - python: "3.5"
-      env: TOXENV=py35-dj2.2
+      env: TOXENV=py35-dj2.2-sqlite3
     - python: "3.6"
-      env: TOXENV=py36-dj1.11
+      env: TOXENV=py36-dj1.11-sqlite3
     - python: "3.6"
-      env: TOXENV=py36-dj2.0
+      env: TOXENV=py36-dj2.0-sqlite3
     - python: "3.6"
-      env: TOXENV=py36-dj2.1
+      env: TOXENV=py36-dj2.1-sqlite3
     - python: "3.6"
-      env: TOXENV=py36-dj2.2
+      env: TOXENV=py36-dj2.2-sqlite3
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-postgresql9
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-postgresql10
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-postgresql11
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-postgresql12
     - python: "3.6"
       env: TOXENV=cov
 install:
