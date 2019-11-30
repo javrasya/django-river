@@ -78,6 +78,8 @@ Requirements
 * Django (``1.11``, ``2.0``, ``2.1``, ``2.2``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
 
+:star: Tested with PostgreSQL ``5.6``, ``5.7`` and ``8.0``
+
 Usage
 -----
 1. Install and enable it

@@ -18,6 +18,7 @@ Requirements
 * Python (``2.7``, ``3.4``, ``3.5``, ``3.6``)
 * Django (``1.11``, ``2.0``, ``2.1``, ``2.2``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
+* Tested with PostgreSQL ``5.6``, ``5.7`` and ``8.0``
 
 Example Scenarios
 -----------------
