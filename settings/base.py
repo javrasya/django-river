@@ -4,7 +4,7 @@ import sys
 import django
 
 __author__ = 'ahmetdal'
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEBUG = True
 
