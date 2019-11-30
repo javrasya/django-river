@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from .base import *
 
 DB_HOST = os.environ['POSTGRES_HOST']
@@ -11,7 +13,8 @@ DATABASES = {
         'HOST': DB_HOST,
         'PORT': DB_PORT,
         'TEST': {
-            'NAME': 'river',
+            'NAME': 'river' + str(uuid4()),
+
         },
     }
 }

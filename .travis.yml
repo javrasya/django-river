@@ -1,8 +1,6 @@
 language: python
 sudo: false
 cache: pip
-services:
-  - docker
 matrix:
   include:
     - python: "2.7"
@@ -26,17 +24,26 @@ matrix:
     - python: "3.6"
       env: TOXENV=py36-dj2.2-sqlite3
     - python: "3.6"
+      env: TOXENV=cov
+    - python: "3.6"
       env: TOXENV=py36-dj2.2-postgresql9
+      services:
+        - docker
     - python: "3.6"
       env: TOXENV=py36-dj2.2-postgresql10
+      services:
+        - docker
     - python: "3.6"
       env: TOXENV=py36-dj2.2-postgresql11
+      services:
+        - docker
     - python: "3.6"
       env: TOXENV=py36-dj2.2-postgresql12
-    - python: "3.6"
-      env: TOXENV=cov
+      services:
+        - docker
 install:
   - pip install tox-travis
+  - pip install tox-docker
   - pip install coveralls
 script:
   - tox
