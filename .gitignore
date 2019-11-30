@@ -8,7 +8,7 @@ coverage
 junit-*.xml
 *.log
 *egg-info*
-*sqlite3*
+*sqlite3
 .coverage
 docs/_build
 dist
