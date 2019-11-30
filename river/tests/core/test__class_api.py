@@ -166,7 +166,7 @@ class ClassApiTest(TestCase):
         before = datetime.now()
         BasicTestModel.river.my_field.get_on_approval_objects(as_user=authorized_user)
         after = datetime.now()
-        assert_that(after - before, less_than(timedelta(milliseconds=100)))
+        assert_that(after - before, less_than(timedelta(milliseconds=200)))
         print("Time taken %s" % str(after - before))
 
     def test_shouldAssesInitialStateProperly(self):
