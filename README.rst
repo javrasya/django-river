@@ -63,14 +63,14 @@ please consider becoming our `sponsor`_  , `patron`_ or donate over `PayPal`_
 Documentation
 -------------
 
-Online documentation is available at http://django-river.rtfd.org/.
+Online documentation is available at http://django-river.rtfd.org/
 
 Advance Admin
 -------------
 
 A very modern admin with some user friendly interfaces that is called `River Admin`_ has been published.
 
-.. _`River Admin`: https://github.com/javrasya/river-admin
+.. _`River Admin`: https://riveradminproject.com/
 
 Requirements
 ------------
@@ -213,6 +213,12 @@ out of the box. All you need to do is to run;
 
        python manage.py migrate river
 
+FAQ
+---
+
+Have a look at `FAQ`_
+
+.. _`FAQ`: https://django-river.readthedocs.io/en/latest/faq.html
 
 
 Contribute

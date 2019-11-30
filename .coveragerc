@@ -3,6 +3,7 @@ omit =
     river/admin/*
     river/tests/*
     river/migrations/*
+    settings/*
     */__init__*
     .tox/*
     setup.py
