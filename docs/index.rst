@@ -15,6 +15,8 @@
 .. |Quality Status| image:: https://api.codacy.com/project/badge/Grade/c3c73d157fe045e6b966d8d4416b6b17
    :alt: Codacy Badge
    :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
+.. |Downloads| image:: https://img.shields.io/pypi/dm/django-river
+    :alt: PyPI - Downloads   
 .. |Logo| raw:: html
     :scale: 50%
 
@@ -25,7 +27,7 @@ Django River
 
 |Logo|
 
-|Build Status| |Coverage Status| |Documentation Status| |Quality Status|
+|Build Status| |Coverage Status| |Documentation Status| |Quality Status| |Downloads|
 
 River is an open source and always free workflow framework for ``Django`` which support on
 the fly changes instead of hardcoding states, transitions and authorization rules.

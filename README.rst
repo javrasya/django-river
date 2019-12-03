@@ -15,13 +15,10 @@
    :alt: Codacy Badge
    :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
 
+.. |Downloads| image:: https://img.shields.io/pypi/dm/django-river
+    :alt: PyPI - Downloads
+
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
-
-.. |Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9653471/3c9dfcfa-522c-11e5-85cb-f90a4f184201.png
-
-.. |Closed Without Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624970/88c0ddaa-515a-11e5-8f65-d1e35e945976.png
-
-.. |Closed With Re Open Case| image:: https://cloud.githubusercontent.com/assets/1279644/9624968/88b5f278-515a-11e5-996b-b62d6e224357.png
 
 .. |Logo| image:: docs/logo.svg
     :width: 200
@@ -33,7 +30,7 @@ Django River
 
 |Logo|
 
-|Build Status| |Coverage Status| |Documentation Status| |Quality Status|
+|Build Status| |Coverage Status| |Documentation Status| |Quality Status| |Downloads|
 
 
 Contributors are welcome. Come and give a hand :-)
