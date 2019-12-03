@@ -17,6 +17,10 @@
 
 .. |Downloads| image:: https://img.shields.io/pypi/dm/django-river
     :alt: PyPI - Downloads
+    
+.. |Discord| image:: https://img.shields.io/discord/651433240019599400
+    :target: https://discord.gg/DweUwZX
+    :alt: Discord    
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
@@ -30,7 +34,7 @@ Django River
 
 |Logo|
 
-|Build Status| |Coverage Status| |Documentation Status| |Quality Status| |Downloads|
+|Build Status| |Coverage Status| |Documentation Status| |Quality Status| |Downloads| |Discord|
 
 
 Contributors are welcome. Come and give a hand :-)
