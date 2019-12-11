@@ -20,7 +20,11 @@
     
 .. |Discord| image:: https://img.shields.io/discord/651433240019599400
     :target: https://discord.gg/DweUwZX
-    :alt: Discord    
+    :alt: Discord  
+    
+.. |Open Collective| image:: https://opencollective.com/django-river/all/badge.svg?label=financial+contributors
+    :alt: Financial Contributors
+    :target: #contributors  
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
@@ -220,6 +224,37 @@ FAQ
 Have a look at `FAQ`_
 
 .. _`FAQ`: https://django-river.readthedocs.io/en/latest/faq.html
+
+Contributors
++++++++
+
+Code Contributors
+------------------
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+
+.. image:: https://opencollective.com/django-river/contributors.svg?width=890&button=false 
+
+Financial Contributors
+------------------
+
+Become a financial contributor and help us sustain our community. Contribute_
+
+Individuals
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: https://opencollective.com/django-river/individuals.svg?width=890
+    :target: https://opencollective.com/django-river
+
+Organizations
+~~~~~~~~~~~~~~~~~~~~~~
+
+Support this project with your organization. Your logo will show up here with a link to your website. Contribute_
+
+.. image:: https://opencollective.com/django-river/organization/0/avatar.svg
+    :target: https://opencollective.com/django-river/organization/0/website
+
+.. _Contribute: https://opencollective.com/django-river
 
 
 Contribute
