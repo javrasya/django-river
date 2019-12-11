@@ -205,7 +205,7 @@ Here are the list of hook models;
 * OnCompleteHook
 
 Migrations
---------------
+----------
 
 2.X.X to 3.0.0
 ^^^^^^^^^^^^^^
@@ -226,28 +226,28 @@ Have a look at `FAQ`_
 .. _`FAQ`: https://django-river.readthedocs.io/en/latest/faq.html
 
 Contributors
-+++++++
+============
 
 Code Contributors
 ------------------
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+This project exists thanks to all the people who contribute :rocket: :heart:
 
 .. image:: https://opencollective.com/django-river/contributors.svg?width=890&button=false 
 
 Financial Contributors
-------------------
+----------------------
 
 Become a financial contributor and help us sustain our community. Contribute_
 
 Individuals
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^
 
 .. image:: https://opencollective.com/django-river/individuals.svg?width=890
     :target: https://opencollective.com/django-river
 
 Organizations
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 Support this project with your organization. Your logo will show up here with a link to your website. Contribute_
 
@@ -255,12 +255,6 @@ Support this project with your organization. Your logo will show up here with a 
     :target: https://opencollective.com/django-river/organization/0/website
 
 .. _Contribute: https://opencollective.com/django-river
-
-
-Contribute
-----------
-
-Contributions are welcome! Please join making always totally free ``django-river`` better.
 
 .. _license:
 
