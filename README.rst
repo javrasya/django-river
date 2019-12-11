@@ -233,7 +233,8 @@ Code Contributors
 
 This project exists thanks to all the people who contribute :rocket: :heart:
 
-.. image:: https://opencollective.com/django-river/contributors.svg?width=890&button=false 
+.. image:: https://opencollective.com/django-river/contributors.svg?width=890&button=false
+    :target: https://github.com/javrasya/django-river/graphs/contributors
 
 Financial Contributors
 ----------------------
