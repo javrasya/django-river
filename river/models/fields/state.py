@@ -15,6 +15,7 @@ except ImportError:
 
 from river.models.state import State
 from river.models.transitionapproval import TransitionApproval
+from river.models.transition import Transition
 
 __author__ = 'ahmetdal'
 
@@ -48,7 +49,8 @@ class StateField(models.ForeignKey):
 
         self.field_name = name
 
-        self._add_to_class(cls, self.field_name + "_transitions", GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
+        self._add_to_class(cls, self.field_name + "_transition_approvals", GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
+        self._add_to_class(cls, self.field_name + "_transitions", GenericRelation('%s.%s' % (Transition._meta.app_label, Transition._meta.object_name)))
 
         if id(cls) not in workflow_registry.workflows:
             self._add_to_class(cls, "river", river)

@@ -8,7 +8,7 @@ from django.db.transaction import atomic
 from django.utils import timezone
 
 from river.config import app_config
-from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow, CANCELLED, Transition, DONE
+from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow, CANCELLED, Transition, DONE, JUMPED
 from river.signals import ApproveSignal, TransitionSignal, OnCompleteSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
@@ -78,9 +78,29 @@ class InstanceWorkflowObject(object):
     @property
     def recent_approval(self):
         try:
-            return getattr(self.workflow_object, self.field_name + "_transitions").filter(transaction_date__isnull=False).latest('transaction_date')
+            return getattr(self.workflow_object, self.field_name + "_transition_approvals").filter(transaction_date__isnull=False).latest('transaction_date')
         except TransitionApproval.DoesNotExist:
             return None
+
+    @transaction.atomic
+    def jump_to(self, state):
+        def _transitions_before(iteration):
+            return Transition.objects.filter(workflow=self.workflow, workflow_object=self.workflow_object, iteration__lte=iteration)
+
+        try:
+            recent_iteration = self.recent_approval.iteration if self.recent_approval else 0
+            jumped_transition = getattr(self.workflow_object, self.field_name + "_transitions").filter(
+                iteration__gte=recent_iteration, destination_state=state, status=PENDING
+            ).earliest("iteration")
+
+            jumped_transitions = _transitions_before(jumped_transition.iteration).filter(status=PENDING)
+            TransitionApproval.objects.filter(pk__in=jumped_transitions.values_list("transition_approvals__pk", flat=True)).update(status=JUMPED)
+            jumped_transitions.update(status=JUMPED)
+            self.set_state(state)
+            self.workflow_object.save()
+
+        except Transition.DoesNotExist:
+            raise RiverException(ErrorCode.STATE_IS_NOT_AVAILABLE_TO_BE_JUMPED, "This state is not available to be jumped in the future of this object")
 
     def get_available_states(self, as_user=None):
         all_destination_state_ids = self.get_available_approvals(as_user=as_user).values_list('transition__destination_state', flat=True)

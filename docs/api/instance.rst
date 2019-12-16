@@ -139,5 +139,24 @@ True
 |        |         | | is complete                        |
 +--------+---------+--------------------------------------+
 
+jump_to
+-------
+
+This is the function that allows to jump to a specific future state
+from the current state of the workflow object. It is good for testing
+purposes.
+
+>>> in_progress_state = State.object.get(label="In Progress")
+>>> transition_approvals = my_model.river.my_state_field.jump_to(in_progress_state)
+
++-------------------+--------+--------------------------+------------------------------------------+
+|                   |  Type  |          Format          |               Description                |
++===================+========+==========================+==========================================+
+| target_state      | input  | State                    | | The target state that the workflow     |
+|                   |        |                          | | object will jump to. It is supposed    |
+|                   |        |                          | | to be a possible state in the future   |
+|                   |        |                          | | of the workflow object                 |
++-------------------+--------+--------------------------+------------------------------------------+
+
 .. toctree::
     :maxdepth: 2
