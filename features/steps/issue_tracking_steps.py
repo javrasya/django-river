@@ -24,5 +24,5 @@ def close_issue(context, workflow_object_identifier, username):
 
 
 @when('"{workflow_object_identifier:ws}" is attempted to be re-opened by {username:w}')
-def close_issue(context, workflow_object_identifier, username):
+def re_open_issue(context, workflow_object_identifier, username):
     _approve(context, workflow_object_identifier, username, "Re-Opened")
