@@ -17,6 +17,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'behave_django',
     'codemirror2',
     'river',
 )
@@ -60,13 +61,6 @@ class DisableMigrations(object):
 
 TESTING = any("py.test" in s for s in sys.argv) or 'test' in sys.argv
 # TESTING = True
-if TESTING:
-    INSTALLED_APPS += (
-        'river.tests',
-    )
-
-    if django.get_version() >= '1.9.0':
-        MIGRATION_MODULES = DisableMigrations()
 
 SITE_ID = 1
 
