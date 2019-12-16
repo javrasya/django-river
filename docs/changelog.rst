@@ -3,8 +3,17 @@
 Change Logs
 ===========
 
-2.1.0 (Dev)
+3.1.0 (Stable)
 --------------
+    * **Imrovement**  -  # 123_: Jump to a specific future state of a workflow object
+    * **Bug**         -  # 124_: Include some BDD tests for the users to understand the usages easier.
+
+
+.. _123: https://github.com/javrasya/django-river/issues/123
+.. _124: https://github.com/javrasya/django-river/issues/124
+
+3.0.0
+-----
     * **Bug**         -  # 106_: It crashes when saving a workflow object when there is no workflow definition for a state field
     * **Bug**         -  # 107_: next_approvals api of the instance is broken
     * **Bug**         -  # 112_: Next approval after it cycles doesn't break the workflow anymore. Multiple cycles are working just fine.
@@ -32,8 +41,8 @@ Change Logs
 .. _115: https://github.com/javrasya/django-river/issues/115
 .. _116: https://github.com/javrasya/django-river/issues/116
 
-2.0.0 (Stable)
---------------
+2.0.0
+-----
     * **Improvement** -  [ # 90_,# 36_ ]: Finding available approvals has been speeded up ~x400 times at scale
     * **Improvement** -  # 92_ : It is mandatory to provide initial state by the system user to avoid confusion and possible mistakes
     * **Improvement** -  # 93_ : Tests are revisited, separated, simplified and easy to maintain right now
