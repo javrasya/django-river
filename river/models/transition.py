@@ -20,12 +20,14 @@ __author__ = 'ahmetdal'
 
 PENDING = "pending"
 CANCELLED = "cancelled"
+JUMPED = "jumped"
 DONE = "done"
 
 STATUSES = [
     (PENDING, _('Pending')),
     (CANCELLED, _('Cancelled')),
     (DONE, _('Done')),
+    (JUMPED, _('Jumped')),
 ]
 
 LOGGER = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none
+from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none, has_items
 
-from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED, Transition
+from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED, Transition, JUMPED
 from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory, TransitionMetaFactory
 from river.tests.matchers import has_permission, has_transition
 from river.tests.models import BasicTestModel, ModelWithTwoStateFields
@@ -1569,6 +1569,200 @@ class InstanceApiTest(TestCase):
                 all_of(
                     has_property("meta", final_meta),
                     has_transition(off_the_cycle_state, final_state, iteration=6)
+                )
+            )
+        )
+
+    def test_shouldJumpToASpecificState(self):
+        authorized_permission = PermissionObjectFactory()
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+
+        transition_meta_1 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state2,
+            destination_state=state3,
+        )
+
+        transition_approval_meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        transition_approval_meta_2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        assert_that(
+            Transition.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_meta_1),
+                ),
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_meta_2),
+                )
+            )
+        )
+
+        assert_that(
+            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_approval_meta_1),
+                ),
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_approval_meta_2),
+                )
+            )
+        )
+
+        workflow_object.model.river.my_field.jump_to(state3)
+
+        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(
+            Transition.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_meta_1),
+                ),
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_meta_2),
+                )
+            )
+        )
+
+        assert_that(
+            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_approval_meta_1),
+                ),
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_approval_meta_2),
+                )
+            )
+        )
+
+    def test_shouldJumpToASpecificStateWhenThereAreMultipleNextState(self):
+        authorized_permission = PermissionObjectFactory()
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+        state3 = StateObjectFactory(label="state3")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+
+        transition_meta_1 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state3,
+        )
+
+        transition_approval_meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        transition_approval_meta_2 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(state1))
+        assert_that(
+            Transition.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_meta_1),
+                ),
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_meta_2),
+                )
+            )
+        )
+
+        assert_that(
+            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_approval_meta_1),
+                ),
+                all_of(
+                    has_property("status", PENDING),
+                    has_property("meta", transition_approval_meta_2),
+                )
+            )
+        )
+
+        workflow_object.model.river.my_field.jump_to(state3)
+
+        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(
+            Transition.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_meta_1),
+                ),
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_meta_2),
+                )
+            )
+        )
+
+        assert_that(
+            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
+            has_items(
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_approval_meta_1),
+                ),
+                all_of(
+                    has_property("status", JUMPED),
+                    has_property("meta", transition_approval_meta_2),
                 )
             )
         )
