@@ -19,7 +19,7 @@ def group(context, name):
 
 
 @given('a user with name {name:w} with permission "{permission_name:ws}"')
-def user(context, name, permission_name):
+def user_with_permission(context, name, permission_name):
     from django.contrib.auth.models import Permission
     from river.models.factories import UserObjectFactory
 
@@ -28,7 +28,7 @@ def user(context, name, permission_name):
 
 
 @given('a user with name {name:w} with group "{group_name:ws}"')
-def user(context, name, group_name):
+def user_with_group(context, name, group_name):
     from django.contrib.auth.models import Group
     from river.models.factories import UserObjectFactory
 
@@ -78,7 +78,7 @@ def transition(context, source_state_label, destination_state_label, workflow_id
 
 
 @given('an authorization rule for the transition "{source_state_label:ws}" -> "{destination_state_label:ws}" with permission "{permission_name:ws}" and priority {priority:d}')
-def authorization_rule(context, source_state_label, destination_state_label, permission_name, priority):
+def authorization_rule_with_permission(context, source_state_label, destination_state_label, permission_name, priority):
     from django.contrib.auth.models import Permission
     from river.models.factories import TransitionApprovalMetaFactory
 
@@ -94,7 +94,7 @@ def authorization_rule(context, source_state_label, destination_state_label, per
 
 
 @given('an authorization rule for the transition "{source_state_label:ws}" -> "{destination_state_label:ws}" with group "{group_name:ws}" and priority {priority:d}')
-def authorization_rule(context, source_state_label, destination_state_label, group_name, priority):
+def authorization_rule_with_group(context, source_state_label, destination_state_label, group_name, priority):
     authorization_rule_with_groups(context, source_state_label, destination_state_label, [group_name], priority)
 
 
