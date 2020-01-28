@@ -27,7 +27,7 @@ class Hook(BaseModel):
     workflow = models.ForeignKey(Workflow, verbose_name=_("Workflow"), related_name='%(app_label)s_%(class)s_hooks', on_delete=PROTECT)
 
     content_type = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.SET_NULL)
-    object_id = models.PositiveIntegerField(blank=True, null=True)
+    object_id = models.CharField(max_length=200, blank=True, null=True)
     workflow_object = GenericForeignKey('content_type', 'object_id')
 
     hook_type = models.CharField(_('When?'), choices=HOOK_TYPES, max_length=50)

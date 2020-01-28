@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from unittest import skipUnless
+from uuid import uuid4
 
 import django
 import six
@@ -10,8 +11,10 @@ from django.db import connection
 from django.test.utils import override_settings
 from hamcrest import assert_that, equal_to, has_length, has_item, is_not, less_than
 
-from river.models import TransitionApproval
-from river.models.factories import StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, UserObjectFactory, TransitionMetaFactory
+from river.models import TransitionApproval, OnApprovedHook, Function, OnCompleteHook, OnTransitHook
+from river.models.factories import StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, UserObjectFactory, \
+    TransitionMetaFactory
+from river.models.hook import BEFORE
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
@@ -22,7 +25,6 @@ except ImportError:
 
 from django.core.management import call_command
 from django.test import TestCase
-from django.conf import settings
 
 _author_ = 'ahmetdal'
 
@@ -672,3 +674,109 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((meta_2.transition_approvals.first().pk, transition_2.transitions.first().pk))))
             assert_that(result, has_item(equal_to((meta_3.transition_approvals.first().pk, transition_2.transitions.first().pk))))
             assert_that(result, has_item(equal_to((meta_4.transition_approvals.first().pk, transition_3.transitions.first().pk))))
+
+    @skipUnless(*MIGRATION_TEST_ENABLED)
+    def test__shouldMigrateObjectIdInHooksByCastingItToString(self):
+        out = StringIO()
+        sys.stout = out
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=ContentType.objects.get_for_model(BasicTestModel), field_name="my_field")
+        transition_1 = TransitionMetaFactory.create(workflow=workflow, source_state=state1, destination_state=state2)
+
+        transition_approval_meta_1 = TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_1,
+            priority=0
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        callback_method = """
+        from river.tests.hooking.base_hooking_test import callback_output
+        def handle(context):
+            print(context)
+            key = '%s'
+            callback_output[key] = callback_output.get(key,[]) + [context]
+        """
+
+        callback_function = Function.objects.create(name=uuid4(), body=callback_method % str(uuid4()))
+
+        OnApprovedHook.objects.create(
+            workflow=workflow,
+            callback_function=callback_function,
+            transition_approval_meta=transition_approval_meta_1,
+            hook_type=BEFORE,
+            workflow_object=workflow_object.model
+        )
+
+        OnCompleteHook.objects.create(
+            workflow=workflow,
+            callback_function=callback_function,
+            hook_type=BEFORE,
+            workflow_object=workflow_object.model
+        )
+
+        OnTransitHook.objects.create(
+            workflow=workflow,
+            callback_function=callback_function,
+            transition_meta=transition_1,
+            hook_type=BEFORE,
+            workflow_object=workflow_object.model
+        )
+
+        call_command('migrate', 'river', '0013', stdout=out)
+
+        with connection.cursor() as cur:
+            schema = cur.execute("PRAGMA table_info('river_onapprovedhook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("integer unsigned"))
+
+            schema = cur.execute("PRAGMA table_info('river_ontransithook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("integer unsigned"))
+
+            schema = cur.execute("PRAGMA table_info('river_oncompletehook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("integer unsigned"))
+
+            result = cur.execute("select object_id from river_onapprovedhook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(workflow_object.model.pk))
+
+            result = cur.execute("select object_id from river_ontransithook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(workflow_object.model.pk))
+
+            result = cur.execute("select object_id from river_oncompletehook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(workflow_object.model.pk))
+
+        call_command('migrate', 'river', '0014', stdout=out)
+
+        with connection.cursor() as cur:
+            schema = cur.execute("PRAGMA table_info('river_onapprovedhook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("varchar(200)"))
+
+            schema = cur.execute("PRAGMA table_info('river_ontransithook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("varchar(200)"))
+
+            schema = cur.execute("PRAGMA table_info('river_oncompletehook');").fetchall()
+            column_type = next(iter([column[2] for column in schema if column[1] == 'object_id']), None)
+            assert_that(column_type, equal_to("varchar(200)"))
+
+            result = cur.execute("select object_id from river_onapprovedhook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(str(workflow_object.model.pk)))
+
+            result = cur.execute("select object_id from river_ontransithook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(str(workflow_object.model.pk)))
+
+            result = cur.execute("select object_id from river_oncompletehook where object_id='%s';" % workflow_object.model.pk).fetchall()
+            assert_that(result, has_length(1))
+            assert_that(result[0][0], equal_to(str(workflow_object.model.pk)))

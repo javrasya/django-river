@@ -17,3 +17,4 @@ dist
 .pytest_cache
 .python-version
 build
+venv*
