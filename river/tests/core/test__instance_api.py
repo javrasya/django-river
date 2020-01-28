@@ -3,9 +3,10 @@ from django.test import TestCase
 from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none, has_items
 
 from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED, Transition, JUMPED
-from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory, TransitionMetaFactory
+from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory, \
+    TransitionMetaFactory
 from river.tests.matchers import has_permission, has_transition
-from river.tests.models import BasicTestModel, ModelWithTwoStateFields
+from river.tests.models import BasicTestModel, ModelWithTwoStateFields, ModelWithStringPrimaryKey
 from river.tests.models.factories import BasicTestModelObjectFactory, ModelWithTwoStateFieldsObjectFactory
 from river.utils.exceptions import RiverException
 
@@ -1766,3 +1767,30 @@ class InstanceApiTest(TestCase):
                 )
             )
         )
+
+    def test_shouldNotCrashWhenAModelObjectWithStringPrimaryKeyIsApproved(self):
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+
+        content_type = ContentType.objects.get_for_model(ModelWithStringPrimaryKey)
+        authorized_permission = PermissionObjectFactory(content_type=content_type)
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="status")
+
+        transition_meta = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = ModelWithStringPrimaryKey.objects.create()
+
+        assert_that(workflow_object.status, equal_to(state1))
+        workflow_object.river.status.approve(as_user=authorized_user)
+        assert_that(workflow_object.status, equal_to(state2))
