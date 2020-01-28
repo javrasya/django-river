@@ -1,6 +1,6 @@
 from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import F, Q, IntegerField, Min
+from django.db.models import F, Q, Min, CharField
 from django.db.models.functions import Cast
 from django_cte import With
 
@@ -47,12 +47,12 @@ class ClassWorkflowObject(object):
         ).with_cte(
             those_with_max_priority
         ).annotate(
-            object_id_as_int=Cast('object_id', IntegerField()),
+            object_id_as_str=Cast('object_id', CharField(max_length=200)),
             min_priority=those_with_max_priority.col.min_priority
         ).filter(min_priority=F("priority"))
 
         return workflow_objects.join(
-            approvals_with_max_priority, object_id_as_int=workflow_objects.col.pk
+            approvals_with_max_priority, object_id_as_str=Cast(workflow_objects.col.pk, CharField(max_length=200))
         ).with_cte(
             workflow_objects
         ).filter(transition__source_state=getattr(workflow_objects.col, self.field_name + "_id"))
