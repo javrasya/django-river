@@ -3,8 +3,17 @@
 Change Logs
 ===========
 
-3.1.0 (Stable)
+3.1.1 (Stable)
 --------------
+    * **Bug**  -         # 128_: Available approvals are not found properly when primary key is string
+    * **Bug**         -  # 129_: Models with string typed primary keys violates integer field in the hooks
+
+
+.. _128: https://github.com/javrasya/django-river/issues/128
+.. _129: https://github.com/javrasya/django-river/issues/129
+
+3.1.0
+-----
     * **Imrovement**  -  # 123_: Jump to a specific future state of a workflow object
     * **Bug**         -  # 124_: Include some BDD tests for the users to understand the usages easier.
 
