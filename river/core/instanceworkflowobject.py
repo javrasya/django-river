@@ -94,7 +94,9 @@ class InstanceWorkflowObject(object):
             ).earliest("iteration")
 
             jumped_transitions = _transitions_before(jumped_transition.iteration).filter(status=PENDING)
-            TransitionApproval.objects.filter(pk__in=jumped_transitions.values_list("transition_approvals__pk", flat=True)).update(status=JUMPED)
+            for approval in TransitionApproval.objects.filter(pk__in=jumped_transitions.values_list("transition_approvals__pk", flat=True)):
+                approval.status = JUMPED
+                approval.save()
             jumped_transitions.update(status=JUMPED)
             self.set_state(state)
             self.workflow_object.save()
@@ -199,8 +201,11 @@ class InstanceWorkflowObject(object):
             transitions = Transition.objects.filter(qs)
             iteration += 1
 
-        actual_cancelled_transitions = Transition.objects.filter(cancelled_transitions_qs & ~uncancelled_transitions_qs)
-        actual_cancelled_transitions.update(status=CANCELLED)
+        actual_cancelled_transitions = Transition.objects.select_for_update(nowait=True).filter(cancelled_transitions_qs & ~uncancelled_transitions_qs)
+        for actual_cancelled_transition in actual_cancelled_transitions:
+            actual_cancelled_transition.status = CANCELLED
+            actual_cancelled_transition.save()
+
         TransitionApproval.objects.filter(transition__in=actual_cancelled_transitions).update(status=CANCELLED)
 
     def _approve_signal(self, approval):
