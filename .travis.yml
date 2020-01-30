@@ -41,6 +41,18 @@ matrix:
       env: TOXENV=py36-dj2.2-postgresql12
       services:
         - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mysql5.6
+      services:
+        - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mysql5.7
+      services:
+        - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mysql8.0
+      services:
+        - docker
 install:
   - pip install tox-travis
   - pip install tox-docker
