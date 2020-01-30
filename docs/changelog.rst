@@ -3,9 +3,16 @@
 Change Logs
 ===========
 
-3.1.1 (Stable)
---------------
-    * **Bug**  -         # 128_: Available approvals are not found properly when primary key is string
+3.1.2 (Stable):
+---------------
+    * **Improvement** -  # 133_: Support MySQL 8.0
+
+
+.. _133: https://github.com/javrasya/django-river/issues/133
+
+3.1.1
+-----
+    * **Bug**         -  # 128_: Available approvals are not found properly when primary key is string
     * **Bug**         -  # 129_: Models with string typed primary keys violates integer field in the hooks
 
 
