@@ -3,8 +3,16 @@
 Change Logs
 ===========
 
-3.1.2 (Stable):
+3.1.3 (Stable):
 ---------------
+    * **Improvement** -  # 135_: Support Django 3.0
+
+
+.. _135: https://github.com/javrasya/django-river/issues/135
+
+
+3.1.2:
+------
     * **Improvement** -  # 133_: Support MySQL 8.0
 
 
