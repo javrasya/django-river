@@ -1695,7 +1695,7 @@ class InstanceApiTest(TestCase):
         workflow_object = BasicTestModelObjectFactory()
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state2)
         assert_that(
-            workflow_object.model.river.my_field.jump_to(state1),
+            calling(workflow_object.model.river.my_field.jump_to).with_args(state1),
             raises(RiverException, "This state is not available to be jumped in the future of this object")
         )
 
