@@ -15,7 +15,7 @@ except IOError as err:
 
 setup(
     name='django-river',
-    version='3.1.3',
+    version='3.1.4',
     author='Ahmet DAL',
     author_email='ceahmetdal@gmail.com',
     packages=find_packages(),
