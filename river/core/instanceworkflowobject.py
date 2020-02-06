@@ -88,7 +88,7 @@ class InstanceWorkflowObject(object):
             return Transition.objects.filter(workflow=self.workflow, workflow_object=self.workflow_object, iteration__lte=iteration)
 
         try:
-            recent_iteration = self.recent_approval.iteration if self.recent_approval else 0
+            recent_iteration = self.recent_approval.transition.iteration if self.recent_approval else 0
             jumped_transition = getattr(self.workflow_object, self.field_name + "_transitions").filter(
                 iteration__gte=recent_iteration, destination_state=state, status=PENDING
             ).earliest("iteration")

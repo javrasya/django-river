@@ -1671,6 +1671,34 @@ class InstanceApiTest(TestCase):
             )
         )
 
+    def test_shouldNotJumpBackToAPreviousState(self):
+        authorized_permission = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        state1 = StateObjectFactory(label="state1")
+        state2 = StateObjectFactory(label="state2")
+
+        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        transition_meta = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=state1,
+            destination_state=state2,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state2)
+        assert_that(
+            calling(workflow_object.model.river.my_field.jump_to).with_args(state1),
+            raises(RiverException, "This state is not available to be jumped in the future of this object")
+        )
+
     def test_shouldJumpToASpecificStateWhenThereAreMultipleNextState(self):
         authorized_permission = PermissionObjectFactory()
 
