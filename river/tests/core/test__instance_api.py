@@ -1671,7 +1671,7 @@ class InstanceApiTest(TestCase):
             )
         )
 
-    def test_shouldNotJumpBackToFuture(self):
+    def test_shouldNotJumpBackToAPreviousState(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
