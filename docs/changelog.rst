@@ -3,8 +3,15 @@
 Change Logs
 ===========
 
-3.1.3 (Stable):
+3.1.4 (Stable):
 ---------------
+    * **Bug**         -  # 137_: Fix a bug with jumping to a state
+
+
+.. _137: https://github.com/javrasya/django-river/issues/137
+
+3.1.3:
+------
     * **Improvement** -  # 135_: Support Django 3.0
 
 
