@@ -109,7 +109,7 @@ class InstanceWorkflowObject(object):
         return State.objects.filter(pk__in=all_destination_state_ids)
 
     def get_available_approvals(self, as_user=None, destination_state=None):
-        qs = self.class_workflow.get_available_approvals(as_user).filter(object_id=self.workflow_object.pk)
+        qs = self.class_workflow.get_available_approvals(as_user, ).filter(object_id=self.workflow_object.pk)
         if destination_state:
             qs = qs.filter(transition__destination_state=destination_state)
 
