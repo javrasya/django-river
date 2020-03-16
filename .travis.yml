@@ -48,7 +48,7 @@ matrix:
 #      services:
 #        - docker
     - python: "3.6"
-      env: TOXENV=py36-dj2.2-mssql19
+      env: TOXENV=py36-dj2.2-mssql17
       services:
         - docker
 
