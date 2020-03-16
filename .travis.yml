@@ -51,6 +51,10 @@ matrix:
       env: TOXENV=py36-dj2.2-mssql17
       services:
         - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mssql19
+      services:
+        - docker
 
 install:
   - curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
