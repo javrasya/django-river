@@ -1,8 +1,6 @@
 import os
 import sys
 
-__author__ = 'ahmetdal'
-
 from setuptools import setup, find_packages
 
 readme_file = os.path.join(os.path.dirname(__file__), 'README.rst')

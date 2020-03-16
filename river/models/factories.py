@@ -7,8 +7,6 @@ from river.models import Workflow, TransitionMeta
 from river.models.state import State
 from river.models.transitionapprovalmeta import TransitionApprovalMeta
 
-__author__ = 'ahmetdal'
-
 
 class ContentTypeObjectFactory(DjangoModelFactory):
     class Meta:

@@ -11,8 +11,6 @@ from river.models.base_model import BaseModel
 from river.models.managers.transitionmetada import TransitionApprovalMetadataManager
 from river.models.transitionmeta import TransitionMeta
 
-__author__ = 'ahmetdal'
-
 
 class TransitionApprovalMeta(BaseModel):
     class Meta:

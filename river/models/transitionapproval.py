@@ -18,8 +18,6 @@ from river.models.base_model import BaseModel
 from river.models.managers.transitionapproval import TransitionApprovalManager
 from river.config import app_config
 
-__author__ = 'ahmetdal'
-
 PENDING = "pending"
 APPROVED = "approved"
 JUMPED = "jumped"

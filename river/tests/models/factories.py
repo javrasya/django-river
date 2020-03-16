@@ -1,7 +1,5 @@
 from river.tests.models import BasicTestModel, ModelWithTwoStateFields
 
-__author__ = 'ahmetdal'
-
 
 class BasicTestModelObjectFactory(object):
     def __init__(self):

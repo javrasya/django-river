@@ -10,8 +10,6 @@ from river.models import State
 from river.models.factories import StateObjectFactory, TransitionApprovalMetaFactory, WorkflowFactory, TransitionMetaFactory
 from river.tests.models import BasicTestModel
 
-__author__ = 'ahmetdal'
-
 
 # noinspection PyMethodMayBeStatic
 class StateFieldTest(TestCase):

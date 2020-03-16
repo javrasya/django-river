@@ -1,17 +1,17 @@
+from functools import lru_cache
+
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 
-__author__ = 'ahmetdal'
+from django.db import connection
 
 
 class RiverConfig(object):
-    # from settings
     prefix = 'RIVER'
 
-    def get_with_prefix(self, config):
-        return '%s_%s' % (self.prefix, config)
-
-    def __getattr__(self, item):
+    @property
+    @lru_cache()
+    def settings(self):
         from django.conf import settings
         allowed_configurations = {
             'CONTENT_TYPE_CLASS': ContentType,
@@ -20,9 +20,20 @@ class RiverConfig(object):
             'GROUP_CLASS': Group,
             'INJECT_MODEL_ADMIN': False
         }
-        if item in allowed_configurations.keys():
-            default_value = allowed_configurations[item]
-            return getattr(settings, self.get_with_prefix(item), default_value)
+        river_settings = {}
+        for key, default in allowed_configurations.items():
+            river_settings[key] = getattr(settings, self.get_with_prefix(key), default)
+
+        river_settings['IS_MSSQL'] = connection.vendor == 'microsoft'
+
+        return river_settings
+
+    def get_with_prefix(self, config):
+        return '%s_%s' % (self.prefix, config)
+
+    def __getattr__(self, item):
+        if item in self.settings:
+            return self.settings[item]
         else:
             raise AttributeError(item)
 

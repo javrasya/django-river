@@ -7,8 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 from river.models import State, Workflow
 from river.models.base_model import BaseModel
 
-__author__ = 'ahmetdal'
-
 
 class TransitionMeta(BaseModel):
     class Meta:

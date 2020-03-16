@@ -1,10 +1,8 @@
-from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection
-from django.db.models import Q
 
+from river.driver.mssql_driver import MsSqlDriver
 from river.driver.orm_driver import OrmDriver
-from river.models import State, TransitionApprovalMeta, TransitionApproval, PENDING, Workflow
+from river.models import State, TransitionApprovalMeta, Workflow, app_config
 
 
 class ClassWorkflowObject(object):
@@ -20,8 +18,8 @@ class ClassWorkflowObject(object):
         if self._cached_river_driver:
             return self._cached_river_driver
         else:
-            if connection.vendor == 'mssql':
-                pass
+            if app_config.IS_MSSQL:
+                self._cached_river_driver = MsSqlDriver(self.workflow, self.wokflow_object_class, self.field_name)
             else:
                 self._cached_river_driver = OrmDriver(self.workflow, self.wokflow_object_class, self.field_name)
             return self._cached_river_driver

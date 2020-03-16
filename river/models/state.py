@@ -14,8 +14,6 @@ from django.utils.translation import ugettext_lazy as _
 from river.models.base_model import BaseModel
 from river.models.managers.state import StateManager
 
-__author__ = 'ahmetdal'
-
 
 @python_2_unicode_compatible
 class State(BaseModel):
