@@ -1,6 +1,3 @@
-__author__ = 'ahmetdal'
-
-
 class RiverException(Exception):
     code = None
 

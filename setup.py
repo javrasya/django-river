@@ -1,8 +1,6 @@
 import os
 import sys
 
-__author__ = 'ahmetdal'
-
 from setuptools import setup, find_packages
 
 readme_file = os.path.join(os.path.dirname(__file__), 'README.rst')
@@ -15,7 +13,7 @@ except IOError as err:
 
 setup(
     name='django-river',
-    version='3.1.4',
+    version='3.2.0',
     author='Ahmet DAL',
     author_email='ceahmetdal@gmail.com',
     packages=find_packages(),

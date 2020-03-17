@@ -1,6 +1,3 @@
-__author__ = 'ahmetdal'
-
-
 class ErrorCode(object):
     NO_AVAILABLE_INITIAL_STATE = 1
     NO_AVAILABLE_FINAL_STATE = 2

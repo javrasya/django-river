@@ -17,8 +17,6 @@ from river.models.state import State
 from river.models.transitionapproval import TransitionApproval
 from river.models.transition import Transition
 
-__author__ = 'ahmetdal'
-
 from django.db import models
 
 LOGGER = logging.getLogger(__name__)
@@ -42,20 +40,21 @@ class StateField(models.ForeignKey):
         kwargs['related_name'] = "+"
         super(StateField, self).__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name):
+    def contribute_to_class(self, cls, name, *args, **kwargs):
         @classproperty
         def river(_self):
             return RiverObject(_self)
 
         self.field_name = name
 
-        self._add_to_class(cls, self.field_name + "_transition_approvals", GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
+        self._add_to_class(cls, self.field_name + "_transition_approvals",
+                           GenericRelation('%s.%s' % (TransitionApproval._meta.app_label, TransitionApproval._meta.object_name)))
         self._add_to_class(cls, self.field_name + "_transitions", GenericRelation('%s.%s' % (Transition._meta.app_label, Transition._meta.object_name)))
 
         if id(cls) not in workflow_registry.workflows:
             self._add_to_class(cls, "river", river)
 
-        super(StateField, self).contribute_to_class(cls, name)
+        super(StateField, self).contribute_to_class(cls, name, *args, **kwargs)
 
         if id(cls) not in workflow_registry.workflows:
             post_save.connect(_on_workflow_object_saved, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))

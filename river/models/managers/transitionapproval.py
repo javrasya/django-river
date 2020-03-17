@@ -1,11 +1,10 @@
 from django_cte import CTEManager
 
 from river.config import app_config
+from river.models.managers.rivermanager import RiverManager
 
-__author__ = 'ahmetdal'
 
-
-class TransitionApprovalManager(CTEManager):
+class TransitionApprovalManager(RiverManager if app_config.IS_MSSQL else CTEManager):
     def __init__(self, *args, **kwargs):
         super(TransitionApprovalManager, self).__init__(*args, **kwargs)
 

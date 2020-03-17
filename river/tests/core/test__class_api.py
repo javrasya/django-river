@@ -5,7 +5,8 @@ from django.test import TestCase
 from hamcrest import assert_that, equal_to, has_item, all_of, has_property, less_than, has_items, has_length
 
 from river.models import TransitionApproval
-from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, GroupObjectFactory, WorkflowFactory, TransitionMetaFactory
+from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, GroupObjectFactory, \
+    WorkflowFactory, TransitionMetaFactory
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 

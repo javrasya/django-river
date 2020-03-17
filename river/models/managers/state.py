@@ -1,8 +1,6 @@
-from django.db import models
-
-__author__ = 'ahmetdal'
+from river.models.managers.rivermanager import RiverManager
 
 
-class StateManager(models.Manager):
+class StateManager(RiverManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)

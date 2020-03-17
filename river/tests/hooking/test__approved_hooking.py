@@ -2,13 +2,12 @@ from django.contrib.contenttypes.models import ContentType
 from hamcrest import equal_to, assert_that, none, has_entry, all_of, has_key, has_length, is_not
 
 from river.models import TransitionApproval
-from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, TransitionMetaFactory
+from river.models.factories import PermissionObjectFactory, UserObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, \
+    TransitionMetaFactory
 from river.models.hook import BEFORE
 from river.tests.hooking.base_hooking_test import BaseHookingTest
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
-
-__author__ = 'ahmetdal'
 
 
 # noinspection DuplicatedCode

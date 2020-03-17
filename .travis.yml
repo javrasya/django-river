@@ -47,7 +47,20 @@ matrix:
       env: TOXENV=py36-dj2.2-mysql8.0
       services:
         - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mssql17
+      services:
+        - docker
+    - python: "3.6"
+      env: TOXENV=py36-dj2.2-mssql19
+      services:
+        - docker
+
 install:
+  - curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+  - curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+  - sudo apt-get update
+  - sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 g++ unixodbc-dev
   - pip install tox-travis
   - pip install tox-docker
   - pip install coveralls

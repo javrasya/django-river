@@ -10,8 +10,6 @@ from river.models.on_approved_hook import OnApprovedHook
 from river.models.on_complete_hook import OnCompleteHook
 from river.models.on_transit_hook import OnTransitHook
 
-__author__ = 'ahmetdal'
-
 pre_on_complete = Signal(providing_args=["workflow_object", "field_name", ])
 post_on_complete = Signal(providing_args=["workflow_object", "field_name", ])
 

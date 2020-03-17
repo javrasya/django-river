@@ -1,7 +1,7 @@
 import os
 import sys
 from datetime import datetime, timedelta
-from unittest import skipUnless
+from unittest import skipUnless, skip
 from uuid import uuid4
 
 import django
@@ -99,6 +99,7 @@ class MigrationTests(TestCase):
         assert_that(self.migrations_after, has_length(len(self.migrations_before)))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldMigrateTransitionApprovalStatusToStringInDB(self):
         out = StringIO()
         sys.stout = out
@@ -143,6 +144,7 @@ class MigrationTests(TestCase):
             assert_that(result[0][0], equal_to("pending"))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldAssessIterationsForExistingApprovals(self):
         out = StringIO()
         sys.stout = out
@@ -228,6 +230,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((meta_4.pk, 1))))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldAssessIterationsForExistingApprovalsWhenThereIsCycle(self):
         out = StringIO()
         sys.stout = out
@@ -363,6 +366,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((final_meta.pk, 5))))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldMigrationForIterationMustFinishInShortAmountOfTimeWithTooManyObject(self):
         out = StringIO()
         sys.stout = out
@@ -423,6 +427,7 @@ class MigrationTests(TestCase):
         assert_that(after - before, less_than(timedelta(minutes=5)))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldAssessIterationsForExistingApprovalsWhenThereIsMoreAdvanceCycle(self):
         out = StringIO()
         sys.stout = out
@@ -577,6 +582,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((closed_to_final.pk, 6))))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldCreateTransitionsAndTransitionMetasOutOfApprovalMetaAndApprovals(self):
         out = StringIO()
         sys.stout = out
@@ -676,6 +682,7 @@ class MigrationTests(TestCase):
             assert_that(result, has_item(equal_to((meta_4.transition_approvals.first().pk, transition_3.transitions.first().pk))))
 
     @skipUnless(*MIGRATION_TEST_ENABLED)
+    @skip("Migrations are reset")
     def test__shouldMigrateObjectIdInHooksByCastingItToString(self):
         out = StringIO()
         sys.stout = out

@@ -7,5 +7,6 @@ Migration Guide
     :maxdepth: 2
 
     migration_2_to_3
+    migration_31_to_32
     hooking
     
