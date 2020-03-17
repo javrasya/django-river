@@ -40,7 +40,7 @@ class StateField(models.ForeignKey):
         kwargs['related_name'] = "+"
         super(StateField, self).__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name):
+    def contribute_to_class(self, cls, name, *args, **kwargs):
         @classproperty
         def river(_self):
             return RiverObject(_self)
@@ -54,7 +54,7 @@ class StateField(models.ForeignKey):
         if id(cls) not in workflow_registry.workflows:
             self._add_to_class(cls, "river", river)
 
-        super(StateField, self).contribute_to_class(cls, name)
+        super(StateField, self).contribute_to_class(cls, name, *args, **kwargs)
 
         if id(cls) not in workflow_registry.workflows:
             post_save.connect(_on_workflow_object_saved, self.model, False, dispatch_uid='%s_%s_riverstatefield_post' % (self.model, name))

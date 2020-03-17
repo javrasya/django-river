@@ -31,12 +31,14 @@ class MsSqlDriver(RiverDriver):
 
             return TransitionApproval.objects.filter(pk__in=[row[0] for row in cursor.fetchall()])
 
-    def _permission_ids_str(self, as_user):
+    @staticmethod
+    def _permission_ids_str(as_user):
         permissions = as_user.user_permissions.all() | Permission.objects.filter(group__user=as_user)
-        return ",".join(list(six.moves.map(lambda x: str(x), permissions.values_list("pk", flat=True))) or ["-1"])
+        return ",".join(list(six.moves.map(str, permissions.values_list("pk", flat=True))) or ["-1"])
 
-    def _group_ids_str(self, as_user):
-        return ",".join(list(six.moves.map(lambda x: str(x), as_user.groups.all().values_list("pk", flat=True))) or ["-1"])
+    @staticmethod
+    def _group_ids_str(as_user):
+        return ",".join(list(six.moves.map(str, as_user.groups.all().values_list("pk", flat=True))) or ["-1"])
 
     @property
     def _clean_sql(self):

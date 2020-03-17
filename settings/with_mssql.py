@@ -33,7 +33,7 @@ DATABASES = {
             'NAME': 'river' + str(uuid4()),
         },
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
+            'driver': DB_DRIVER
         },
     }
 }

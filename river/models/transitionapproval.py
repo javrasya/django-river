@@ -3,7 +3,7 @@ import logging
 from django.db.models import CASCADE, PROTECT, SET_NULL
 from mptt.fields import TreeOneToOneField
 
-from river.models import State, TransitionApprovalMeta, Workflow
+from river.models import TransitionApprovalMeta, Workflow
 from river.models.transition import Transition
 
 try:
@@ -11,7 +11,7 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 
-from django.db import models, transaction
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from river.models.base_model import BaseModel
