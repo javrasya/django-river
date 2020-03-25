@@ -48,7 +48,7 @@ the availability and the authorization issues.
 get_available_approvals
 -----------------------
 
-This is the function that helps you to fetch all available approvals waiting for a spesific user according to given source and
+This is the function that helps you to fetch all available approvals waiting for a specific user according to given source and
 destination states. If the source state is not provided, ``django-river`` will pick the current objects source state.
 
 >>> transition_approvals = my_model.river.my_state_field.get_available_approvals(as_user=manager)
@@ -69,7 +69,7 @@ destination states. If the source state is not provided, ``django-river`` will p
 |                   |        | | Object's     |          |                          | | approvals comes after. Default is      |
 |                   |        | | Source State |          |                          | | current object's source state          |
 +-------------------+--------+----------------+----------+--------------------------+------------------------------------------+
-| destination_state | input  | NaN            | True     | State                    | | A spesific destination state to        |
+| destination_state | input  | NaN            | True     | State                    | | A specific destination state to        |
 |                   |        |                |          |                          | | fetch all available state. If it       |
 |                   |        |                |          |                          | | is not provided, the approvals         |
 |                   |        |                |          |                          | | will be found for all available        |
