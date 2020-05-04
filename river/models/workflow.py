@@ -12,10 +12,10 @@ class Workflow(BaseModel):
         app_label = 'river'
         verbose_name = _("Workflow")
         verbose_name_plural = _("Workflows")
-        unique_together = [("content_type", "field_name")]
 
     objects = WorkflowManager()
 
+    name = models.CharField(_("Workflow Name"), max_length=128, null=True, blank=True, unique=True)
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=PROTECT)
     field_name = models.CharField(_("Field Name"), max_length=200)
     initial_state = models.ForeignKey(State, verbose_name=_("Initial State"), related_name='workflow_this_set_as_initial_state', on_delete=PROTECT)

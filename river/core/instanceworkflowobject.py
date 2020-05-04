@@ -19,11 +19,12 @@ LOGGER = logging.getLogger(__name__)
 class InstanceWorkflowObject(object):
 
     def __init__(self, workflow_object, field_name):
-        self.class_workflow = getattr(workflow_object.__class__.river, field_name)
+        self.class_workflow = getattr(workflow_object.__class__.river, field_name, workflow_object)
         self.workflow_object = workflow_object
         self.content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
         self.field_name = field_name
-        self.workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
+        self.workflow = Workflow.objects.get(id=workflow_object.workflow.id)
+        print("workflow", self.workflow.id)
         self.initialized = False
 
     @transaction.atomic
@@ -64,7 +65,7 @@ class InstanceWorkflowObject(object):
 
     @property
     def on_initial_state(self):
-        return self.get_state() == self.class_workflow.initial_state
+        return self.get_state() == self.class_workwflow.initial_state
 
     @property
     def on_final_state(self):

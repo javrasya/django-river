@@ -19,7 +19,7 @@ class OrmDriver(RiverDriver):
         )
 
         workflow_objects = With(
-            self.wokflow_object_class.objects.all(),
+            self.workflow_object_class.objects.all(),
             name="workflow_object"
         )
 

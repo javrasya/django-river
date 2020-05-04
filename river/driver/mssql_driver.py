@@ -25,8 +25,8 @@ class MsSqlDriver(RiverDriver):
                 "field_name": self.field_name,
                 "permission_ids": self._permission_ids_str(as_user),
                 "group_ids": self._group_ids_str(as_user),
-                "workflow_object_table": self.wokflow_object_class._meta.db_table,
-                "object_pk_name": self.wokflow_object_class._meta.pk.name
+                "workflow_object_table": self.workflow_object_class._meta.db_table,
+                "object_pk_name": self.workflow_object_class._meta.pk.name
             })
 
             return TransitionApproval.objects.filter(pk__in=[row[0] for row in cursor.fetchall()])
