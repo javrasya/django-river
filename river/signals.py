@@ -82,11 +82,7 @@ class ApproveSignal(object):
         self.field_name = field_name
         self.transition_approval = transition_approval
         self.content_type = ContentType.objects.get_for_model(self.workflow_object.__class__)
-        try:
-            self.workflow = Workflow.objects.get(id=self.workflow_object.workflow_id)
-        except Exception as e:
-            pass
-            # import ipdb; ipdb.set_trace()
+        self.workflow = Workflow.objects.get(id=self.workflow_object.workflow_id)
 
     def __enter__(self):
         for hook in OnApprovedHook.objects.filter(

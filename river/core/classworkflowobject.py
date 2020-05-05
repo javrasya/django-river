@@ -7,12 +7,10 @@ from river.models import State, TransitionApprovalMeta, Workflow, app_config
 
 class ClassWorkflowObject(object):
 
-    def __init__(self, workflow_object_class, field_name, workflow=None):
+    def __init__(self, workflow_object_class, field_name):
         self.workflow_object_class = workflow_object_class
         self.field_name = field_name
-        # TODO : Fix
-        print("class workflow")
-        self.workflow = workflow or Workflow.objects.get(id=self.workflow_object_class.objects.first().workflow_id)
+        self.workflow = None
         self._cached_river_driver = None
 
     @property

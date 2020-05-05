@@ -36,7 +36,7 @@ class StateFieldTest(TestCase):
             transition_meta=transition_meta,
             priority=0
         )
-        test_model = BasicTestModel.objects.create()
+        test_model = BasicTestModel.objects.create(workflow=workflow)
         assert_that(test_model, has_property('river', is_(instance_of(RiverObject))))
         assert_that(test_model.river, has_property('my_field', is_(instance_of(InstanceWorkflowObject))))
         assert_that(BasicTestModel.river.my_field, has_property('initial_state', is_(instance_of(State))))

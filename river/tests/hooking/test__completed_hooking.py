@@ -47,7 +47,7 @@ class CompletedHookingTest(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_post_complete(workflow, workflow_object=workflow_object.model)
         assert_that(self.get_output(), none())
@@ -108,7 +108,7 @@ class CompletedHookingTest(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_post_complete(workflow)
         assert_that(self.get_output(), none())

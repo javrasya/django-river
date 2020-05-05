@@ -70,7 +70,7 @@ class StateField(models.ForeignKey):
 
 def _on_workflow_object_saved(sender, instance, created, *args, **kwargs):
     if created:
-        instance_workflow = instance.river.status
+        instance_workflow = getattr(instance.river, instance.workflow.field_name)
         instance_workflow.initialize_approvals()
         if not instance_workflow.get_state():
             init_state = getattr(instance.__class__.river, instance_workflow.field_name).initial_state
