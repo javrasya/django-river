@@ -19,6 +19,7 @@ class Workflow(BaseModel):
     content_type = models.ForeignKey(app_config.CONTENT_TYPE_CLASS, verbose_name=_('Content Type'), on_delete=PROTECT)
     field_name = models.CharField(_("Field Name"), max_length=200)
     initial_state = models.ForeignKey(State, verbose_name=_("Initial State"), related_name='workflow_this_set_as_initial_state', on_delete=PROTECT)
+    draft = models.BooleanField(default=True)
 
     def natural_key(self):
         return self.content_type, self.field_name
