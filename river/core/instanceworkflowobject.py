@@ -249,6 +249,7 @@ class InstanceWorkflowObject(object):
         old_transitions = self._get_transition_images([done_transition.destination_state.pk])
 
         iteration = done_transition.iteration + 1
+        regenerated_transitions = set()
         while old_transitions:
             for old_transition in old_transitions:
                 cycled_transition = Transition.objects.create(
@@ -275,8 +276,11 @@ class InstanceWorkflowObject(object):
                     cycled_approval.permissions.set(old_approval.permissions.all())
                     cycled_approval.groups.set(old_approval.groups.all())
 
+            regenerated_transitions.add((old_transition.source_state, old_transition.destination_state))
+
             old_transitions = self._get_transition_images(old_transitions.values_list("destination_state__pk", flat=True)).exclude(
-                source_state=done_transition.destination_state)
+                six.moves.reduce(lambda agg, q: q | agg, [Q(source_state=source_state, destination_state=destination_state) for source_state, destination_state in regenerated_transitions], Q(pk=-1))
+            )
 
             iteration += 1
 
