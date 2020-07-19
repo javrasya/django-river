@@ -6,6 +6,7 @@ Change Logs
 3.2.1 (Stable):
 ---------------
     * **Bug**         -  # 159_: A bug that is with having multiple cyclic dependencies in a workflow that happens when one of tem goes through has been fixed.
+    * **Drop**        -        : Drop Python3.4 support since it is having incompatibilities with the module ``six``
 
 
 .. _159: https://github.com/javrasya/django-river/issues/159
