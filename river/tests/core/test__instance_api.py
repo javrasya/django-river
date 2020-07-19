@@ -1822,3 +1822,134 @@ class InstanceApiTest(TestCase):
         assert_that(workflow_object.status, equal_to(state1))
         workflow_object.river.status.approve(as_user=authorized_user)
         assert_that(workflow_object.status, equal_to(state2))
+
+    def test_shouldAllowMultipleCyclicTransitions(self):
+        authorized_permission = PermissionObjectFactory()
+
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+
+        initial_state = StateObjectFactory(label="initial_state")
+        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
+        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
+        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
+        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
+        cycle_state_4 = StateObjectFactory(label="cycle_state_4")
+        final_state = StateObjectFactory(label="final_state")
+
+        workflow = WorkflowFactory(initial_state=initial_state, content_type=self.content_type, field_name="my_field")
+
+        transition_meta_1 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=initial_state,
+            destination_state=cycle_state_1,
+        )
+
+        transition_meta_2 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=cycle_state_2,
+        )
+
+        transition_meta_3 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_2,
+            destination_state=cycle_state_1,
+        )
+
+        transition_meta_4 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=off_the_cycle_state,
+        )
+
+        transition_meta_5 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=off_the_cycle_state,
+            destination_state=cycle_state_3,
+        )
+
+        transition_meta_6 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=cycle_state_4,
+        )
+        transition_meta_7 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_4,
+            destination_state=cycle_state_3,
+        )
+
+        transition_meta_8 = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_3,
+            destination_state=final_state,
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_2,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_3,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_4,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_5,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_6,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_7,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_8,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        workflow_object = BasicTestModelObjectFactory()
+
+        assert_that(workflow_object.model.my_field, equal_to(initial_state))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_2)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
+
+        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
