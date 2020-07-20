@@ -26,4 +26,4 @@ twine check dist/*
 
 echo "Publishing to ${REPOSITORY}"
 
-twine upload --repository "$REPOSITORY" --config-file="${PWD}/../.pypirc-temp" dist/*
+twine upload --repository "$REPOSITORY" --config-file="${PWD}/.pypirc" dist/*
