@@ -3,8 +3,14 @@
 Change Logs
 ===========
 
-3.2.1 (Stable):
+3.2.2 (Stable):
 ---------------
+    * **Bug**         -  # 162_: Fix a bug that is causing some possible future transitions to turn to CANCELLED for some workflows.
+
+.. _162: https://github.com/javrasya/django-river/issues/159
+
+3.2.1:
+------
     * **Bug**         -  # 159_: A bug that is with having multiple cyclic dependencies in a workflow that happens when one of tem goes through has been fixed.
     * **Drop**        -        : Drop Python3.4 support since it is having incompatibilities with the module ``six``
 
