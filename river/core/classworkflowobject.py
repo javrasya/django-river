@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from river.driver.mssql_driver import MsSqlDriver
 from river.driver.orm_driver import OrmDriver
-from river.models import State, TransitionApprovalMeta, Workflow, app_config
+from river.models import State, TransitionApprovalMeta, Workflow, app_config, TransitionMeta
 
 
 class ClassWorkflowObject(object):
@@ -39,8 +39,11 @@ class ClassWorkflowObject(object):
 
     @property
     def final_states(self):
-        final_approvals = TransitionApprovalMeta.objects.filter(workflow=self.workflow, children__isnull=True)
-        return State.objects.filter(pk__in=final_approvals.values_list("transition_meta__destination_state", flat=True))
+        all_states = TransitionMeta.objects.filter(workflow=self.workflow).values_list("source_state", "destination_state")
+        source_states = set([states[0] for states in all_states])
+        destination_states = set([states[1] for states in all_states])
+        final_states = destination_states - source_states
+        return State.objects.filter(pk__in=final_states)
 
     @property
     def _content_type(self):

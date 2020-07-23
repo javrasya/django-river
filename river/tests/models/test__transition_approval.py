@@ -8,100 +8,60 @@ from river.models.factories import WorkflowFactory, StateObjectFactory, Transiti
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 
-
 # noinspection PyMethodMayBeStatic,DuplicatedCode
+from rivertest.flowbuilder import RawState, FlowBuilder
+
+
 class TransitionApprovalModelTest(TestCase):
 
     def test_shouldNotAllowWorkflowToBeDeletedWhenThereIsATransitionApproval(self):
         content_type = ContentType.objects.get_for_model(BasicTestModel)
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state_1")
+        state2 = RawState("state_2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
-
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-
-        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
-
-        BasicTestModelObjectFactory()
-        TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
-        approvals = TransitionApproval.objects.filter(workflow=workflow)
-        assert_that(approvals, has_length(1))
+        authorization_policies = []
+        flow = FlowBuilder("my_field", content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
         assert_that(
-            calling(workflow.delete),
+            calling(flow.workflow.delete),
             raises(ProtectedError, "Cannot delete some instances of model 'Workflow' because they are referenced through a protected foreign key")
         )
 
     def test_shouldNotAllowTheStateToBeDeletedWhenThereIsATransitionApprovalThatIsUsedAsSource(self):
         content_type = ContentType.objects.get_for_model(BasicTestModel)
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state_1")
+        state2 = RawState("state_2")
+        state3 = RawState("state_3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
-
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
-        )
-
-        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
-        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
-
-        BasicTestModelObjectFactory()
-        TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
-        approvals = TransitionApproval.objects.filter(workflow=workflow)
-        assert_that(approvals, has_length(2))
+        authorization_policies = []
+        flow = FlowBuilder("my_field", content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state2, state3, authorization_policies) \
+            .build()
 
         assert_that(
-            calling(state2.delete),
+            calling(flow.get_state(state2).delete),
             raises(ProtectedError, "Cannot delete some instances of model 'State' because they are referenced through a protected foreign key")
         )
 
     def test_shouldNotAllowTheStateToBeDeletedWhenThereIsATransitionApprovalThatIsUsedAsDestination(self):
         content_type = ContentType.objects.get_for_model(BasicTestModel)
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state_1")
+        state2 = RawState("state_2")
+        state3 = RawState("state_3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="my_field")
-
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
-        )
-
-        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
-        TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
-
-        BasicTestModelObjectFactory()
-        TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
-        approvals = TransitionApproval.objects.filter(workflow=workflow)
-        assert_that(approvals, has_length(2))
+        authorization_policies = []
+        flow = FlowBuilder("my_field", content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state2, state3, authorization_policies) \
+            .build()
 
         assert_that(
-            calling(state3.delete),
+            calling(flow.get_state(state3).delete),
             raises(ProtectedError, "Cannot delete some instances of model 'State' because they are referenced through a protected foreign key")
         )
