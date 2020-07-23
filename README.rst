@@ -40,16 +40,13 @@ Django River
 
 |Build Status| |Coverage Status| |Documentation Status| |Quality Status| |Downloads| |Discord|
 
+River is an open source workflow framework for ``Django`` which supports on
+the fly changes instead of hard-coding states, transitions and authorization rules.
 
-Contributors are welcome. Come and give a hand :-)
----------------------------------------------------
-
-River is an open source workflow framework for ``Django`` which support on
-the fly changes instead of hardcoding states, transitions and authorization rules.
-
-The main goal of developing this framework is **to be able to edit any
-workflow item on the fly.** This means that all the elements in a workflow like
-states, transitions or authorizations rules are editable at any time so that no changes requires a re-deploying of your application anymore.
+The main goal of developing this framework is **to be able to modify literally everything
+about the workflows on the fly.** This means that all the elements in a workflow like
+states, transitions or authorizations rules are editable at any time so that no changes
+requires a re-deploying of your application anymore.
 
 **Playground**: There is a fake jira example repository as a playground of django-river. https://github.com/javrasya/fakejira
 
@@ -235,6 +232,15 @@ Here are the list of hook models;
 * OnApprovedHook
 * OnTransitHook
 * OnCompleteHook
+
+Before Reporting A Bug
+----------------------
+
+``django-river`` has behavioral tests that are very easy to read and write. One can easily set up one
+and see if everything is running as expected. Please look at other examples (that are the files with ``.feature`` postfix)
+under ``features`` folder that you can get all the inspiration and create one for yourself before you open an issue
+Then refer to your behavioral test to point out what is not function as expected to speed the process up for your own
+sake. It is even better to name it with your issue number so we can persist it in the repository.
 
 Migrations
 ----------

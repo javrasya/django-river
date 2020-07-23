@@ -1,17 +1,17 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none, has_items
+from hamcrest import assert_that, equal_to, has_item, has_property, raises, calling, has_length, is_not, all_of, none
 
 from river.models import TransitionApproval, PENDING, CANCELLED, APPROVED, Transition, JUMPED
-from river.models.factories import UserObjectFactory, StateObjectFactory, TransitionApprovalMetaFactory, PermissionObjectFactory, WorkflowFactory, \
-    TransitionMetaFactory
-from river.tests.matchers import has_permission, has_transition
+from river.models.factories import UserObjectFactory, PermissionObjectFactory
+from river.tests.matchers import has_approval
 from river.tests.models import BasicTestModel, ModelWithTwoStateFields, ModelWithStringPrimaryKey
-from river.tests.models.factories import BasicTestModelObjectFactory, ModelWithTwoStateFieldsObjectFactory
+from river.tests.models.factories import ModelWithTwoStateFieldsObjectFactory
 from river.utils.exceptions import RiverException
-
-
 # noinspection PyMethodMayBeStatic,DuplicatedCode
+from rivertest.flowbuilder import FlowBuilder, AuthorizationPolicyBuilder, RawState
+
+
 class InstanceApiTest(TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -21,89 +21,63 @@ class InstanceApiTest(TestCase):
     def test_shouldNotReturnOtherObjectsApprovalsForTheAuthorizedUser(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[authorized_permission]
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build()]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_objects(2) \
+            .build()
 
-        )
+        workflow_object1 = flow.objects[0]
+        workflow_object2 = flow.objects[1]
 
-        workflow_object1 = BasicTestModelObjectFactory()
-        workflow_object2 = BasicTestModelObjectFactory()
-
-        available_approvals = workflow_object1.model.river.my_field.get_available_approvals(as_user=authorized_user)
+        available_approvals = workflow_object1.river.my_field.get_available_approvals(as_user=authorized_user)
         assert_that(available_approvals, has_length(1))
         assert_that(list(available_approvals), has_item(
-            has_property("workflow_object", workflow_object1.model)
+            has_property("workflow_object", workflow_object1)
         ))
         assert_that(list(available_approvals), has_item(
-            is_not(has_property("workflow_object", workflow_object2.model))
+            is_not(has_property("workflow_object", workflow_object2))
         ))
 
     def test_shouldNotAllowUnauthorizedUserToProceedToNextState(self):
         unauthorized_user = UserObjectFactory()
-
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
         authorized_permission = PermissionObjectFactory()
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow_object = BasicTestModelObjectFactory()
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build()]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
+
+        workflow_object = flow.objects[0]
 
         assert_that(
-            calling(workflow_object.model.river.my_field.approve).with_args(as_user=unauthorized_user),
+            calling(workflow_object.river.my_field.approve).with_args(as_user=unauthorized_user),
             raises(RiverException, "There is no available approval for the user")
         )
 
     def test_shouldAllowAuthorizedUserToProceedToNextState(self):
         authorized_permission = PermissionObjectFactory()
-
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build()]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        workflow_object = flow.objects[0]
 
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(state2))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state2)))
 
     def test_shouldNotLetUserWhosePriorityComesLaterApproveProceed(self):
         manager_permission = PermissionObjectFactory()
@@ -111,35 +85,21 @@ class InstanceApiTest(TestCase):
 
         manager = UserObjectFactory(user_permissions=[manager_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [
+            AuthorizationPolicyBuilder().with_priority(0).with_permission(team_leader_permission).build(),
+            AuthorizationPolicyBuilder().with_priority(1).with_permission(manager_permission).build(),
+        ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=1,
-            permissions=[manager_permission]
-
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[team_leader_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = flow.objects[0]
 
         assert_that(
-            calling(workflow_object.model.river.my_field.approve).with_args(as_user=manager),
+            calling(workflow_object.river.my_field.approve).with_args(as_user=manager),
             raises(RiverException, "There is no available approval for the user")
         )
 
@@ -149,119 +109,69 @@ class InstanceApiTest(TestCase):
 
         team_leader = UserObjectFactory(user_permissions=[team_leader_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [
+            AuthorizationPolicyBuilder().with_priority(0).with_permission(team_leader_permission).build(),
+            AuthorizationPolicyBuilder().with_priority(1).with_permission(manager_permission).build(),
+        ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=1,
-            permissions=[manager_permission]
-        )
+        workflow_object = flow.objects[0]
 
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[team_leader_permission]
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(team_leader)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
 
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(team_leader)
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-
-    def test_shouldTransitToNextStateWhenAppTheApprovalsAreApprovedBeApproved(self):
+    def test_shouldTransitToNextStateWhenAllTheApprovalsAreApproved(self):
         manager_permission = PermissionObjectFactory()
         team_leader_permission = PermissionObjectFactory()
 
         manager = UserObjectFactory(user_permissions=[manager_permission])
         team_leader = UserObjectFactory(user_permissions=[team_leader_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [
+            AuthorizationPolicyBuilder().with_priority(0).with_permission(team_leader_permission).build(),
+            AuthorizationPolicyBuilder().with_priority(1).with_permission(manager_permission).build(),
+        ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=1,
-            permissions=[manager_permission]
+        workflow_object = flow.objects[0]
 
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(team_leader)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
 
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[team_leader_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(team_leader)
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(manager)
-        assert_that(workflow_object.model.my_field, equal_to(state2))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(manager)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state2)))
 
     def test_shouldDictatePassingNextStateWhenThereAreMultiple(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
+        workflow_object = flow.objects[0]
         assert_that(
-            calling(workflow_object.model.river.my_field.approve).with_args(as_user=authorized_user),
+            calling(workflow_object.river.my_field.approve).with_args(as_user=authorized_user),
             raises(RiverException, "State must be given when there are multiple states for destination")
         )
 
@@ -270,81 +180,43 @@ class InstanceApiTest(TestCase):
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .build()
 
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        workflow_object = flow.objects[0]
 
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state3)
-        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state3)))
 
     def test_shouldNotAcceptANextStateWhichIsNotAmongPossibleNextStates(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
-        invalid_state = StateObjectFactory(label="state4")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
+        invalid_state = RawState("state4")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .with_additional_state(invalid_state) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
         assert_that(
-            calling(workflow_object.model.river.my_field.approve).with_args(as_user=authorized_user, next_state=invalid_state),
+            calling(workflow_object.river.my_field.approve).with_args(as_user=authorized_user, next_state=flow.get_state(invalid_state)),
             raises(RiverException,
                    "Invalid state is given\(%s\). Valid states is\(are\) (%s|%s)" % (
                        invalid_state.label,
@@ -358,651 +230,191 @@ class InstanceApiTest(TestCase):
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
-        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
-        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
-        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
-        final_state = StateObjectFactory(label="final_state")
+        cycle_state_1 = RawState("cycle_state_1")
+        cycle_state_2 = RawState("cycle_state_2")
+        cycle_state_3 = RawState("cycle_state_3")
+        off_the_cycle_state = RawState("off_the_cycle_state")
+        final_state = RawState("final_state")
 
-        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(cycle_state_1, cycle_state_2, authorization_policies) \
+            .with_transition(cycle_state_2, cycle_state_3, authorization_policies) \
+            .with_transition(cycle_state_3, cycle_state_1, authorization_policies) \
+            .with_transition(cycle_state_3, off_the_cycle_state, authorization_policies) \
+            .with_transition(off_the_cycle_state, final_state, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_1,
-            destination_state=cycle_state_2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_2)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_3)))
 
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=cycle_state_1,
-        )
-
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=off_the_cycle_state,
-        )
-
-        transition_meta_5 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_5,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
-
-        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        transitions = Transition.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(transitions, has_length(5))
 
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(approvals, has_length(5))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=0),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=0, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=1, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, PENDING, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, PENDING, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, PENDING, iteration=3, permissions=[authorized_permission]))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=1),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(cycle_state_1))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-
-        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        transitions = Transition.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(transitions, has_length(10))
 
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(approvals, has_length(10))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=0),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=0, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=1, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, APPROVED, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, CANCELLED, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, CANCELLED, iteration=3, permissions=[authorized_permission]))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=1),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=4),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=5),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=5),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=6),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, PENDING, iteration=3, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, PENDING, iteration=4, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, PENDING, iteration=5, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, PENDING, iteration=5, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, PENDING, iteration=6, permissions=[authorized_permission]))
 
     def test_shouldHandleSecondCycleProperly(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
-        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
-        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
-        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
-        final_state = StateObjectFactory(label="final_state")
+        cycle_state_1 = RawState("cycle_state_1")
+        cycle_state_2 = RawState("cycle_state_2")
+        cycle_state_3 = RawState("cycle_state_3")
+        off_the_cycle_state = RawState("off_the_cycle_state")
+        final_state = RawState("final_state")
 
-        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(cycle_state_1, cycle_state_2, authorization_policies) \
+            .with_transition(cycle_state_2, cycle_state_3, authorization_policies) \
+            .with_transition(cycle_state_3, cycle_state_1, authorization_policies) \
+            .with_transition(cycle_state_3, off_the_cycle_state, authorization_policies) \
+            .with_transition(off_the_cycle_state, final_state, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_1,
-            destination_state=cycle_state_2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_2)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_3)))
 
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=cycle_state_1,
-        )
-
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=off_the_cycle_state,
-        )
-
-        transition_meta_5 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_5,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
-
-        transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        transitions = Transition.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(transitions, has_length(5))
 
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(approvals, has_length(5))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=0),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=0, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=1, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, PENDING, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, PENDING, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, PENDING, iteration=3, permissions=[authorized_permission]))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=1),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(cycle_state_1))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_2)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_3)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(cycle_state_1))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(approvals, has_length(15))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=0),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=0, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=1, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, APPROVED, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, CANCELLED, iteration=2, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, CANCELLED, iteration=3, permissions=[authorized_permission]))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=1),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=3, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=4, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, APPROVED, iteration=5, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, CANCELLED, iteration=5, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, CANCELLED, iteration=6, permissions=[authorized_permission]))
 
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=2),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=3),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=4),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=5),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", APPROVED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=5),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=6),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", CANCELLED),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_1, cycle_state_2, iteration=6),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_2, cycle_state_3, iteration=7),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, cycle_state_1, iteration=8),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(cycle_state_3, off_the_cycle_state, iteration=8),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
-
-        assert_that(approvals, has_item(
-            all_of(
-                has_transition(off_the_cycle_state, final_state, iteration=9),
-                has_permission("permissions", has_length(1)),
-                has_permission("permissions", has_item(authorized_permission)),
-                has_property("status", PENDING),
-            )
-        ))
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, PENDING, iteration=6, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, PENDING, iteration=7, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, PENDING, iteration=8, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, PENDING, iteration=8, permissions=[authorized_permission]))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, PENDING, iteration=9, permissions=[authorized_permission]))
 
     def test__shouldHandleUndefinedSecondWorkflowCase(self):
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        content_type = ContentType.objects.get_for_model(ModelWithTwoStateFields)
-        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="status1")
+        authorization_policies = []
+        flow = FlowBuilder("status1", ContentType.objects.get_for_model(ModelWithTwoStateFields)) \
+            .with_object_factory(lambda: ModelWithTwoStateFieldsObjectFactory().model) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-        )
+        workflow_object = flow.objects[0]
 
-        workflow_object = ModelWithTwoStateFieldsObjectFactory()
-
-        assert_that(workflow_object.model.status1, equal_to(state1))
-        assert_that(workflow_object.model.status2, none())
+        assert_that(workflow_object.status1, equal_to(flow.get_state(state1)))
+        assert_that(workflow_object.status2, none())
 
     def test__shouldReturnNextApprovals(self):
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().build()]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-
-        meta1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-        )
-
-        meta2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        next_approvals = workflow_object.model.river.my_field.next_approvals
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        next_approvals = workflow_object.river.my_field.next_approvals
         assert_that(next_approvals, has_length(2))
-        assert_that(next_approvals, has_item(meta1.transition_approvals.first()))
-        assert_that(next_approvals, has_item(meta2.transition_approvals.first()))
+        assert_that(next_approvals, has_item(flow.transitions_approval_metas[0].transition_approvals.first()))
+        assert_that(next_approvals, has_item(flow.transitions_approval_metas[1].transition_approvals.first()))
 
     def test_shouldCancelAllOtherStateTransition(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
-        state4 = StateObjectFactory(label="state4")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
+        state4 = RawState("state4")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .with_transition(state1, state4, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state4,
-        )
-
-        meta1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        meta2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        meta3 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state3)
-        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state3)))
 
         assert_that(
-            meta2.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", APPROVED))
-            )
-        ),
-
-        assert_that(
-            meta1.transition_approvals.all(),
+            flow.transitions_approval_metas[0].transition_approvals.all(),
             all_of(
                 has_length(1),
                 has_item(has_property("status", CANCELLED))
@@ -1010,7 +422,15 @@ class InstanceApiTest(TestCase):
         ),
 
         assert_that(
-            meta3.transition_approvals.all(),
+            flow.transitions_approval_metas[1].transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", APPROVED))
+            )
+        ),
+
+        assert_that(
+            flow.transitions_approval_metas[2].transition_approvals.all(),
             all_of(
                 has_length(1),
                 has_item(has_property("status", CANCELLED))
@@ -1022,90 +442,44 @@ class InstanceApiTest(TestCase):
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
-        state4 = StateObjectFactory(label="state4")
-        state5 = StateObjectFactory(label="state5")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
+        state4 = RawState("state4")
+        state5 = RawState("state5")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .with_transition(state1, state4, authorization_policies) \
+            .with_transition(state4, state5, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
-
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state4,
-        )
-
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state4,
-            destination_state=state5,
-        )
-
-        meta1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        meta2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        meta3 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        meta4 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state3)
-        assert_that(workflow_object.model.my_field, equal_to(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(state3))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state3)))
 
         assert_that(
-            meta2.transition_approvals.all(),
+            flow.transitions_approval_metas[0].transition_approvals.all(),
+            all_of(
+                has_length(1),
+                has_item(has_property("status", CANCELLED))
+            )
+        )
+
+        assert_that(
+            flow.transitions_approval_metas[1].transition_approvals.all(),
             all_of(
                 has_length(1),
                 has_item(has_property("status", APPROVED))
             )
-        ),
+        )
 
         assert_that(
-            meta1.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", CANCELLED))
-            )
-        ),
-
-        assert_that(
-            meta3.transition_approvals.all(),
+            flow.transitions_approval_metas[2].transition_approvals.all(),
             all_of(
                 has_length(1),
                 has_item(has_property("status", CANCELLED))
@@ -1113,7 +487,7 @@ class InstanceApiTest(TestCase):
         )
 
         assert_that(
-            meta4.transition_approvals.all(),
+            flow.transitions_approval_metas[3].transition_approvals.all(),
             all_of(
                 has_length(1),
                 has_item(has_property("status", CANCELLED))
@@ -1125,909 +499,272 @@ class InstanceApiTest(TestCase):
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        first_state = StateObjectFactory(label="first")
-        diamond_left_state_1 = StateObjectFactory(label="diamond-left-1")
-        diamond_left_state_2 = StateObjectFactory(label="diamond-left-2")
-        diamond_right_state_1 = StateObjectFactory(label="diamond-right-1")
-        diamond_right_state_2 = StateObjectFactory(label="diamond-right-2")
-        diamond_join_state = StateObjectFactory(label="diamond-join")
-        final_state = StateObjectFactory(label="final")
+        first_state = RawState("first")
+        diamond_left_state_1 = RawState("diamond-left-1")
+        diamond_left_state_2 = RawState("diamond-left-2")
+        diamond_right_state_1 = RawState("diamond-right-1")
+        diamond_right_state_2 = RawState("diamond-right-2")
+        diamond_join_state = RawState("diamond-join")
+        final_state = RawState("final")
 
-        workflow = WorkflowFactory(initial_state=first_state, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(first_state, diamond_left_state_1, authorization_policies) \
+            .with_transition(first_state, diamond_right_state_1, authorization_policies) \
+            .with_transition(diamond_left_state_1, diamond_left_state_2, authorization_policies) \
+            .with_transition(diamond_right_state_1, diamond_right_state_2, authorization_policies) \
+            .with_transition(diamond_left_state_2, diamond_join_state, authorization_policies) \
+            .with_transition(diamond_right_state_2, diamond_join_state, authorization_policies) \
+            .with_transition(diamond_join_state, final_state, authorization_policies) \
+            .build()
 
-        first_to_left_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=first_state,
-            destination_state=diamond_left_state_1,
-        )
+        workflow_object = flow.objects[0]
 
-        first_to_right_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=first_state,
-            destination_state=diamond_right_state_1,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(first_state)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(diamond_left_state_1))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(diamond_left_state_1)))
 
-        left_follow_up_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=diamond_left_state_1,
-            destination_state=diamond_left_state_2,
-        )
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
 
-        right_follow_up_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=diamond_right_state_1,
-            destination_state=diamond_right_state_2,
-        )
-
-        left_join_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=diamond_left_state_2,
-            destination_state=diamond_join_state
-        )
-
-        right_join_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=diamond_right_state_2,
-            destination_state=diamond_join_state
-        )
-
-        join_to_final_transition = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=diamond_join_state,
-            destination_state=final_state
-        )
-
-        first_to_left = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=first_to_left_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        first_to_right = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=first_to_right_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        left_follow_up = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=left_follow_up_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        right_follow_up = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=right_follow_up_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        left_join = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=left_join_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        right_join = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=right_join_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        join_to_final = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=join_to_final_transition,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(first_state))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=diamond_left_state_1)
-        assert_that(workflow_object.model.my_field, equal_to(diamond_left_state_1))
-
-        assert_that(
-            first_to_left.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", APPROVED))
-            )
-        ),
-
-        assert_that(
-            left_follow_up.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", PENDING))
-            )
-        )
-
-        assert_that(
-            left_join.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", PENDING))
-            )
-        )
-
-        assert_that(
-            first_to_right.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", CANCELLED))
-            )
-        ),
-
-        assert_that(
-            right_follow_up.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", CANCELLED))
-            )
-        )
-
-        assert_that(
-            right_join.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", CANCELLED))
-            )
-        )
-
-        assert_that(
-            join_to_final.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", PENDING))
-            )
-        )
+        assert_that(approvals, has_approval(first_state, diamond_left_state_1, APPROVED))
+        assert_that(approvals, has_approval(diamond_left_state_1, diamond_left_state_2, PENDING))
+        assert_that(approvals, has_approval(diamond_left_state_2, diamond_join_state, PENDING))
+        assert_that(approvals, has_approval(first_state, diamond_right_state_1, CANCELLED))
+        assert_that(approvals, has_approval(diamond_right_state_1, diamond_right_state_2, CANCELLED))
+        assert_that(approvals, has_approval(diamond_right_state_2, diamond_join_state, CANCELLED))
+        assert_that(approvals, has_approval(diamond_join_state, final_state, PENDING))
 
     def test_shouldAssessIterationsCorrectly(self):
         authorized_permission1 = PermissionObjectFactory()
         authorized_permission2 = PermissionObjectFactory()
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, [AuthorizationPolicyBuilder().with_permission(authorized_permission1).build()]) \
+            .with_transition(state2, state3,
+                             [
+                                 AuthorizationPolicyBuilder().with_permission(authorized_permission1).build(),
+                                 AuthorizationPolicyBuilder().with_priority(1).with_permission(authorized_permission2).build(),
+                             ]) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
-        )
-
-        meta1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        meta2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        meta3 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=1,
-            permissions=[authorized_permission2]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
         assert_that(approvals, has_length(3))
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta1),
-                    has_transition(state1, state2, iteration=0)
-                )
-            )
-        )
 
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta2),
-                    has_transition(state2, state3, iteration=1),
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta3),
-                    has_transition(state2, state3, iteration=1),
-                )
-            )
-        )
+        assert_that(approvals, has_approval(state1, state2, PENDING, iteration=0))
+        assert_that(approvals, has_approval(state2, state3, PENDING, iteration=1, permissions=[authorized_permission1]))
+        assert_that(approvals, has_approval(state2, state3, PENDING, iteration=1, permissions=[authorized_permission2]))
 
     def test_shouldAssessIterationsCorrectlyWhenCycled(self):
-        authorized_permission1 = PermissionObjectFactory()
-        authorized_permission2 = PermissionObjectFactory()
-        authorized_user = UserObjectFactory(user_permissions=[authorized_permission1, authorized_permission2])
+        authorized_permission = PermissionObjectFactory()
+        authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
-        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
-        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
-        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
-        final_state = StateObjectFactory(label="final_state")
+        cycle_state_1 = RawState("cycle_state_1")
+        cycle_state_2 = RawState("cycle_state_2")
+        cycle_state_3 = RawState("cycle_state_3")
+        off_the_cycle_state = RawState("off_the_cycle_state")
+        final_state = RawState("final_state")
 
-        workflow = WorkflowFactory(initial_state=cycle_state_1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(cycle_state_1, cycle_state_2, authorization_policies) \
+            .with_transition(cycle_state_2, cycle_state_3, authorization_policies) \
+            .with_transition(cycle_state_3, cycle_state_1, authorization_policies) \
+            .with_transition(cycle_state_3, off_the_cycle_state, authorization_policies) \
+            .with_transition(off_the_cycle_state, final_state, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_1,
-            destination_state=cycle_state_2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_2)))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_3)))
 
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=cycle_state_1,
-        )
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
+        assert_that(approvals, has_length(5))
 
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=off_the_cycle_state,
-        )
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(cycle_state_1))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
 
-        transition_meta_5 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=final_state,
-        )
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
+        assert_that(approvals, has_length(10))
 
-        meta_1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, APPROVED, iteration=0))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, APPROVED, iteration=1))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, APPROVED, iteration=2))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, CANCELLED, iteration=2))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, CANCELLED, iteration=3))
 
-        meta_21 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        meta_22 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=1,
-            permissions=[authorized_permission2]
-        )
-
-        meta_3 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        meta_4 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        final_meta = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_5,
-            priority=0,
-            permissions=[authorized_permission1]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
-
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(6))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-
-        approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(12))
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_1),
-                    has_transition(cycle_state_1, cycle_state_2, iteration=0)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_21),
-                    has_transition(cycle_state_2, cycle_state_3, iteration=1)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_22),
-                    has_transition(cycle_state_2, cycle_state_3, iteration=1)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_3),
-                    has_transition(cycle_state_3, cycle_state_1, iteration=2)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_4),
-                    has_transition(cycle_state_3, off_the_cycle_state, iteration=2)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", final_meta),
-                    has_transition(off_the_cycle_state, final_state, iteration=3)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_1),
-                    has_transition(cycle_state_1, cycle_state_2, iteration=3)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_21),
-                    has_transition(cycle_state_2, cycle_state_3, iteration=4)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_22),
-                    has_transition(cycle_state_2, cycle_state_3, iteration=4)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_3),
-                    has_transition(cycle_state_3, cycle_state_1, iteration=5)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", meta_4),
-                    has_transition(cycle_state_3, off_the_cycle_state, iteration=5)
-                )
-            )
-        )
-
-        assert_that(
-            approvals, has_item(
-                all_of(
-                    has_property("meta", final_meta),
-                    has_transition(off_the_cycle_state, final_state, iteration=6)
-                )
-            )
-        )
+        assert_that(approvals, has_approval(cycle_state_1, cycle_state_2, PENDING, iteration=3))
+        assert_that(approvals, has_approval(cycle_state_2, cycle_state_3, PENDING, iteration=4))
+        assert_that(approvals, has_approval(cycle_state_3, cycle_state_1, PENDING, iteration=5))
+        assert_that(approvals, has_approval(cycle_state_3, off_the_cycle_state, PENDING, iteration=5))
+        assert_that(approvals, has_approval(off_the_cycle_state, final_state, PENDING, iteration=6))
 
     def test_shouldJumpToASpecificState(self):
         authorized_permission = PermissionObjectFactory()
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state2, state3, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
 
-        transition_approval_meta_1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        approvals = TransitionApproval.objects.filter(workflow_object=workflow_object)
+        assert_that(approvals, has_approval(state1, state2, PENDING))
+        assert_that(approvals, has_approval(state2, state3, PENDING))
 
-        transition_approval_meta_2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        workflow_object.river.my_field.jump_to(flow.get_state(state3))
 
-        workflow_object = BasicTestModelObjectFactory()
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state3)))
 
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        assert_that(
-            Transition.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_meta_1),
-                ),
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_meta_2),
-                )
-            )
-        )
-
-        assert_that(
-            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_approval_meta_1),
-                ),
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_approval_meta_2),
-                )
-            )
-        )
-
-        workflow_object.model.river.my_field.jump_to(state3)
-
-        assert_that(workflow_object.model.my_field, equal_to(state3))
-        assert_that(
-            Transition.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_meta_1),
-                ),
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_meta_2),
-                )
-            )
-        )
-
-        assert_that(
-            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_approval_meta_1),
-                ),
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_approval_meta_2),
-                )
-            )
-        )
+        approvals = TransitionApproval.objects.filter(workflow_object=workflow_object)
+        assert_that(approvals, has_approval(state1, state2, JUMPED))
+        assert_that(approvals, has_approval(state2, state3, JUMPED))
 
     def test_shouldNotJumpBackToAPreviousState(self):
         authorized_permission = PermissionObjectFactory()
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .build()
 
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        workflow_object = flow.objects[0]
 
-        workflow_object = BasicTestModelObjectFactory()
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state2)
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(state2))
         assert_that(
-            calling(workflow_object.model.river.my_field.jump_to).with_args(state1),
+            calling(workflow_object.river.my_field.jump_to).with_args(flow.get_state(state1)),
             raises(RiverException, "This state is not available to be jumped in the future of this object")
         )
 
     def test_shouldJumpToASpecificStateWhenThereAreMultipleNextState(self):
         authorized_permission = PermissionObjectFactory()
 
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-        state3 = StateObjectFactory(label="state3")
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        state3 = RawState("state3")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
 
-        transition_approval_meta_1 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        approvals = TransitionApproval.objects.filter(workflow_object=workflow_object)
+        assert_that(approvals, has_approval(state1, state2, PENDING))
+        assert_that(approvals, has_approval(state1, state3, PENDING))
 
-        transition_approval_meta_2 = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        workflow_object.river.my_field.jump_to(flow.get_state(state3))
 
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        assert_that(
-            Transition.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_meta_1),
-                ),
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_meta_2),
-                )
-            )
-        )
-
-        assert_that(
-            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_approval_meta_1),
-                ),
-                all_of(
-                    has_property("status", PENDING),
-                    has_property("meta", transition_approval_meta_2),
-                )
-            )
-        )
-
-        workflow_object.model.river.my_field.jump_to(state3)
-
-        assert_that(workflow_object.model.my_field, equal_to(state3))
-        assert_that(
-            Transition.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_meta_1),
-                ),
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_meta_2),
-                )
-            )
-        )
-
-        assert_that(
-            TransitionApproval.objects.filter(workflow_object=workflow_object.model),
-            has_items(
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_approval_meta_1),
-                ),
-                all_of(
-                    has_property("status", JUMPED),
-                    has_property("meta", transition_approval_meta_2),
-                )
-            )
-        )
+        approvals = TransitionApproval.objects.filter(workflow_object=workflow_object)
+        assert_that(approvals, has_approval(state1, state2, JUMPED))
+        assert_that(approvals, has_approval(state1, state3, JUMPED))
 
     def test_shouldNotCrashWhenAModelObjectWithStringPrimaryKeyIsApproved(self):
-        state1 = StateObjectFactory(label="state1")
-        state2 = StateObjectFactory(label="state2")
-
         content_type = ContentType.objects.get_for_model(ModelWithStringPrimaryKey)
         authorized_permission = PermissionObjectFactory(content_type=content_type)
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
-        workflow = WorkflowFactory(initial_state=state1, content_type=content_type, field_name="status")
 
-        transition_meta = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta,
-            priority=0,
-            permissions=[authorized_permission]
-        )
+        state1 = RawState("state1")
+        state2 = RawState("state2")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("status", content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_object_factory(lambda: ModelWithStringPrimaryKey.objects.create()) \
+            .build()
 
-        workflow_object = ModelWithStringPrimaryKey.objects.create()
+        workflow_object = flow.objects[0]
 
-        assert_that(workflow_object.status, equal_to(state1))
+        assert_that(workflow_object.status, equal_to(flow.get_state(state1)))
         workflow_object.river.status.approve(as_user=authorized_user)
-        assert_that(workflow_object.status, equal_to(state2))
+        assert_that(workflow_object.status, equal_to(flow.get_state(state2)))
 
     def test_shouldAllowMultipleCyclicTransitions(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        initial_state = StateObjectFactory(label="initial_state")
-        cycle_state_1 = StateObjectFactory(label="cycle_state_1")
-        cycle_state_2 = StateObjectFactory(label="cycle_state_2")
-        off_the_cycle_state = StateObjectFactory(label="off_the_cycle_state")
-        cycle_state_3 = StateObjectFactory(label="cycle_state_3")
-        cycle_state_4 = StateObjectFactory(label="cycle_state_4")
-        final_state = StateObjectFactory(label="final_state")
+        initial_state = RawState("initial_state")
+        cycle_state_1 = RawState("cycle_state_1")
+        cycle_state_2 = RawState("cycle_state_2")
+        off_the_cycle_state = RawState("off_the_cycle_state")
+        cycle_state_3 = RawState("cycle_state_3")
+        cycle_state_4 = RawState("cycle_state_4")
+        final_state = RawState("final_state")
 
-        workflow = WorkflowFactory(initial_state=initial_state, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(initial_state, cycle_state_1, authorization_policies) \
+            .with_transition(cycle_state_1, cycle_state_2, authorization_policies) \
+            .with_transition(cycle_state_2, cycle_state_1, authorization_policies) \
+            .with_transition(cycle_state_1, off_the_cycle_state, authorization_policies) \
+            .with_transition(off_the_cycle_state, cycle_state_3, authorization_policies) \
+            .with_transition(cycle_state_3, cycle_state_4, authorization_policies) \
+            .with_transition(cycle_state_4, cycle_state_3, authorization_policies) \
+            .with_transition(cycle_state_3, final_state, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=initial_state,
-            destination_state=cycle_state_1,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_1,
-            destination_state=cycle_state_2,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(initial_state)))
 
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_2,
-            destination_state=cycle_state_1,
-        )
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
 
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_1,
-            destination_state=off_the_cycle_state,
-        )
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(cycle_state_2))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_2)))
 
-        transition_meta_5 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=off_the_cycle_state,
-            destination_state=cycle_state_3,
-        )
-
-        transition_meta_6 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=cycle_state_4,
-        )
-        transition_meta_7 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_4,
-            destination_state=cycle_state_3,
-        )
-
-        transition_meta_8 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=cycle_state_3,
-            destination_state=final_state,
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_5,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_6,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_7,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_8,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(initial_state))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_2)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
-        assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
+        workflow_object.river.my_field.approve(as_user=authorized_user)
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(cycle_state_1)))
 
     def test_shouldNotCancelDescendantsThatCanBeTransitedInTheFuture(self):
         authorized_permission = PermissionObjectFactory()
 
         authorized_user = UserObjectFactory(user_permissions=[authorized_permission])
 
-        state1 = StateObjectFactory(label="state_1")
-        state2 = StateObjectFactory(label="state_2")
-        state3 = StateObjectFactory(label="state_3")
-        final_state = StateObjectFactory(label="final_state")
+        state1 = RawState("state_1")
+        state2 = RawState("state_2")
+        state3 = RawState("state_3")
+        final_state = RawState("final_state")
 
-        workflow = WorkflowFactory(initial_state=state1, content_type=self.content_type, field_name="my_field")
+        authorization_policies = [AuthorizationPolicyBuilder().with_permission(authorized_permission).build(), ]
+        flow = FlowBuilder("my_field", self.content_type) \
+            .with_transition(state1, state2, authorization_policies) \
+            .with_transition(state1, state3, authorization_policies) \
+            .with_transition(state2, state3, authorization_policies) \
+            .with_transition(state3, final_state, authorization_policies) \
+            .build()
 
-        transition_meta_1 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state2,
-        )
+        workflow_object = flow.objects[0]
 
-        transition_meta_2 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state1,
-            destination_state=state3,
-        )
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state1)))
+        workflow_object.river.my_field.approve(as_user=authorized_user, next_state=flow.get_state(state2))
+        assert_that(workflow_object.my_field, equal_to(flow.get_state(state2)))
 
-        transition_meta_3 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state2,
-            destination_state=state3,
-        )
+        approvals = TransitionApproval.objects.filter(workflow=flow.workflow, workflow_object=workflow_object)
 
-        transition_meta_4 = TransitionMetaFactory.create(
-            workflow=workflow,
-            source_state=state3,
-            destination_state=final_state,
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_1,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_2,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_3,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        finalTransitionApprovalMeta = TransitionApprovalMetaFactory.create(
-            workflow=workflow,
-            transition_meta=transition_meta_4,
-            priority=0,
-            permissions=[authorized_permission]
-        )
-
-        workflow_object = BasicTestModelObjectFactory()
-
-        assert_that(workflow_object.model.my_field, equal_to(state1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=state2)
-        assert_that(workflow_object.model.my_field, equal_to(state2))
-
-        assert_that(
-            finalTransitionApprovalMeta.transition_approvals.all(),
-            all_of(
-                has_length(1),
-                has_item(has_property("status", PENDING))
-            )
-        ),
+        assert_that(approvals, has_approval(state3, final_state, PENDING))

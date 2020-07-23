@@ -189,6 +189,15 @@ It means the user that you are trying to approve with is not really authorized
 to approve the next step of the transition. Catch the error and turn it to a
 more user friendly error if you would like to warn your user about that.
 
+How to reproduce before opening an issue?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``django-river`` has behavioral tests that are very easy to read and write. One can easily set up one
+and see if everything is running as expected. Please look at other examples (that are the files with ``.feature`` postfix)
+under ``features`` folder that you can get all the inspiration and create one for yourself before you open an issue
+Then refer to your behavioral test to point out what is not function as expected to speed the process up for your own
+sake. It is even better to name it with your issue number so we can persist it in the repository.
+
 .. _`Class API`: https://django-river.readthedocs.io/en/latest/api/class.html
 .. _`Instance API`: https://django-river.readthedocs.io/en/latest/api/instance.html
 

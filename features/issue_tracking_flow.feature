@@ -17,15 +17,8 @@ Feature: An example issue tracking flow that is set up with django-river
     And a user with name team_leader_1 with group "Team Leader"
     And a user with name tester_1 with group "Tester"
 
-    # States
-    Given a state with label "Open"
-    And a state with label "In Progress"
-    And a state with label "Resolved"
-    And a state with label "Re-Opened"
-    And a state with label "Closed"
-
     # Workflow
-    Given a workflow with an identifier "Issue Tracking Flow" and initial state "Open"
+    Given a workflow with an identifier "Issue Tracking Flow"
 
     # Transitions
     Given a transition "Open" -> "In Progress" in "Issue Tracking Flow"

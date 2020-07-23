@@ -7,15 +7,8 @@ Feature: An example #162 Flow that is set up with django-river (https://github.c
     # Users
     Given a user with name authorized_user with group "Authorized Group"
 
-    # States
-    Given a state with label "Draft"
-    And a state with label "Issued"
-    And a state with label "Part Received"
-    And a state with label "Received"
-    And a state with label "Closed"
-
     # Workflow
-    Given a workflow with an identifier "#162 Flow" and initial state "Draft"
+    Given a workflow with an identifier "#162 Flow"
 
     # Transitions
     Given a transition "Draft" -> "Issued" in "#162 Flow"
