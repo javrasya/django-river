@@ -10,18 +10,8 @@ Feature: An example #159 Flow that is set up with django-river
     # Users
     Given a user with name authorized_user with group "Authorized Group"
 
-    # States
-    Given a state with label "Draft"
-    And a state with label "Awaiting 1"
-    And a state with label "First Approval"
-    And a state with label "Second Approval"
-    And a state with label "Recreate 1"
-    And a state with label "Awaiting 2"
-    And a state with label "Recreate 2"
-    And a state with label "Published"
-
     # Workflow
-    Given a workflow with an identifier "#159 Flow" and initial state "Draft"
+    Given a workflow with an identifier "#159 Flow"
 
     # Transitions
     Given a transition "Draft" -> "Awaiting 1" in "#159 Flow"

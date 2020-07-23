@@ -19,18 +19,8 @@ Feature: An example shipping flow that is set up with django-river
     And a user with name courier_company_attendant_1 with group "Courier Company Attendant"
     And a user with name finance_person_1 with group "Finance Person"
 
-    # States
-    Given a state with label "Initialized"
-    And a state with label "Shipped"
-    And a state with label "Arrived"
-    And a state with label "Return Initialized"
-    And a state with label "Returned"
-    And a state with label "Re-Initialized"
-    And a state with label "Refunded"
-    And a state with label "Closed"
-
     # Workflow
-    Given a workflow with an identifier "Shipping Flow" and initial state "Initialized"
+    Given a workflow with an identifier "Shipping Flow"
 
     # Transitions
     Given a transition "Initialized" -> "Shipped" in "Shipping Flow"

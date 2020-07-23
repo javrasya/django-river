@@ -45,29 +45,29 @@ def state_with_label(context, state_label):
     StateObjectFactory(label=state_label)
 
 
-@given('a workflow with an identifier "{identifier:ws}" and initial state "{initial_state_label:ws}"')
-def workflow(context, identifier, initial_state_label):
-    from django.contrib.contenttypes.models import ContentType
-    from river.tests.models import BasicTestModel
-    from river.models import State
-    from river.models.factories import WorkflowFactory
-
-    content_type = ContentType.objects.get_for_model(BasicTestModel)
-    initial_state = State.objects.get(label=initial_state_label)
-    workflow = WorkflowFactory(initial_state=initial_state, content_type=content_type, field_name="my_field")
-    workflows = getattr(context, "workflows", {})
-    workflows[identifier] = workflow
-    context.workflows = workflows
+@given('a workflow with an identifier "{identifier:ws}"')
+def workflow(context, identifier):
+    context.workflow_identifier = identifier
 
 
 @given('a transition "{source_state_label:ws}" -> "{destination_state_label:ws}" in "{workflow_identifier:ws}"')
 def transition(context, source_state_label, destination_state_label, workflow_identifier):
     from river.models import State
+    from django.contrib.contenttypes.models import ContentType
     from river.models.factories import TransitionMetaFactory
+    from river.tests.models import BasicTestModel
+    from river.models.factories import WorkflowFactory
 
-    workflow = getattr(context, "workflows", {})[workflow_identifier]
-    source_state = State.objects.get(label=source_state_label)
-    destination_state = State.objects.get(label=destination_state_label)
+    source_state, _ = State.objects.get_or_create(label=source_state_label)
+    workflow = getattr(context, "workflows", {}).get(workflow_identifier, None)
+    if not workflow:
+        content_type = ContentType.objects.get_for_model(BasicTestModel)
+        workflow = WorkflowFactory(initial_state=source_state, content_type=content_type, field_name="my_field")
+        if "workflows" not in context:
+            context.workflows = {}
+        context.workflows[workflow_identifier] = workflow
+
+    destination_state, _ = State.objects.get_or_create(label=destination_state_label)
     transition = TransitionMetaFactory.create(
         workflow=workflow,
         source_state=source_state,
