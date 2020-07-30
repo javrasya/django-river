@@ -114,8 +114,8 @@ Example Function
         def _handle_my_transitions(hook):
             workflow = hook['payload']['workflow']
             workflow_object = hook['payload']['workflow_object']
-            source_state = hook['payload']['transition_approval'].meta.source_state
-            destination_state = hook['payload']['transition_approval'].meta.destination_state
+            source_state = hook['payload']['transition_approval'].meta.transition_meta.source_state
+            destination_state = hook['payload']['transition_approval'].meta.transition_meta.destination_state
             last_approved_by = hook['payload']['transition_approval'].transactioner
             if hook['when'] == BEFORE:
                 print('A transition from %s to %s will soon happen on the object with id:%s and field_name:%s!' % (source_state.label, destination_state.label, workflow_object.pk, workflow.field_name))

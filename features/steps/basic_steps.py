@@ -3,6 +3,8 @@ from datetime import datetime
 from behave import given, when, then
 from hamcrest import assert_that, has_length, is_
 
+from river.models import State
+
 
 @given('a permission with name {name:w}')
 def permission(context, name):
@@ -168,6 +170,15 @@ def approve_by(context, workflow_object_identifier, username):
 
     user = User.objects.get(username=username)
     workflow_object.river.my_field.approve(as_user=user)
+
+
+@when('"{workflow_object_identifier:ws}" is attempted to be approved for next state "{next_state:ws}" by {username:w}')
+def approve_for_next_state_by(context, workflow_object_identifier, next_state, username):
+    from django.contrib.auth.models import User
+    workflow_object = getattr(context, "workflow_objects", {})[workflow_object_identifier]
+
+    user = User.objects.get(username=username)
+    workflow_object.river.my_field.approve(as_user=user, next_state=State.objects.get(label=next_state))
 
 
 @then('return {number:d} items')

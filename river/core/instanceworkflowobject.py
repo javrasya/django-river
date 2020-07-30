@@ -159,55 +159,31 @@ class InstanceWorkflowObject(object):
     @atomic
     def cancel_impossible_future(self, approved_approval):
         transition = approved_approval.transition
-        qs = Q(
-            workflow=self.workflow,
-            object_id=self.workflow_object.pk,
-            iteration=transition.iteration,
-            source_state=transition.source_state,
-        ) & ~Q(destination_state=transition.destination_state)
 
-        transitions = Transition.objects.filter(qs)
-        iteration = transition.iteration + 1
-        cancelled_transitions_qs = Q(pk=-1)
-        while transitions:
-            cancelled_transitions_qs = cancelled_transitions_qs | qs
-            qs = Q(
+        possible_transition_ids = {transition.pk}
+
+        possible_next_states = {transition.destination_state.label}
+        while possible_next_states:
+            possible_transitions = Transition.objects.filter(
                 workflow=self.workflow,
                 object_id=self.workflow_object.pk,
-                iteration=iteration,
-                source_state__pk__in=transitions.values_list("destination_state__pk", flat=True)
-            )
-            transitions = Transition.objects.filter(qs)
-            iteration += 1
+                status=PENDING,
+                source_state__label__in=possible_next_states
+            ).exclude(pk__in=possible_transition_ids)
 
-        uncancelled_transitions_qs = Q(pk=-1)
-        qs = Q(
+            possible_transition_ids.update(set(possible_transitions.values_list("pk", flat=True)))
+
+            possible_next_states = set(possible_transitions.values_list("destination_state__label", flat=True))
+
+        cancelled_transitions = Transition.objects.filter(
             workflow=self.workflow,
             object_id=self.workflow_object.pk,
-            iteration=transition.iteration,
-            source_state=transition.source_state,
-            destination_state=transition.destination_state
-        )
-        transitions = Transition.objects.filter(qs)
-        iteration = transition.iteration + 1
-        while transitions:
-            uncancelled_transitions_qs = uncancelled_transitions_qs | qs
-            qs = Q(
-                workflow=self.workflow,
-                object_id=self.workflow_object.pk,
-                iteration=iteration,
-                source_state__pk__in=transitions.values_list("destination_state__pk", flat=True),
-                status=PENDING
-            )
-            transitions = Transition.objects.filter(qs)
-            iteration += 1
+            status=PENDING,
+            iteration__gte=transition.iteration
+        ).exclude(pk__in=possible_transition_ids)
 
-        actual_cancelled_transitions = Transition.objects.select_for_update(nowait=True).filter(cancelled_transitions_qs & ~uncancelled_transitions_qs)
-        for actual_cancelled_transition in actual_cancelled_transitions:
-            actual_cancelled_transition.status = CANCELLED
-            actual_cancelled_transition.save()
-
-        TransitionApproval.objects.filter(transition__in=actual_cancelled_transitions).update(status=CANCELLED)
+        TransitionApproval.objects.filter(transition__in=cancelled_transitions).update(status=CANCELLED)
+        cancelled_transitions.update(status=CANCELLED)
 
     def _approve_signal(self, approval):
         return ApproveSignal(self.workflow_object, self.field_name, approval)
@@ -250,6 +226,7 @@ class InstanceWorkflowObject(object):
         old_transitions = self._get_transition_images([done_transition.destination_state.pk])
 
         iteration = done_transition.iteration + 1
+        regenerated_transitions = set()
         while old_transitions:
             for old_transition in old_transitions:
                 cycled_transition = Transition.objects.create(
@@ -276,8 +253,11 @@ class InstanceWorkflowObject(object):
                     cycled_approval.permissions.set(old_approval.permissions.all())
                     cycled_approval.groups.set(old_approval.groups.all())
 
+            regenerated_transitions.add((old_transition.source_state, old_transition.destination_state))
+
             old_transitions = self._get_transition_images(old_transitions.values_list("destination_state__pk", flat=True)).exclude(
-                source_state=done_transition.destination_state)
+                six.moves.reduce(lambda agg, q: q | agg, [Q(source_state=source_state, destination_state=destination_state) for source_state, destination_state in regenerated_transitions], Q(pk=-1))
+            )
 
             iteration += 1
 
