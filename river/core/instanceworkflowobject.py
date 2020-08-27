@@ -285,3 +285,36 @@ class InstanceWorkflowObject(object):
 
     def set_state(self, state):
         return setattr(self.workflow_object, self.field_name, state)
+
+    def on_pre_approve(self, callback_function, transition_approval_meta, transition_approval=None):
+        self.class_workflow.on_pre_approve(
+            callback_function,
+            transition_approval_meta,
+            workflow_object=self.workflow_object,
+            transition_approval=transition_approval
+        )
+
+    def on_post_approve(self, callback_function, transition_approval_meta, transition_approval=None):
+        self.class_workflow.on_post_approve(
+            callback_function,
+            transition_approval_meta,
+            workflow_object=self.workflow_object,
+            transition_approval=transition_approval
+        )
+
+    def on_pre_transition(self, callback_function, transition_meta, transition=None):
+        self.class_workflow.on_pre_transition(
+            callback_function,
+            transition_meta,
+            workflow_object=self.workflow_object,
+            transition=transition
+        )
+
+    def on_post_transition(self, callback_function, transition_meta, transition=None):
+        self.class_workflow.on_post_transition(callback_function, transition_meta, workflow_object=self.workflow_object, transition=transition)
+
+    def on_pre_complete(self, callback_function):
+        self.class_workflow.on_pre_complete(callback_function, workflow_object=self.workflow_object)
+
+    def on_post_complete(self, callback_function):
+        self.class_workflow.on_post_complete(callback_function, workflow_object=self.workflow_object)

@@ -54,5 +54,65 @@ True
 | Output | List<State> | List of the final states in the workflow |
 +--------+-------------+------------------------------------------+
 
+Class Level Hooking API
+=======================
+
+Please see ':ref:`Implement a Function`' to know how to implement a callback function.
+
+on_pre_approve
+--------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right before an approve happens.
+
+>>> MyModel.river.my_state_field.on_pre_approve(callback_function, transition_approval_meta)
+None
+
+on_post_approve
+---------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right after an approve happens.
+
+>>> MyModel.river.my_state_field.on_post_approve(callback_function, transition_approval_meta)
+None
+
+on_pre_transition
+-----------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right before a transition happens.
+
+>>> MyModel.river.my_state_field.on_pre_transition(callback_function, transition_approval_meta)
+None
+
+on_post_transition
+------------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right after a transition happens.
+
+>>> MyModel.river.my_state_field.on_post_transition(callback_function, transition_meta)
+None
+
+
+on_pre_complete
+-----------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right before a the whole flow is complete.
+
+>>> MyModel.river.my_state_field.on_pre_complete(callback_function)
+None
+
+on_post_complete
+------------------
+
+To register a hook for all the objects with a statically defined callback function that will
+be executed right after a the whole flow is complete.
+
+>>> MyModel.river.my_state_field.on_post_complete(callback_function)
+None
+
 .. toctree::
     :maxdepth: 2

@@ -5,9 +5,9 @@ Transition Meta Administration
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
 |           Field           |  Default   | Optional |       Format       |                Description                |
 +===========================+============+==========+====================+===========================================+
-| workflow                  |            | False    | | Choice           | | Your model class along with the field   |
-|                           |            |          | | of               | | that you want to use this transition    |
-|                           |            | False    | | Strings          | | approval meta for. ``django-river``     |
+| workflow                  |            | False    | Workflow           | | Your model class along with the field   |
+|                           |            |          |                    | | that you want to use this transition    |
+|                           |            |          |                    | | approval meta for. ``django-river``     |
 |                           |            |          |                    | | will list all the possible model and    |
 |                           |            |          |                    | | fields you can pick on the admin page   |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+

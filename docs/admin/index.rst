@@ -14,4 +14,5 @@ is to provide them by using their Django admin pages.
     state
     transition_meta
     transition_approval_meta
-    
+    dynamichooks
+    function

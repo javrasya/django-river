@@ -3,7 +3,7 @@ from hamcrest import assert_that, equal_to, has_entry, none, has_key, has_length
 
 from river.models.factories import PermissionObjectFactory, StateObjectFactory, WorkflowFactory, TransitionApprovalMetaFactory, UserObjectFactory, TransitionMetaFactory
 from river.models.hook import AFTER
-from river.tests.hooking.base_hooking_test import BaseHookingTest
+from river.tests.hooking.base_dynamic_hooking_test import BaseHookingTest
 from river.tests.models import BasicTestModel
 from river.tests.models.factories import BasicTestModelObjectFactory
 

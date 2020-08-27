@@ -158,5 +158,65 @@ purposes.
 |                   |        |                          | | of the workflow object                 |
 +-------------------+--------+--------------------------+------------------------------------------+
 
+Instance Level Hooking API
+==========================
+
+Please see ':ref:`Implement a Function`' to know how to implement a callback function.
+
+on_pre_approve
+--------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right before an approve happens.
+
+>>> my_model.river.my_state_field.on_pre_approve(callback_function, transition_approval_meta)
+None
+
+on_post_approve
+---------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right after an approve happens.
+
+>>> my_model.river.my_state_field.on_post_approve(callback_function, transition_approval_meta)
+None
+
+on_pre_transition
+-----------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right before a transition happens.
+
+>>> my_model.river.my_state_field.on_pre_transition(callback_function, transition_approval_meta)
+None
+
+on_post_transition
+------------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right after a transition happens.
+
+>>> my_model.river.my_state_field.on_post_transition(callback_function, transition_meta)
+None
+
+
+on_pre_complete
+-----------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right before a the whole flow is complete.
+
+>>> my_model.river.my_state_field.on_pre_complete(callback_function)
+None
+
+on_post_complete
+------------------
+
+To register a hook for either a specific object with a statically defined callback function that will
+be executed right after a the whole flow is complete.
+
+>>> my_model.river.my_state_field.on_post_complete(callback_function)
+None
+
 .. toctree::
     :maxdepth: 2

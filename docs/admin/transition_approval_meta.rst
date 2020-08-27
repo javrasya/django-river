@@ -5,13 +5,13 @@ Transition Approval Meta Administration
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
 |           Field           |  Default   | Optional |       Format       |                Description                |
 +===========================+============+==========+====================+===========================================+
-| workflow                  |            |          | | Choice           | | Your model class along with the field   |
-|                           |            |          | | of               | | that you want to use this transition    |
-|                           |            | False    | | Strings          | | approval meta for. ``django-river``     |
+| workflow                  |            |          | Workflow           | | Your model class along with the field   |
+|                           |            |          |                    | | that you want to use this transition    |
+|                           |            | False    |                    | | approval meta for. ``django-river``     |
 |                           |            |          |                    | | will list all the possible model and    |
 |                           |            |          |                    | | fields you can pick on the admin page   |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
-| transition_meta           |            | False    | TransitionMete     | | Transition information that contains    |
+| transition_meta           |            | False    | TransitionMeta     | | Transition information that contains    |
 |                           |            |          |                    | | source and destination states           |
 +---------------------------+------------+----------+--------------------+-------------------------------------------+
 | permissions               | Empty List | True     | List<Permission>   | | List of permissions which will be       |

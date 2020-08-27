@@ -1,8 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
 
+from river.core.statichookregistry import static_hook_registry
 from river.driver.mssql_driver import MsSqlDriver
 from river.driver.orm_driver import OrmDriver
-from river.models import State, TransitionApprovalMeta, Workflow, app_config
+from river.models import State, TransitionApprovalMeta, Workflow, app_config, OnTransitHook
 
 
 class ClassWorkflowObject(object):
@@ -45,3 +46,53 @@ class ClassWorkflowObject(object):
     @property
     def _content_type(self):
         return ContentType.objects.get_for_model(self.wokflow_object_class)
+
+    def on_pre_approve(self, callback_function, transition_approval_meta, workflow_object=None, transition_approval=None):
+        static_hook_registry.on_pre_approve(
+            callback_function,
+            self.workflow,
+            transition_approval_meta,
+            workflow_object=workflow_object,
+            transition_approval=transition_approval
+        )
+
+    def on_post_approve(self, callback_function, transition_approval_meta, workflow_object=None, transition_approval=None):
+        static_hook_registry.on_post_approve(
+            callback_function,
+            self.workflow,
+            transition_approval_meta,
+            workflow_object=workflow_object,
+            transition_approval=transition_approval
+        )
+
+    def on_pre_transition(self, callback_function, transition_meta, workflow_object=None, transition=None):
+        static_hook_registry.on_pre_transition(
+            callback_function,
+            self.workflow,
+            transition_meta,
+            workflow_object=workflow_object,
+            transition=transition
+        )
+
+    def on_post_transition(self, callback_function, transition_meta, workflow_object=None, transition=None):
+        static_hook_registry.on_post_transition(
+            callback_function,
+            self.workflow,
+            transition_meta,
+            workflow_object=workflow_object,
+            transition=transition
+        )
+
+    def on_pre_complete(self, callback_function, workflow_object=None):
+        static_hook_registry.on_pre_complete(
+            callback_function,
+            self.workflow,
+            workflow_object=workflow_object,
+        )
+
+    def on_post_complete(self, callback_function, workflow_object=None):
+        static_hook_registry.on_post_complete(
+            callback_function,
+            self.workflow,
+            workflow_object=workflow_object,
+        )

@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.dispatch import Signal
 
+from river.core.statichookregistry import static_hook_registry
 from river.models import Workflow
 from river.models.hook import BEFORE, AFTER
 from river.models.on_approved_hook import OnApprovedHook
@@ -33,6 +34,7 @@ class TransitionSignal(object):
 
     def __enter__(self):
         if self.status:
+            context = self._get_context(BEFORE)
             for hook in OnTransitHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                     (Q(transition__isnull=True) | Q(transition=self.transition_approval.transition)) &
@@ -42,13 +44,24 @@ class TransitionSignal(object):
                         hook_type=BEFORE
                     )
             ):
-                hook.execute(self._get_context(BEFORE))
+                hook.execute(context)
+
+            static_callbacks = static_hook_registry.list_on_pre_transition_callbacks(
+                self.workflow,
+                self.transition_approval.transition.meta,
+                self.workflow_object,
+                self.transition_approval.transition
+            )
+
+            for static_callback in static_callbacks:
+                static_callback(context)
 
             LOGGER.debug("The signal that is fired right before the transition ( %s ) happened for %s"
                          % (self.transition_approval.transition, self.workflow_object))
 
     def __exit__(self, type, value, traceback):
         if self.status:
+            context = self._get_context(AFTER)
             for hook in OnTransitHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                     (Q(transition__isnull=True) | Q(transition=self.transition_approval.transition)) &
@@ -58,7 +71,18 @@ class TransitionSignal(object):
                         hook_type=AFTER
                     )
             ):
-                hook.execute(self._get_context(AFTER))
+                hook.execute(context)
+
+            static_callbacks = static_hook_registry.list_on_post_transition_callbacks(
+                self.workflow,
+                self.transition_approval.transition.meta,
+                self.workflow_object,
+                self.transition_approval.transition
+            )
+
+            for static_callback in static_callbacks:
+                static_callback(context)
+
             LOGGER.debug("The signal that is fired right after the transition ( %s) happened for %s"
                          % (self.transition_approval.transition, self.workflow_object))
 
@@ -85,6 +109,8 @@ class ApproveSignal(object):
         self.workflow = Workflow.objects.get(content_type=self.content_type, field_name=self.field_name)
 
     def __enter__(self):
+        context = self._get_context(BEFORE)
+
         for hook in OnApprovedHook.objects.filter(
                 (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                 (Q(transition_approval__isnull=True) | Q(transition_approval=self.transition_approval)) &
@@ -94,12 +120,23 @@ class ApproveSignal(object):
                     hook_type=BEFORE
                 )
         ):
-            hook.execute(self._get_context(BEFORE))
+            hook.execute(context)
+
+        static_callbacks = static_hook_registry.list_on_pre_approve_callbacks(
+            self.workflow,
+            self.transition_approval.meta,
+            self.workflow_object,
+            self.transition_approval
+        )
+
+        for static_callback in static_callbacks:
+            static_callback(context)
 
         LOGGER.debug("The signal that is fired right before a transition approval is approved for %s due to transition %s -> %s" % (
             self.workflow_object, self.transition_approval.transition.source_state.label, self.transition_approval.transition.destination_state.label))
 
     def __exit__(self, type, value, traceback):
+        context = self._get_context(AFTER)
         for hook in OnApprovedHook.objects.filter(
                 (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                 (Q(transition_approval__isnull=True) | Q(transition_approval=self.transition_approval)) &
@@ -109,7 +146,18 @@ class ApproveSignal(object):
                     hook_type=AFTER
                 )
         ):
-            hook.execute(self._get_context(AFTER))
+            hook.execute(context)
+
+        static_callbacks = static_hook_registry.list_on_post_approve_callbacks(
+            self.workflow,
+            self.transition_approval.meta,
+            self.workflow_object,
+            self.transition_approval
+        )
+
+        for static_callback in static_callbacks:
+            static_callback(context)
+
         LOGGER.debug("The signal that is fired right after a transition approval is approved for %s due to transition %s -> %s" % (
             self.workflow_object, self.transition_approval.transition.source_state.label, self.transition_approval.transition.destination_state.label))
 
@@ -138,6 +186,7 @@ class OnCompleteSignal(object):
 
     def __enter__(self):
         if self.status:
+            context = self._get_context(BEFORE)
             for hook in OnCompleteHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                     Q(
@@ -145,11 +194,21 @@ class OnCompleteSignal(object):
                         hook_type=BEFORE
                     )
             ):
-                hook.execute(self._get_context(BEFORE))
+                hook.execute(context)
+
+            static_callbacks = static_hook_registry.list_on_pre_complete_callbacks(
+                self.workflow,
+                self.workflow_object
+            )
+
+            for static_callback in static_callbacks:
+                static_callback(context)
+
             LOGGER.debug("The signal that is fired right before the workflow of %s is complete" % self.workflow_object)
 
     def __exit__(self, type, value, traceback):
         if self.status:
+            context = self._get_context(AFTER)
             for hook in OnCompleteHook.objects.filter(
                     (Q(object_id__isnull=True) | Q(object_id=self.workflow_object.pk, content_type=self.content_type)) &
                     Q(
@@ -157,7 +216,16 @@ class OnCompleteSignal(object):
                         hook_type=AFTER
                     )
             ):
-                hook.execute(self._get_context(AFTER))
+                hook.execute(context)
+
+            static_callbacks = static_hook_registry.list_on_post_complete_callbacks(
+                self.workflow,
+                self.workflow_object
+            )
+
+            for static_callback in static_callbacks:
+                static_callback(context)
+
             LOGGER.debug("The signal that is fired right after the workflow of %s is complete" % self.workflow_object)
 
     def _get_context(self, when):

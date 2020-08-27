@@ -3,6 +3,13 @@
 Change Logs
 ===========
 
+3.3.0:
+------
+    * **Improvement** -  # 170_ : Support hooks with statically defined callback functions that are in the workspace
+
+
+.. _170: https://github.com/javrasya/django-river/issues/170
+
 3.2.0 (Stable):
 ---------------
     * **Improvement** -  # 140_ 141_: Support Microsoft SQL Server 17 and 19
@@ -29,7 +36,7 @@ Change Logs
 3.1.2:
 ------
     * **Improvement** -  # 133_: Support MySQL 8.0
-
+_handle_my_transitions
 
 .. _133: https://github.com/javrasya/django-river/issues/133
 

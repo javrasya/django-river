@@ -1,23 +1,8 @@
-.. _hooking_function_guide:
+Implement a Function
+====================
 
-.. |Create Function Page| image:: /_static/create-function.png
-
-Functions
-=========
-
-Functions are the description in ``Python`` of what you want to do on certain events happen. So you define them once and you can use them
-with multiple hooking up. Just go to ``/admin/river/function/`` admin page and create your functions there.``django-river`` function admin support
-python code highlighting as well if you enable the ``codemirror2`` app. Don't forget to collect statics for production deployments.
-
-
-   .. code:: python
-
-       INSTALLED_APPS=[
-           ...
-           codemirror2
-           river
-           ...
-       ]
+Functions are a piece of ``Python`` code to do what you want when certain events happen. Either with static or dynamic hookings, they should be implemented
+according to the following specifics;
 
 Here is an example function;
 
@@ -28,7 +13,8 @@ Here is an example function;
         def handle(context):
             print(datetime.now())
 
-**Important:** **YOUR FUNCTION SHOULD BE NAMED AS** ``handle``. Otherwise ``django-river`` won't execute your function.
+**Important:** **YOUR FUNCTION SHOULD BE NAMED AS** ``handle`` if it is used in dynamically created hooks.
+Otherwise ``django-river`` won't execute your function.
 
 |Create Function Page|
 
