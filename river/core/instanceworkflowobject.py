@@ -208,7 +208,7 @@ class InstanceWorkflowObject(object):
             source_state=done_transition.destination_state
         )
 
-        return qs.filter(status=DONE).count() > 0 and qs.filter(status=PENDING).count() == 0
+        return qs.filter(status=DONE).count() > 0
 
     def _get_transition_images(self, source_states):
         meta_max_iteration = Transition.objects.filter(
