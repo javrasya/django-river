@@ -43,7 +43,7 @@ class ApprovedHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_pre_approve(workflow, meta1, workflow_object=workflow_object.model)
 
@@ -114,7 +114,7 @@ class ApprovedHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_pre_approve(workflow, meta1)
 
@@ -205,7 +205,7 @@ class ApprovedHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)

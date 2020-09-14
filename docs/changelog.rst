@@ -3,16 +3,30 @@
 Change Logs
 ===========
 
-3.2.0 (Stable):
+3.2.2 (Stable):
 ---------------
+    * **Bug**         -  # 162_: Fix a bug that is causing some possible future transitions to turn to CANCELLED for some workflows.
+
+.. _162: https://github.com/javrasya/django-river/issues/159
+
+3.2.1:
+------
+    * **Bug**         -  # 159_: A bug that is with having multiple cyclic dependencies in a workflow that happens when one of tem goes through has been fixed.
+    * **Drop**        -        : Drop Python3.4 support since it is having incompatibilities with the module ``six``
+
+
+.. _159: https://github.com/javrasya/django-river/issues/159
+
+3.2.0:
+------
     * **Improvement** -  # 140_ 141_: Support Microsoft SQL Server 17 and 19
 
 
 .. _140: https://github.com/javrasya/django-river/issues/140
 .. _141: https://github.com/javrasya/django-river/issues/141
 
-3.1.4
------
+3.1.4:
+------
     * **Bug**         -  # 137_: Fix a bug with jumping to a state
 
 

@@ -26,7 +26,7 @@ class TransitionApprovalMetaModelTest(TestCase):
         )
         meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
-        BasicTestModelObjectFactory()
+        BasicTestModelObjectFactory(workflow=workflow)
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
         approvals = TransitionApproval.objects.filter(workflow=workflow)
         assert_that(approvals, has_length(1))
@@ -53,7 +53,7 @@ class TransitionApprovalMetaModelTest(TestCase):
         )
         meta1 = TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
-        BasicTestModelObjectFactory()
+        BasicTestModelObjectFactory(workflow=workflow)
         TransitionApproval.objects.filter(workflow=workflow).update(status=PENDING)
         assert_that(TransitionApproval.objects.filter(workflow=workflow), has_length(1))
 

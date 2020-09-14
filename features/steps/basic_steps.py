@@ -3,6 +3,8 @@ from datetime import datetime
 from behave import given, when, then
 from hamcrest import assert_that, has_length, is_
 
+from river.models import State
+
 
 @given('a permission with name {name:w}')
 def permission(context, name):
@@ -116,8 +118,9 @@ def authorization_rule_with_groups(context, source_state_label, destination_stat
 @given('a workflow object with identifier "{identifier:ws}"')
 def workflow_object(context, identifier):
     from river.tests.models.factories import BasicTestModelObjectFactory
+    from river.models import Workflow
 
-    workflow_object = BasicTestModelObjectFactory().model
+    workflow_object = BasicTestModelObjectFactory(workflow=Workflow.objects.first()).model
     workflow_objects = getattr(context, "workflow_objects", {})
     workflow_objects[identifier] = workflow_object
     context.workflow_objects = workflow_objects
@@ -135,8 +138,9 @@ def jump_workflow_object(context, workflow_object_identifier, state_label):
 @given('{number:d} workflow objects')
 def many_workflow_object(context, number):
     from river.tests.models.factories import BasicTestModelObjectFactory
+    from river.models import Workflow
 
-    BasicTestModelObjectFactory.create_batch(250)
+    BasicTestModelObjectFactory.create_batch(250, workflow=Workflow.objects.first())
 
 
 @when('available approvals are fetched with user {username:w}')
@@ -166,6 +170,15 @@ def approve_by(context, workflow_object_identifier, username):
 
     user = User.objects.get(username=username)
     workflow_object.river.my_field.approve(as_user=user)
+
+
+@when('"{workflow_object_identifier:ws}" is attempted to be approved for next state "{next_state:ws}" by {username:w}')
+def approve_for_next_state_by(context, workflow_object_identifier, next_state, username):
+    from django.contrib.auth.models import User
+    workflow_object = getattr(context, "workflow_objects", {})[workflow_object_identifier]
+
+    user = User.objects.get(username=username)
+    workflow_object.river.my_field.approve(as_user=user, next_state=State.objects.get(label=next_state))
 
 
 @then('return {number:d} items')

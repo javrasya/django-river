@@ -3,9 +3,9 @@ from abc import abstractmethod
 
 class RiverDriver(object):
 
-    def __init__(self, workflow, wokflow_object_class, field_name):
+    def __init__(self, workflow, workflow_object_class, field_name):
         self.workflow = workflow
-        self.wokflow_object_class = wokflow_object_class
+        self.workflow_object_class = workflow_object_class
         self.field_name = field_name
         self._cached_workflow = None
 

@@ -5,8 +5,6 @@ matrix:
   include:
     - python: "2.7"
       env: TOXENV=py27-dj1.11-sqlite3
-    - python: "3.4"
-      env: TOXENV=py34-dj1.11-sqlite3
     - python: "3.5"
       env: TOXENV=py35-dj1.11-sqlite3
     - python: "3.5"

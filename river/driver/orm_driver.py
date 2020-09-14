@@ -19,7 +19,7 @@ class OrmDriver(RiverDriver):
         )
 
         workflow_objects = With(
-            self.wokflow_object_class.objects.all(),
+            self.workflow_object_class.objects.all(),
             name="workflow_object"
         )
 
@@ -39,7 +39,9 @@ class OrmDriver(RiverDriver):
             approvals_with_max_priority, object_id_as_str=Cast(workflow_objects.col.pk, CharField(max_length=200))
         ).with_cte(
             workflow_objects
-        ).filter(transition__source_state=getattr(workflow_objects.col, self.field_name + "_id"))
+        ).filter(
+            transition__source_state=getattr(workflow_objects.col, self.field_name + "_id")
+        ).distinct()
 
     def _authorized_approvals(self, as_user):
         group_q = Q()

@@ -7,10 +7,10 @@ from river.models import State, TransitionApprovalMeta, Workflow, app_config
 
 class ClassWorkflowObject(object):
 
-    def __init__(self, wokflow_object_class, field_name):
-        self.wokflow_object_class = wokflow_object_class
+    def __init__(self, workflow_object_class, field_name):
+        self.workflow_object_class = workflow_object_class
         self.field_name = field_name
-        self.workflow = Workflow.objects.filter(field_name=self.field_name, content_type=self._content_type).first()
+        self.workflow = None
         self._cached_river_driver = None
 
     @property
@@ -19,15 +19,15 @@ class ClassWorkflowObject(object):
             return self._cached_river_driver
         else:
             if app_config.IS_MSSQL:
-                self._cached_river_driver = MsSqlDriver(self.workflow, self.wokflow_object_class, self.field_name)
+                self._cached_river_driver = MsSqlDriver(self.workflow, self.workflow_object_class, self.field_name)
             else:
-                self._cached_river_driver = OrmDriver(self.workflow, self.wokflow_object_class, self.field_name)
+                self._cached_river_driver = OrmDriver(self.workflow, self.workflow_object_class, self.field_name)
             return self._cached_river_driver
 
     def get_on_approval_objects(self, as_user):
         approvals = self.get_available_approvals(as_user)
         object_ids = list(approvals.values_list('object_id', flat=True))
-        return self.wokflow_object_class.objects.filter(pk__in=object_ids)
+        return self.workflow_object_class.objects.filter(pk__in=object_ids)
 
     def get_available_approvals(self, as_user):
         return self._river_driver.get_available_approvals(as_user)
@@ -44,4 +44,4 @@ class ClassWorkflowObject(object):
 
     @property
     def _content_type(self):
-        return ContentType.objects.get_for_model(self.wokflow_object_class)
+        return ContentType.objects.get_for_model(self.workflow_object_class)

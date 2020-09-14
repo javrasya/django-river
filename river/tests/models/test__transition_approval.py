@@ -28,7 +28,7 @@ class TransitionApprovalModelTest(TestCase):
 
         TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta, priority=0)
 
-        BasicTestModelObjectFactory()
+        BasicTestModelObjectFactory(workflow=workflow)
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
         approvals = TransitionApproval.objects.filter(workflow=workflow)
         assert_that(approvals, has_length(1))
@@ -62,7 +62,7 @@ class TransitionApprovalModelTest(TestCase):
         TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
         TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
 
-        BasicTestModelObjectFactory()
+        BasicTestModelObjectFactory(workflow=workflow)
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
         approvals = TransitionApproval.objects.filter(workflow=workflow)
         assert_that(approvals, has_length(2))
@@ -96,7 +96,7 @@ class TransitionApprovalModelTest(TestCase):
         TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_1, priority=0)
         TransitionApprovalMetaFactory.create(workflow=workflow, transition_meta=transition_meta_2, priority=0)
 
-        BasicTestModelObjectFactory()
+        BasicTestModelObjectFactory(workflow=workflow)
         TransitionApproval.objects.filter(workflow=workflow).update(status=APPROVED)
         approvals = TransitionApproval.objects.filter(workflow=workflow)
         assert_that(approvals, has_length(2))

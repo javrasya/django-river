@@ -83,6 +83,7 @@ class WorkflowFactory(DjangoModelFactory):
     class Meta:
         model = Workflow
 
+    name = factory.Sequence(lambda n: 'Workflow %s' % n)
     content_type = factory.SubFactory(ContentTypeObjectFactory)
     initial_state = factory.SubFactory(StateObjectFactory)
 

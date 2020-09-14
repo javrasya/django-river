@@ -49,7 +49,7 @@ class TransitionHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_post_transition(workflow, transition_meta_2, workflow_object=workflow_object.model)
 
@@ -117,7 +117,7 @@ class TransitionHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         self.hook_post_transition(workflow, transition_meta_2)
 
@@ -197,7 +197,7 @@ class TransitionHooking(BaseHookingTest):
             permissions=[authorized_permission]
         )
 
-        workflow_object = BasicTestModelObjectFactory()
+        workflow_object = BasicTestModelObjectFactory(workflow=workflow)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
         workflow_object.model.river.my_field.approve(as_user=authorized_user)
