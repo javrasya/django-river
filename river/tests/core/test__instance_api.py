@@ -606,6 +606,12 @@ class InstanceApiTest(TestCase):
             destination_state=cycle_state_2,
         )
 
+        transition_meta_1_alternative = TransitionMetaFactory.create(
+            workflow=workflow,
+            source_state=cycle_state_1,
+            destination_state=final_state,
+        )
+
         transition_meta_2 = TransitionMetaFactory.create(
             workflow=workflow,
             source_state=cycle_state_2,
@@ -633,6 +639,13 @@ class InstanceApiTest(TestCase):
         TransitionApprovalMetaFactory.create(
             workflow=workflow,
             transition_meta=transition_meta_1,
+            priority=0,
+            permissions=[authorized_permission]
+        )
+
+        TransitionApprovalMetaFactory.create(
+            workflow=workflow,
+            transition_meta=transition_meta_1_alternative,
             priority=0,
             permissions=[authorized_permission]
         )
@@ -668,16 +681,16 @@ class InstanceApiTest(TestCase):
         workflow_object = BasicTestModelObjectFactory(workflow=workflow)
 
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_2)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_3)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
 
         transitions = Transition.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(transitions, has_length(5))
+        assert_that(transitions, has_length(6))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(5))
+        assert_that(approvals, has_length(6))
 
         assert_that(approvals, has_item(
             all_of(
@@ -726,15 +739,15 @@ class InstanceApiTest(TestCase):
 
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_2)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_2))
-        workflow_object.model.river.my_field.approve(as_user=authorized_user)
+        workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_3)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_3))
         workflow_object.model.river.my_field.approve(as_user=authorized_user, next_state=cycle_state_1)
         assert_that(workflow_object.model.my_field, equal_to(cycle_state_1))
 
         approvals = TransitionApproval.objects.filter(workflow=workflow, workflow_object=workflow_object.model)
-        assert_that(approvals, has_length(15))
+        assert_that(approvals, has_length(18))
 
         assert_that(approvals, has_item(
             all_of(
