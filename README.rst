@@ -1,6 +1,6 @@
 .. |Build Status| image:: https://travis-ci.org/javrasya/django-river.svg
     :target: https://travis-ci.org/javrasya/django-river
-    
+
 .. |Coverage Status| image:: https://coveralls.io/repos/javrasya/django-river/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/javrasya/django-river?branch=master
 
@@ -10,21 +10,21 @@
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/django-river/badge/?version=latest
     :target: https://readthedocs.org/projects/django-river/?badge=latest
-    
+
 .. |Quality Status| image:: https://api.codacy.com/project/badge/Grade/c3c73d157fe045e6b966d8d4416b6b17
    :alt: Codacy Badge
    :target: https://app.codacy.com/app/javrasya/django-river?utm_source=github.com&utm_medium=referral&utm_content=javrasya/django-river&utm_campaign=Badge_Grade_Dashboard
 
 .. |Downloads| image:: https://img.shields.io/pypi/dm/django-river
     :alt: PyPI - Downloads
-    
+
 .. |Discord| image:: https://img.shields.io/discord/651433240019599400
     :target: https://discord.gg/DweUwZX
-    :alt: Discord  
-    
+    :alt: Discord
+
 .. |Open Collective| image:: https://opencollective.com/django-river/all/badge.svg?label=financial+contributors
     :alt: Financial Contributors
-    :target: #contributors  
+    :target: #contributors
 
 .. |Timeline| image:: https://cloud.githubusercontent.com/assets/1279644/9934893/921b543a-5d5c-11e5-9596-a5e067db79ed.png
 
@@ -77,7 +77,7 @@ A very modern admin with some user friendly interfaces that is called `River Adm
 Requirements
 ------------
 * Python (``2.7``, ``3.5``, ``3.6``)
-* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``, ``3.0``)
+* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``, ``3.0``, ``3.1``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
 
 Supported (Tested) Databases:

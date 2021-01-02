@@ -24,6 +24,8 @@ matrix:
     - python: "3.6"
       env: TOXENV=py36-dj3.0-sqlite3
     - python: "3.6"
+      env: TOXENV=py36-dj3.1-sqlite3
+    - python: "3.6"
       env: TOXENV=cov
     - python: "3.6"
       env: TOXENV=py36-dj2.2-postgresql9
