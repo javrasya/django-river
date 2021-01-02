@@ -29,9 +29,7 @@ class TransitionApprovalModelTest(TestCase):
             ),
         )
 
-    def test_shouldNotAllowTheStateToBeDeletedWhenThereIsATransitionApprovalThatIsUsedAsSource(
-        self,
-    ):
+    def test_shouldNotAllowTheStateToBeDeletedWhenThereIsATransitionApprovalThatIsUsedAsSource(self):
         content_type = ContentType.objects.get_for_model(BasicTestModel)
 
         state1 = RawState("state_1")
