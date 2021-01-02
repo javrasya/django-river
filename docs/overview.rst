@@ -16,7 +16,7 @@ There is ordering aprovments for a transition functionality in ``django-river``.
 Requirements
 ------------
 * Python (``2.7``, ``3.5``, ``3.6``)
-* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``, ``3.0``)
+* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``, ``3.0``, ``3.1``)
 * ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
 
 
@@ -67,4 +67,4 @@ Closed without Re-Open case
 
 Closed with Re-Open case
 """"""""""""""""""""""""
-|Closed With Re Open Case|  
+|Closed With Re Open Case|

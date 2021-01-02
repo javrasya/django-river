@@ -18,3 +18,4 @@ dist
 .python-version
 build
 venv*
+.vscode/settings.json
