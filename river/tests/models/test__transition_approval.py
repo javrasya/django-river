@@ -23,10 +23,7 @@ class TransitionApprovalModelTest(TestCase):
 
         assert_that(
             calling(flow.workflow.delete),
-            raises(
-                ProtectedError,
-                "Cannot delete some instances of model 'Workflow' because they are referenced through .*",
-            ),
+            raises(ProtectedError, "Cannot delete some instances of model 'Workflow' because they are referenced through .*")
         )
 
     def test_shouldNotAllowTheStateToBeDeletedWhenThereIsATransitionApprovalThatIsUsedAsSource(self):
