@@ -3,28 +3,26 @@ sudo: false
 cache: pip
 matrix:
   include:
-    - python: "2.7"
-      env: TOXENV=py27-dj1.11-sqlite3
-    - python: "3.5"
-      env: TOXENV=py35-dj1.11-sqlite3
-    - python: "3.5"
-      env: TOXENV=py35-dj2.0-sqlite3
-    - python: "3.5"
-      env: TOXENV=py35-dj2.1-sqlite3
     - python: "3.5"
       env: TOXENV=py35-dj2.2-sqlite3
-    - python: "3.6"
-      env: TOXENV=py36-dj1.11-sqlite3
-    - python: "3.6"
-      env: TOXENV=py36-dj2.0-sqlite3
-    - python: "3.6"
-      env: TOXENV=py36-dj2.1-sqlite3
     - python: "3.6"
       env: TOXENV=py36-dj2.2-sqlite3
     - python: "3.6"
       env: TOXENV=py36-dj3.0-sqlite3
     - python: "3.6"
       env: TOXENV=py36-dj3.1-sqlite3
+    - python: "3.7"
+      env: TOXENV=py37-dj2.2-sqlite3
+    - python: "3.7"
+      env: TOXENV=py37-dj3.0-sqlite3
+    - python: "3.7"
+      env: TOXENV=py37-dj3.1-sqlite3
+    - python: "3.8"
+      env: TOXENV=py38-dj2.2-sqlite3
+    - python: "3.8"
+      env: TOXENV=py38-dj3.0-sqlite3
+    - python: "3.8"
+      env: TOXENV=py38-dj3.1-sqlite3
     - python: "3.6"
       env: TOXENV=cov
     - python: "3.6"
