@@ -76,9 +76,10 @@ A very modern admin with some user friendly interfaces that is called `River Adm
 
 Requirements
 ------------
-* Python (``2.7``, ``3.5``, ``3.6``)
-* Django (``1.11``, ``2.0``, ``2.1``, ``2.2``, ``3.0``, ``3.1``)
-* ``Django`` >= 2.0 is supported for ``Python`` >= 3.5
+* Python (``3.5`` (for Django ``2.2`` only), ``3.6``, ``3.7``, ``3.8``)
+* Django (``2.2``, ``3.0``, ``3.1``)
+* ``Django`` = 2.2 is supported for ``Python`` >= 3.5
+* ``Django`` >= 3.0 is supported for ``Python`` >= 3.6
 
 Supported (Tested) Databases:
 -----------------------------
