@@ -3,8 +3,16 @@
 Change Logs
 ===========
 
-3.2.2 (Stable):
+3.3.0 (Stable):
 ---------------
+    * **Drop**         -  # 182_: No longer maintain Python versions <= 3.5
+    * **Drop**         -  # 181_: No longer maintain Django versions <= 2.1
+
+.. _181: https://github.com/javrasya/django-river/issues/181
+.. _182: https://github.com/javrasya/django-river/issues/182
+
+3.2.2:
+------
     * **Bug**         -  # 162_: Fix a bug that is causing some possible future transitions to turn to CANCELLED for some workflows.
 
 .. _162: https://github.com/javrasya/django-river/issues/159
