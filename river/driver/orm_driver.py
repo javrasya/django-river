@@ -48,7 +48,8 @@ class OrmDriver(RiverDriver):
 
         permissions = []
         for backend in auth.get_backends():
-            permissions.extend(backend.get_all_permissions(as_user))
+            if hasattr(backend, "get_all_permissions"):
+                permissions.extend(backend.get_all_permissions(as_user))
 
         permission_q = Q()
         for p in permissions:
