@@ -15,7 +15,6 @@ from river.utils.exceptions import RiverException
 
 LOGGER = logging.getLogger(__name__)
 
-
 class InstanceWorkflowObject(object):
 
     def __init__(self, workflow_object, field_name):
@@ -24,43 +23,31 @@ class InstanceWorkflowObject(object):
         self.content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
         self.field_name = field_name
         self.workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
-        self.initialized = False
 
     @transaction.atomic
-    def initialize_approvals(self):
-        if not self.initialized:
-            if self.workflow and self.workflow.transition_approvals.filter(workflow_object=self.workflow_object).count() == 0:
-                transition_meta_list = self.workflow.transition_metas.filter(source_state=self.workflow.initial_state)
-                iteration = 0
-                processed_transitions = []
-                while transition_meta_list:
-                    for transition_meta in transition_meta_list:
-                        transition = Transition.objects.create(
-                            workflow=self.workflow,
-                            workflow_object=self.workflow_object,
-                            source_state=transition_meta.source_state,
-                            destination_state=transition_meta.destination_state,
-                            meta=transition_meta,
-                            iteration=iteration
-                        )
-                        for transition_approval_meta in transition_meta.transition_approval_meta.all():
-                            transition_approval = TransitionApproval.objects.create(
-                                workflow=self.workflow,
-                                workflow_object=self.workflow_object,
-                                transition=transition,
-                                priority=transition_approval_meta.priority,
-                                meta=transition_approval_meta
-                            )
-                            transition_approval.permissions.add(*transition_approval_meta.permissions.all())
-                            transition_approval.groups.add(*transition_approval_meta.groups.all())
-                        processed_transitions.append(transition_meta.pk)
-                    transition_meta_list = self.workflow.transition_metas.filter(
-                        source_state__in=transition_meta_list.values_list("destination_state", flat=True)
-                    ).exclude(pk__in=processed_transitions)
-
-                    iteration += 1
-                self.initialized = True
-                LOGGER.debug("Transition approvals are initialized for the workflow object %s" % self.workflow_object)
+    def initialize_approvals(self, iteration=0):
+        transition_meta_list = self.workflow.transition_metas.filter(source_state=self.get_state() or self.workflow.initial_state)
+        if transition_meta_list:
+            for transition_meta in transition_meta_list:
+                transition = Transition.objects.create(
+                    workflow=self.workflow,
+                    workflow_object=self.workflow_object,
+                    source_state=transition_meta.source_state,
+                    destination_state=transition_meta.destination_state,
+                    meta=transition_meta,
+                    iteration=iteration
+                )
+                for transition_approval_meta in transition_meta.transition_approval_meta.all():
+                    transition_approval = TransitionApproval.objects.create(
+                        workflow=self.workflow,
+                        workflow_object=self.workflow_object,
+                        transition=transition,
+                        priority=transition_approval_meta.priority,
+                        meta=transition_approval_meta
+                    )
+                    transition_approval.permissions.add(*transition_approval_meta.permissions.all())
+                    transition_approval.groups.add(*transition_approval_meta.groups.all())
+        LOGGER.debug("Next iteration transition approvals are initialized for the workflow object %s" % self.workflow_object)
 
     @property
     def on_initial_state(self):
@@ -147,39 +134,23 @@ class InstanceWorkflowObject(object):
             previous_state = self.get_state()
             self.set_state(approval.transition.destination_state)
             has_transit = True
-            if self._check_if_it_cycled(approval.transition):
-                self._re_create_cycled_path(approval.transition)
-            LOGGER.debug("Workflow object %s is proceeded for next transition. Transition: %s -> %s" % (
-                self.workflow_object, previous_state, self.get_state()))
 
+        if next_state:
+            self.initialize_approvals(approval.transition.iteration + 1)
+        
         with self._approve_signal(approval), self._transition_signal(has_transit, approval), self._on_complete_signal():
             self.workflow_object.save()
-
+    
     @atomic
     def cancel_impossible_future(self, approved_approval):
         transition = approved_approval.transition
-
-        possible_transition_ids = {transition.pk}
-
-        possible_next_states = {transition.destination_state.label}
-        while possible_next_states:
-            possible_transitions = Transition.objects.filter(
-                workflow=self.workflow,
-                object_id=self.workflow_object.pk,
-                status=PENDING,
-                source_state__label__in=possible_next_states
-            ).exclude(pk__in=possible_transition_ids)
-
-            possible_transition_ids.update(set(possible_transitions.values_list("pk", flat=True)))
-
-            possible_next_states = set(possible_transitions.values_list("destination_state__label", flat=True))
 
         cancelled_transitions = Transition.objects.filter(
             workflow=self.workflow,
             object_id=self.workflow_object.pk,
             status=PENDING,
             iteration__gte=transition.iteration
-        ).exclude(pk__in=possible_transition_ids)
+        ).exclude(pk=transition.pk)
 
         TransitionApproval.objects.filter(transition__in=cancelled_transitions).update(status=CANCELLED)
         cancelled_transitions.update(status=CANCELLED)
@@ -200,15 +171,6 @@ class InstanceWorkflowObject(object):
     def _to_key(self, source_state):
         return str(self.content_type.pk) + self.field_name + source_state.label
 
-    def _check_if_it_cycled(self, done_transition):
-        qs = Transition.objects.filter(
-            workflow_object=self.workflow_object,
-            workflow=self.class_workflow.workflow,
-            source_state=done_transition.destination_state
-        )
-
-        return qs.filter(status=DONE).count() > 0 and qs.filter(status=PENDING).count() == 0
-
     def _get_transition_images(self, source_states):
         meta_max_iteration = Transition.objects.filter(
             workflow=self.workflow,
@@ -220,45 +182,6 @@ class InstanceWorkflowObject(object):
             Q(workflow=self.workflow, object_id=self.workflow_object.pk) &
             six.moves.reduce(lambda agg, q: q | agg, [Q(meta__id=meta_id, iteration=max_iteration) for meta_id, max_iteration in meta_max_iteration], Q(pk=-1))
         )
-
-    def _re_create_cycled_path(self, done_transition):
-        old_transitions = self._get_transition_images([done_transition.destination_state.pk])
-
-        iteration = done_transition.iteration + 1
-        regenerated_transitions = set()
-        while old_transitions:
-            for old_transition in old_transitions:
-                cycled_transition = Transition.objects.create(
-                    source_state=old_transition.source_state,
-                    destination_state=old_transition.destination_state,
-                    workflow=old_transition.workflow,
-                    object_id=old_transition.workflow_object.pk,
-                    content_type=old_transition.content_type,
-                    status=PENDING,
-                    iteration=iteration,
-                    meta=old_transition.meta
-                )
-
-                for old_approval in old_transition.transition_approvals.all():
-                    cycled_approval = TransitionApproval.objects.create(
-                        transition=cycled_transition,
-                        workflow=old_approval.workflow,
-                        object_id=old_approval.workflow_object.pk,
-                        content_type=old_approval.content_type,
-                        priority=old_approval.priority,
-                        status=PENDING,
-                        meta=old_approval.meta
-                    )
-                    cycled_approval.permissions.set(old_approval.permissions.all())
-                    cycled_approval.groups.set(old_approval.groups.all())
-
-            regenerated_transitions.add((old_transition.source_state, old_transition.destination_state))
-
-            old_transitions = self._get_transition_images(old_transitions.values_list("destination_state__pk", flat=True)).exclude(
-                six.moves.reduce(lambda agg, q: q | agg, [Q(source_state=source_state, destination_state=destination_state) for source_state, destination_state in regenerated_transitions], Q(pk=-1))
-            )
-
-            iteration += 1
 
     def get_state(self):
         return getattr(self.workflow_object, self.field_name)
