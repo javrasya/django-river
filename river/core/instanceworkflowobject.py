@@ -135,12 +135,16 @@ class InstanceWorkflowObject(object):
             self.set_state(approval.transition.destination_state)
             has_transit = True
 
+        LOGGER.debug("Workflow object %s is proceeded for next transition. Transition: %s -> %s" % (   
+                self.workflow_object, previous_state, self.get_state()))
+
         if next_state:
             self.initialize_approvals(approval.transition.iteration + 1)
         
         with self._approve_signal(approval), self._transition_signal(has_transit, approval), self._on_complete_signal():
             self.workflow_object.save()
-    
+
+
     @atomic
     def cancel_impossible_future(self, approved_approval):
         transition = approved_approval.transition
