@@ -12,17 +12,23 @@ from river.models import TransitionApproval, PENDING, State, APPROVED, Workflow,
 from river.signals import ApproveSignal, TransitionSignal, OnCompleteSignal
 from river.utils.error_code import ErrorCode
 from river.utils.exceptions import RiverException
+from functools import lru_cache
 
 LOGGER = logging.getLogger(__name__)
 
-class InstanceWorkflowObject(object):
 
+@lru_cache(None)
+def get_cached_workflow(field_name, content_type):
+    return Workflow.objects.filter(field_name=field_name, content_type=content_type).first()
+
+
+class InstanceWorkflowObject(object):
     def __init__(self, workflow_object, field_name):
         self.class_workflow = getattr(workflow_object.__class__.river, field_name)
         self.workflow_object = workflow_object
         self.content_type = app_config.CONTENT_TYPE_CLASS.objects.get_for_model(self.workflow_object)
         self.field_name = field_name
-        self.workflow = Workflow.objects.filter(content_type=self.content_type, field_name=self.field_name).first()
+        self.workflow = get_cached_workflow(content_type=self.content_type, field_name=self.field_name)
 
     @transaction.atomic
     def initialize_approvals(self, iteration=0):
