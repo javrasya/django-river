@@ -1,4 +1,4 @@
-django-mptt==0.9.1
+django-mptt==0.14.0
 factory-boy==2.11.1
 mock==2.0.0
 pyhamcrest==1.9.0
