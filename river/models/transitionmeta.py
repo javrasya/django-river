@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import PROTECT
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from river.models import State, Workflow
 from river.models.base_model import BaseModel
