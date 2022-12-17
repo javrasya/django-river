@@ -10,14 +10,14 @@ from river.models.on_approved_hook import OnApprovedHook
 from river.models.on_complete_hook import OnCompleteHook
 from river.models.on_transit_hook import OnTransitHook
 
-pre_on_complete = Signal(providing_args=["workflow_object", "field_name", ])
-post_on_complete = Signal(providing_args=["workflow_object", "field_name", ])
+pre_on_complete = Signal()
+post_on_complete = Signal()
 
-pre_transition = Signal(providing_args=["workflow_object", "field_name", "source_state", "destination_state"])
-post_transition = Signal(providing_args=["workflow_object", "field_name", "source_state", "destination_state"])
+pre_transition = Signal()
+post_transition = Signal()
 
-pre_approve = Signal(providing_args=["workflow_object", "field_name", "transition_approval"])
-post_approve = Signal(providing_args=["workflow_object", "field_name", "transition_approval", "transition_approval_meta"])
+pre_approve = Signal()
+post_approve = Signal()
 
 LOGGER = logging.getLogger(__name__)
 

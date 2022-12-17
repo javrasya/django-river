@@ -9,7 +9,10 @@ try:
 except ImportError:
     from six import python_2_unicode_compatible
 
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from river.models.base_model import BaseModel
 from river.models.managers.state import StateManager

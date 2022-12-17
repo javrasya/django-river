@@ -3,7 +3,10 @@ import re
 
 from django.db import models
 from django.db.models.signals import pre_save
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from river.models import BaseModel
 
