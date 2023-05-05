@@ -123,17 +123,17 @@ touch the existing workflow objects due to the changes on the workflow.
 Can I add a new hook on-the-fly?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The answer has ben yes since ``django-river`` version ``3.0.0``.
+The answer has been yes since ``django-river`` version ``3.0.0``.
 
 Can I delete an existing hook on-the-fly?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The answer has ben yes since ``django-river`` version ``3.0.0``.
+The answer has been yes since ``django-river`` version ``3.0.0``.
 
 Can I modify a the source code of the function that is used in the hooks on-the-fly?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The answer has ben yes since ``django-river`` version ``3.0.0``. ``django-river`` also
+The answer has been yes since ``django-river`` version ``3.0.0``. ``django-river`` also
 comes with an input component on the admin page that supports basic code highlighting.
 
 Is there any delay for functions updates?
